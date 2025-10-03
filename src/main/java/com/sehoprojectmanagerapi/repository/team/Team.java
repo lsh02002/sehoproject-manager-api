@@ -1,9 +1,13 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.team;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
+import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "teams", uniqueConstraints = {
@@ -14,7 +18,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Team {
+public class Team extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,6 +26,6 @@ public class Team {
     @Column(nullable = false, unique = true, length = 255)
     private String name;
 
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeamMember> members = new ArrayList<>();
 }

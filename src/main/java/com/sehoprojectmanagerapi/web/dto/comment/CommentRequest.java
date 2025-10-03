@@ -1,4 +1,7 @@
 package com.sehoprojectmanagerapi.web.dto.comment;
 
-public class CommentRequest {
-}
+public record CommentRequest(
+        Long taskId,
+        String content
+) {}
+

@@ -1,4 +1,10 @@
 package com.sehoprojectmanagerapi.web.dto.team;
 
-public record TeamInviteRequest() {
+import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
+
+public record TeamInviteRequest(
+        Long invitedUserId,
+        RoleTeam requestedRole,   // null이면 MEMBER 기본
+        String message
+) {
 }

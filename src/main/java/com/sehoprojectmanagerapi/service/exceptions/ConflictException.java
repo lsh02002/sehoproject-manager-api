@@ -1,4 +1,4 @@
-package com.sehoaccountapi.service.exceptions;
+package com.sehoprojectmanagerapi.service.exceptions;
 
 import lombok.Getter;
 

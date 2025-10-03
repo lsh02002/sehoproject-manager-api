@@ -1,29 +1,31 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.tag;
 
+import com.sehoprojectmanagerapi.repository.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "tags", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_tag_team_name", columnNames = {"team_id", "name"})
-})
+@Table(name = "tag")
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Tag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
-    private Team team;
-
-    @Column(nullable = false, length = 64)
+    @Column(nullable = false, length = 50, unique = true)
     private String name;
 
-    @Column(name = "color_hex", length = 16)
-    private String colorHex;
+    @Column(length = 200)
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;   // 태그는 특정 프로젝트 범위 안에서만 유효하도록
 }

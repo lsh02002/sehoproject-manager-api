@@ -1,4 +1,4 @@
-package com.sehoaccountapi.repository.user.userDetails;
+package com.sehoprojectmanagerapi.repository.user.userdetails;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,13 +9,11 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -26,20 +24,20 @@ public class CustomUserDetails implements UserDetails {
     private Long id;
 
     @Getter
-    private String nickname;
+    private String name;
 
     @Getter
     private String email;
 
     @Getter
     private String userStatus;
-
-    @Getter
-    @JsonProperty("birthDate")
-    @JsonSerialize(using = LocalDateTimeSerializer.class) // 직렬화 시 필요
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class) // 역직렬화 시 필요
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-    private LocalDateTime birthDate;
+//
+//    @Getter
+//    @JsonProperty("birthDate")
+//    @JsonSerialize(using = LocalDateTimeSerializer.class) // 직렬화 시 필요
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class) // 역직렬화 시 필요
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+//    private LocalDateTime birthDate;
 
     @Getter
     @JsonProperty("createdAt")
@@ -55,12 +53,9 @@ public class CustomUserDetails implements UserDetails {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime deletedAt;
 
-    private List<String> authorities;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities.stream().map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return List.of();
     }
 
     @JsonIgnore

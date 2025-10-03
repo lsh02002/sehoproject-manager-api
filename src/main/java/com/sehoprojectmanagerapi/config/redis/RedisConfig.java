@@ -1,4 +1,4 @@
-package com.sehoaccountapi.config.redis;
+package com.sehoprojectmanagerapi.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;

@@ -1,10 +1,8 @@
-package com.sehoaccountapi.service.security;
+package com.sehoprojectmanagerapi.service.security;
 
-import com.sehoaccountapi.repository.user.User;
-import com.sehoaccountapi.repository.user.UserRepository;
-import com.sehoaccountapi.repository.user.userDetails.CustomUserDetails;
-import com.sehoaccountapi.repository.user.userRoles.Roles;
-import com.sehoaccountapi.repository.user.userRoles.UserRoles;
+import com.sehoprojectmanagerapi.repository.user.User;
+import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -13,8 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.stream.Collectors;
 
 @Primary
 @Service
@@ -33,14 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .nickname(user.getNickname())
-                .userStatus(user.getUserStatus())
+                .name(user.getName())
                 .createdAt(user.getCreatedAt())
                 .deletedAt(user.getDeletedAt())
-                .authorities(user.getUserRoles()
-                        .stream().map(UserRoles::getRoles)
-                        .map(Roles::getName)
-                        .collect(Collectors.toList()))
                 .build();
     }
 }

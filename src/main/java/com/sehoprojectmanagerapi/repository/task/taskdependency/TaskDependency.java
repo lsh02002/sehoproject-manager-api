@@ -1,5 +1,6 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.taskdependency;
 
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,5 +28,10 @@ public class TaskDependency {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private DependencyType type = DependencyType.BLOCKS;
+    private TaskDependencyId.DependencyType type = TaskDependencyId.DependencyType.BLOCKS;
+
+    public TaskDependency(Task task, Task dependsOn) {
+        this.task = task;
+        this.dependsOn = dependsOn;
+    }
 }

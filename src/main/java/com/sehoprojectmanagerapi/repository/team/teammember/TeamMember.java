@@ -1,9 +1,12 @@
-package com.sehoprojectmanagerapi.repository.team;
+package com.sehoprojectmanagerapi.repository.team.teammember;
 
-import com.sehoprojectmanagerapi.repository.user.RoleTeam;
+import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
@@ -11,7 +14,6 @@ import java.time.OffsetDateTime;
 @Table(name = "team_members")
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamMember {

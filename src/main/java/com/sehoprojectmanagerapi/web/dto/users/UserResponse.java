@@ -1,4 +1,4 @@
-package com.sehoaccountapi.web.dto.users;
+package com.sehoprojectmanagerapi.web.dto.users;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

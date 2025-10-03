@@ -1,44 +1,49 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.notification;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "notifications", indexes = {
-        @Index(name = "idx_notification_user_read_created", columnList = "user_id,is_read,created_at")
-})
+@Table(name = "notification")
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Notification {
+@AllArgsConstructor
+public class Notification extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 알림 받는 사용자 */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
 
-    @Column(name = "entity_type", length = 64)
-    private String entityType;
+    /** 알림 메시지 */
+    @Column(nullable = false, length = 500)
+    private String message;
 
-    @Column(name = "entity_id")
-    private Long entityId;
-
+    /** 알림 유형 (TASK_ASSIGNED, COMMENT_ADDED, PROJECT_INVITE 등) */
     @Enumerated(EnumType.STRING)
-    @Column(length = 16, nullable = false)
-    private NotificationChannel channel = NotificationChannel.IN_APP;
+    @Column(nullable = false, length = 40)
+    private NotificationType type;
 
-    @Column(name = "payload_json", columnDefinition = "jsonb")
-    private String payloadJson;
+    /** 관련된 엔티티 ID (TaskId, ProjectId 등) */
+    private Long relatedId;
 
-    @Column(name = "is_read", nullable = false)
-    private Boolean isRead = false;
+    /** 읽음 여부 */
+    private boolean readFlag = false;
 
-    private OffsetDateTime createdAt;
-    private OffsetDateTime readAt;
+    /** 읽음 처리 */
+    public void markAsRead() {
+        this.readFlag = true;
+    }
 }

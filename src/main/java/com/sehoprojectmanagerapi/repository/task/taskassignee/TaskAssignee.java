@@ -1,5 +1,6 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.taskassignee;
 
+import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,8 +12,8 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Builder
+@RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
 public class TaskAssignee {
     @EmbeddedId
     private TaskAssigneeId id = new TaskAssigneeId();
@@ -28,4 +29,11 @@ public class TaskAssignee {
     private User user;
 
     private OffsetDateTime assignedAt;
+
+    // id는 제외한 생성자
+    public TaskAssignee(Task task, User user, OffsetDateTime assignedAt) {
+        this.task = task;
+        this.user = user;
+        this.assignedAt = assignedAt;
+    }
 }

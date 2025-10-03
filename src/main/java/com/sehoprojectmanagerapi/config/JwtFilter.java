@@ -1,6 +1,6 @@
-package com.sehoaccountapi.config.filters;
+package com.sehoprojectmanagerapi.config;
 
-import com.sehoaccountapi.config.security.JwtTokenProvider;
+import com.sehoprojectmanagerapi.config.security.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

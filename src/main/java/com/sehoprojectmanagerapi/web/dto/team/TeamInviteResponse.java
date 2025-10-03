@@ -1,4 +1,18 @@
 package com.sehoprojectmanagerapi.web.dto.team;
 
-public record TeamInviteResponse() {
+import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
+
+import java.time.OffsetDateTime;
+
+public record TeamInviteResponse(
+        Long id,
+        Long teamId,
+        Long inviterId,
+        Long invitedUserId,
+        String message,
+        RoleTeam requestedRole,
+        String status,            // PENDING / ACCEPTED / DECLINED / EXPIRED
+        OffsetDateTime expiresAt,
+        OffsetDateTime createdAt
+) {
 }

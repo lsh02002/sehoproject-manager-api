@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.tasksprint;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;

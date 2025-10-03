@@ -1,6 +1,7 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.tasksprint;
 
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +25,9 @@ public class TaskSprint {
     @MapsId("sprintId")
     @JoinColumn(name = "sprint_id", nullable = false)
     private Sprint sprint;
+
+    public TaskSprint(Task task, Sprint sprint) {
+        this.task = task;
+        this.sprint = sprint;
+    }
 }

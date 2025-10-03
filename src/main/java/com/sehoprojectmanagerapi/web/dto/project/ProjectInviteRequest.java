@@ -1,4 +1,10 @@
 package com.sehoprojectmanagerapi.web.dto.project;
 
-public record ProjectInviteRequest() {
+import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
+
+public record ProjectInviteRequest(
+        Long invitedUserId,
+        String message,
+        RoleProject requestedRole // null 허용
+) {
 }

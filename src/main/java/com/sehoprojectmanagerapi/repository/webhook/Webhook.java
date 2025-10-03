@@ -1,9 +1,9 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.webhook;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "webhooks")
@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Webhook {
+public class Webhook extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,11 +27,9 @@ public class Webhook {
     @Column(length = 255)
     private String secret;
 
-    @Column(name = "event_mask", columnDefinition = "jsonb")
+    @Column(name = "event_mask", columnDefinition = "JSON")
     private String eventMask;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
-
-    private OffsetDateTime createdAt;
 }

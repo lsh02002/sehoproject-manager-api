@@ -1,4 +1,4 @@
-package com.sehoaccountapi.config.security;
+package com.sehoprojectmanagerapi.config.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

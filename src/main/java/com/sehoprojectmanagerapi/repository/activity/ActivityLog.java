@@ -1,9 +1,10 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.activity;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "activity_logs", indexes = {
@@ -15,7 +16,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActivityLog {
+public class ActivityLog extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,11 +40,9 @@ public class ActivityLog {
     @Column(length = 16, nullable = false)
     private ActivityAction action;
 
-    @Column(name = "before_json", columnDefinition = "jsonb")
+    @Column(name = "before_json", columnDefinition = "JSON")
     private String beforeJson;
 
-    @Column(name = "after_json", columnDefinition = "jsonb")
+    @Column(name = "after_json", columnDefinition = "JSON")
     private String afterJson;
-
-    private OffsetDateTime createdAt;
 }

@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.taskassignee;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

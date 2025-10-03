@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.taskdependency;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
@@ -27,4 +27,6 @@ public class TaskDependencyId implements java.io.Serializable {
     public int hashCode() {
         return Objects.hash(taskId, dependsOnTaskId);
     }
+
+    public enum DependencyType {BLOCKS, RELATES, DUPLICATES}
 }

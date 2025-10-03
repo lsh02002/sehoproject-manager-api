@@ -1,4 +1,4 @@
-package com.sehoaccountapi.repository.user.refreshToken;
+package com.sehoprojectmanagerapi.repository.user.refreshToken;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

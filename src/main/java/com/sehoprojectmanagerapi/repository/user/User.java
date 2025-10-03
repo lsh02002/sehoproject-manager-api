@@ -1,9 +1,10 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.user;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -14,7 +15,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,12 +32,12 @@ public class User {
     @Column(name = "avatar_url", length = 1024)
     private String avatarUrl;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(length = 64)
     private String timezone;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
-
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
 }

@@ -1,10 +1,11 @@
-package com.sehoprojectmanagerapi.repository;
+package com.sehoprojectmanagerapi.repository.sprint;
 
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "sprints")
@@ -13,7 +14,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Sprint {
+public class Sprint extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +32,4 @@ public class Sprint {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private SprintState state = SprintState.PLANNED;
-
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
 }

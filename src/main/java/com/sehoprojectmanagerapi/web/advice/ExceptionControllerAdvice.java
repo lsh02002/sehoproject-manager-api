@@ -1,6 +1,6 @@
-package com.sehoaccountapi.web.advice;
+package com.sehoprojectmanagerapi.web.advice;
 
-import com.sehoaccountapi.service.exceptions.*;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

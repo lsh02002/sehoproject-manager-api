@@ -1,6 +1,7 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.tasktag;
 
 import com.sehoprojectmanagerapi.repository.tag.Tag;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +25,8 @@ public class TaskTag {
     @MapsId("tagId")
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
+
+    public TaskTag(Task task, Tag tag) {
+        this.task = task;
+    }
 }

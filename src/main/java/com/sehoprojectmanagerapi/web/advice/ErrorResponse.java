@@ -1,4 +1,4 @@
-package com.sehoaccountapi.web.advice;
+package com.sehoprojectmanagerapi.web.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

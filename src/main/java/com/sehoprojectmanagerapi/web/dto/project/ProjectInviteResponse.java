@@ -1,4 +1,18 @@
 package com.sehoprojectmanagerapi.web.dto.project;
 
-public record ProjectInviteResponse() {
+import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
+
+import java.time.OffsetDateTime;
+
+public record ProjectInviteResponse(
+        Long id,
+        Long projectId,
+        Long inviterId,
+        Long invitedUserId,
+        String message,
+        RoleProject requestedRole,
+        String status,
+        OffsetDateTime expiresAt,
+        java.time.LocalDateTime createdAt
+) {
 }

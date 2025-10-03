@@ -1,6 +1,7 @@
-package com.sehoprojectmanagerapi.repository.task;
+package com.sehoprojectmanagerapi.repository.task.taskmilestone;
 
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +25,10 @@ public class TaskMilestone {
     @MapsId("milestoneId")
     @JoinColumn(name = "milestone_id", nullable = false)
     private Milestone milestone;
+
+
+    public TaskMilestone(Task task, Milestone milestone) {
+        this.task = task;
+        this.milestone = milestone;
+    }
 }

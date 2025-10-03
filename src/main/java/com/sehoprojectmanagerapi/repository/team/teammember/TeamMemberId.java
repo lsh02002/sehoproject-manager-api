@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.repository.team;
+package com.sehoprojectmanagerapi.repository.team.teammember;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;

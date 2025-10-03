@@ -1,10 +1,9 @@
-package com.sehoaccountapi.config.security;
+package com.sehoprojectmanagerapi.config.security;
 
-import com.sehoaccountapi.config.filters.JwtFilter;
+import com.sehoprojectmanagerapi.config.filters.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -50,22 +49,6 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests(a ->
                         a
-                                .requestMatchers(HttpMethod.GET, "/api/books/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("USER")
-
-                                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("USER")
-
-                                .requestMatchers(HttpMethod.GET, "/api/transactions/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.POST, "/api/transactions/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.PUT, "/api/transactions/**").hasRole("USER")
-
-                                .requestMatchers(HttpMethod.GET, "/user/info/**", "/user/test1/**", "/user/all-users-info/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.DELETE, "/user/logout/**", "/user/withdrawal/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.GET, "/user/entrypoint/**", "/user/access-denied/**").permitAll()
                                 // 지정하지 않은 나머지는 Jwt 토큰이 상관없는 엔트리포인트입니다.
                                 .requestMatchers("/**").permitAll())
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

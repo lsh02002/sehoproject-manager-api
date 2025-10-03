@@ -1,4 +1,6 @@
 package com.sehoprojectmanagerapi.repository.sprint;
 
-public interface SprintRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SprintRepository extends JpaRepository<Sprint, Long> {
 }

@@ -1,4 +1,4 @@
-package com.sehoaccountapi.config.s3;
+package com.sehoprojectmanagerapi.config.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

@@ -1,4 +1,4 @@
-package com.sehoaccountapi.web.dto.users;
+package com.sehoprojectmanagerapi.web.dto.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,5 +13,6 @@ public class SignupRequest {
     private String email;
     private String password;
     private String passwordConfirm;
-    private String nickname;
+    private String name;
+    private String timezone;
 }

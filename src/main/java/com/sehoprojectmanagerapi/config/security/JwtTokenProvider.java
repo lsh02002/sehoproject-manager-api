@@ -1,8 +1,8 @@
-package com.sehoaccountapi.config.security;
+package com.sehoprojectmanagerapi.config.security;
 
-import com.sehoaccountapi.config.redis.RedisUtil;
-import com.sehoaccountapi.repository.user.refreshToken.RefreshToken;
-import com.sehoaccountapi.repository.user.refreshToken.RefreshTokenRepository;
+import com.sehoprojectmanagerapi.config.redis.RedisUtil;
+import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshToken;
+import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

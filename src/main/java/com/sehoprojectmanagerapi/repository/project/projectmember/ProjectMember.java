@@ -1,6 +1,6 @@
-package com.sehoprojectmanagerapi.repository.project;
+package com.sehoprojectmanagerapi.repository.project.projectmember;
 
-import com.sehoprojectmanagerapi.repository.user.RoleProject;
+import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;

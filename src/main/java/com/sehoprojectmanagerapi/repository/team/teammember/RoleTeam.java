@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.repository.user;
+package com.sehoprojectmanagerapi.repository.team.teammember;
 
 /**
  * TeamMember role
