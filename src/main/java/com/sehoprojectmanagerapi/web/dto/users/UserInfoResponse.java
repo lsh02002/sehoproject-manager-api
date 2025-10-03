@@ -1,17 +1,14 @@
 package com.sehoprojectmanagerapi.web.dto.users;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Builder
-public class UserInfoResponse {
-    private Long userId;
-    private String nickname;
-    private String email;
-    private String userStatus;
-    private String createdAt;
-    private String deletedAt;
+public record UserInfoResponse(
+        Long userId,
+        String nickname,
+        String email,
+        String userStatus,
+        String createdAt,
+        String deletedAt
+) {
 }

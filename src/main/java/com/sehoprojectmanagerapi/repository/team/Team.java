@@ -1,7 +1,6 @@
 package com.sehoprojectmanagerapi.repository.team;
 
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
-import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,7 +1,5 @@
 package com.sehoprojectmanagerapi.web.dto.milestone;
 
-import lombok.Builder;
-
 import java.time.LocalDate;
 
 public record MilestoneRequest(
@@ -11,5 +9,6 @@ public record MilestoneRequest(
         LocalDate startDate,
         LocalDate dueDate,
         String status
-) {}
+) {
+}
 

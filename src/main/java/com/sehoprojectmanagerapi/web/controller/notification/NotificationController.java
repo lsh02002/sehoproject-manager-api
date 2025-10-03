@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.web.controller.notification;
 
-import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.notification.NotificationService;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationRequest;
@@ -24,17 +23,17 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody NotificationRequest request){
+    public ResponseEntity<?> createNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody NotificationRequest request) {
         return ResponseEntity.ok(notificationService.createNotification(customUserDetails.getId(), request));
     }
 
     @PutMapping("/{notificationId}")
-    public ResponseEntity<?> updateNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("notificationId") Long notificationId, @RequestBody NotificationRequest request){
+    public ResponseEntity<?> updateNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("notificationId") Long notificationId, @RequestBody NotificationRequest request) {
         return ResponseEntity.ok(notificationService.updateNotification(customUserDetails.getId(), notificationId, request));
     }
 
     @DeleteMapping("/{notificationId}")
-    public ResponseEntity<?> deleteNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("notificationId") Long notificationId){
+    public ResponseEntity<?> deleteNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("notificationId") Long notificationId) {
         notificationService.deleteNotification(customUserDetails.getId(), notificationId);
         return ResponseEntity.ok().build();
     }

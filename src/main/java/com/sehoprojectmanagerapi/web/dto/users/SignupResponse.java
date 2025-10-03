@@ -1,13 +1,10 @@
 package com.sehoprojectmanagerapi.web.dto.users;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class SignupResponse {
-    private Long userId;
-    private String name;
+public record SignupResponse(
+        Long userId,
+        String name
+) {
 }

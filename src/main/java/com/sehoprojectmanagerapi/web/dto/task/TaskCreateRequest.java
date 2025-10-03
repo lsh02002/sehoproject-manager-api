@@ -16,4 +16,5 @@ public record TaskCreateRequest(
         String type,                // "TASK/BUG/STORY" 등
         Integer storyPoints,        // null 가능
         LocalDate dueDate           // null 가능
-) {}
+) {
+}

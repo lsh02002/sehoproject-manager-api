@@ -1,15 +1,10 @@
 package com.sehoprojectmanagerapi.web.dto.team;
 
+import lombok.Builder;
 
-import lombok.*;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@ToString
-public class TeamResponse {
-    private Long id;
-    private String name;
+public record TeamResponse(
+        Long id,
+        String name
+) {
 }

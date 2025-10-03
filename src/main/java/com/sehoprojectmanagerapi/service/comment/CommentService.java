@@ -12,7 +12,6 @@ import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentRequest;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,20 +26,20 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentByTaskId(Long taskId){
+    public List<CommentResponse> getCommentByTaskId(Long taskId) {
         return commentRepository.findByTaskId(taskId)
                 .stream().map(this::convertToCommentResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public CommentResponse getCommentById(Long commentId){
+    public CommentResponse getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
         return convertToCommentResponse(comment);
     }
 
     @Transactional
-    public List<CommentResponse> getCommentsByUserId(Long userId){
+    public List<CommentResponse> getCommentsByUserId(Long userId) {
         return commentRepository.findByAuthorId(userId)
                 .stream().map(this::convertToCommentResponse).toList();
     }
@@ -48,12 +47,12 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(Long userId, CommentRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         Task task = taskRepository.findById(request.taskId())
-                .orElseThrow(()->new NotFoundException("해당 테스크를 찾을 수 없습니다.", request.taskId()));
+                .orElseThrow(() -> new NotFoundException("해당 테스크를 찾을 수 없습니다.", request.taskId()));
 
-        if(request.content() == null || request.content().isEmpty()) {
+        if (request.content() == null || request.content().isEmpty()) {
             throw new BadRequestException("내용란이 비어있습니다.", null);
         }
 
@@ -71,16 +70,16 @@ public class CommentService {
     @Transactional
     public CommentResponse updateComment(Long userId, Long commentId, CommentRequest request) {
         Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
-                .orElseThrow(()->new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
+                .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
 
         Task task = taskRepository.findById(request.taskId())
-                .orElseThrow(()->new NotFoundException("해당 테스크를 찾을 수 없습니다.", request.taskId()));
+                .orElseThrow(() -> new NotFoundException("해당 테스크를 찾을 수 없습니다.", request.taskId()));
 
-        if(task != null) {
+        if (task != null) {
             comment.setTask(task);
         }
 
-        if(request.content() != null && !request.content().isEmpty()) {
+        if (request.content() != null && !request.content().isEmpty()) {
             comment.setBody(request.content());
         }
 

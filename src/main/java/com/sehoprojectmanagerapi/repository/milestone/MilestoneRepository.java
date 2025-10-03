@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface MilestoneRepository extends JpaRepository<Milestone, Long> {
     @Query("""
-        select distinct m
-          from Milestone m
-          join m.project p
-          left join p.team t
-          left join t.members tm
-         where tm.user.id = :userId
-            or p.createdBy.id = :userId
-    """)
+                select distinct m
+                  from Milestone m
+                  join m.project p
+                  left join p.team t
+                  left join t.members tm
+                 where tm.user.id = :userId
+                    or p.createdBy.id = :userId
+            """)
     List<Milestone> findAllVisibleForUser(@Param("userId") Long userId);
 }

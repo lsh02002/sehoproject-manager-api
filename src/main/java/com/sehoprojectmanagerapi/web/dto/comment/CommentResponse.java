@@ -14,4 +14,5 @@ public record CommentResponse(
         String avatarUrl,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
-) {}
+) {
+}

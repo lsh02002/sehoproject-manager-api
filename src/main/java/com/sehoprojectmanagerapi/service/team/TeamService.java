@@ -49,7 +49,7 @@ public class TeamService {
 
     @Transactional
     public TeamResponse createTeam(Long userId, TeamRequest teamRequest) {
-        if (teamRequest.getName() == null || teamRequest.getName().trim().isEmpty()) {
+        if (teamRequest.name() == null || teamRequest.name().trim().isEmpty()) {
             throw new BadRequestException("팀명이 비어있습니다.", null);
         }
 
@@ -57,7 +57,7 @@ public class TeamService {
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         Team team = Team.builder()
-                .name(teamRequest.getName())
+                .name(teamRequest.name())
                 .build();
 
         Team savedTeam = teamRepository.save(team);
@@ -80,9 +80,9 @@ public class TeamService {
 
         Team team = teamMember.getTeam();
 
-        if (teamRequest.getName() != null && !teamRequest.getName().trim().isEmpty()) {
-            team.setName(teamRepository.findByName(teamRequest.getName())
-                    .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", teamRequest.getName())).getName());
+        if (teamRequest.name() != null && !teamRequest.name().trim().isEmpty()) {
+            team.setName(teamRepository.findByName(teamRequest.name())
+                    .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", teamRequest.name())).getName());
         }
 
         teamRepository.save(team);

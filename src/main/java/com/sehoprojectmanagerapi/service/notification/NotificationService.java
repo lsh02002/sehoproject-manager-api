@@ -6,18 +6,14 @@ import com.sehoprojectmanagerapi.repository.notification.NotificationRepository;
 import com.sehoprojectmanagerapi.repository.notification.NotificationType;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationRequest;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -37,9 +33,9 @@ public class NotificationService {
     @Transactional
     public NotificationResponse createNotification(Long userId, NotificationRequest notificationRequest) {
         User receiver = userRepository.findById(notificationRequest.receiverId())
-                .orElseThrow(()->new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
+                .orElseThrow(() -> new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
 
-        if(notificationRequest.message().trim().isEmpty()){
+        if (notificationRequest.message().trim().isEmpty()) {
             throw new BadRequestException("메시지 란이 비어있습니다.", null);
         }
 
@@ -47,7 +43,7 @@ public class NotificationService {
         try {
             type = NotificationType.valueOf(notificationRequest.type().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("알림 형식이 잘못되어 있습니다.",  null);
+            throw new BadRequestException("알림 형식이 잘못되어 있습니다.", null);
         }
 
         Notification notification = new Notification();
@@ -64,28 +60,28 @@ public class NotificationService {
     @Transactional
     public NotificationResponse updateNotification(Long userId, Long notificationId, NotificationRequest notificationRequest) {
         User receiver = userRepository.findById(notificationRequest.receiverId())
-                .orElseThrow(()->new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
+                .orElseThrow(() -> new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
 
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(()->new NotFoundException("해당 알림을 찾을 수 없습니다.", notificationId));
+                .orElseThrow(() -> new NotFoundException("해당 알림을 찾을 수 없습니다.", notificationId));
 
         notification.setReceiver(receiver);
 
-        if(!notificationRequest.message().trim().isEmpty()){
+        if (!notificationRequest.message().trim().isEmpty()) {
             notification.setMessage(notificationRequest.message());
         }
 
         NotificationType type;
         try {
-            if(notificationRequest.type() != null){
+            if (notificationRequest.type() != null) {
                 type = NotificationType.valueOf(notificationRequest.type().toUpperCase());
                 notification.setType(type);
             }
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("알림 형식이 잘못되어 있습니다.",  null);
+            throw new BadRequestException("알림 형식이 잘못되어 있습니다.", null);
         }
 
-        if(notificationRequest.relatedId() != null){
+        if (notificationRequest.relatedId() != null) {
             notification.setRelatedId(notificationRequest.relatedId());
         }
 

@@ -23,17 +23,17 @@ public class MilestoneController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody MilestoneRequest request){
+    public ResponseEntity<?> createMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody MilestoneRequest request) {
         return ResponseEntity.ok(milestoneService.createMilestone(customUserDetails.getId(), request));
     }
 
     @PutMapping("/{milestoneId}")
-    public ResponseEntity<?> updateMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId, @RequestBody MilestoneRequest request){
+    public ResponseEntity<?> updateMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId, @RequestBody MilestoneRequest request) {
         return ResponseEntity.ok(milestoneService.updateMilestone(customUserDetails.getId(), milestoneId, request));
     }
 
     @DeleteMapping("/{milestoneId}")
-    public ResponseEntity<?> deleteMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId){
+    public ResponseEntity<?> deleteMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId) {
         milestoneService.deleteMilestone(customUserDetails.getId(), milestoneId);
         return ResponseEntity.ok().build();
     }

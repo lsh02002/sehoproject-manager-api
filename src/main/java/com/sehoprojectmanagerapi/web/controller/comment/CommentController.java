@@ -18,17 +18,17 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<List<CommentResponse>> getAllCommentsByUserId(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+    public ResponseEntity<List<CommentResponse>> getAllCommentsByUserId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return ResponseEntity.ok(commentService.getCommentsByUserId(customUserDetails.getId()));
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<List<CommentResponse>> getAllCommentsByTaskId(@PathVariable Long taskId){
+    public ResponseEntity<List<CommentResponse>> getAllCommentsByTaskId(@PathVariable Long taskId) {
         return ResponseEntity.ok(commentService.getCommentByTaskId(taskId));
     }
 
     @GetMapping("/{commentId}")
-    public ResponseEntity<CommentResponse> getCommentById(@PathVariable Long commentId){
+    public ResponseEntity<CommentResponse> getCommentById(@PathVariable Long commentId) {
         return ResponseEntity.ok(commentService.getCommentById(commentId));
     }
 

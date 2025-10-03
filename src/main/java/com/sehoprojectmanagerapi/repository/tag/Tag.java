@@ -4,8 +4,6 @@ import com.sehoprojectmanagerapi.repository.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "tag")
 @Getter

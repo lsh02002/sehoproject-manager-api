@@ -1,13 +1,9 @@
 package com.sehoprojectmanagerapi.web.dto.team;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@ToString
-public class TeamRequest {
-    private String name;
+public record TeamRequest(
+        String name
+) {
 }

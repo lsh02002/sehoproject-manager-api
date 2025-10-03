@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MilestoneMapper {
 
-    /** Entity → Response */
+    /**
+     * Entity → Response
+     */
     public MilestoneResponse toResponse(Milestone milestone) {
         return new MilestoneResponse(
                 milestone.getId(),

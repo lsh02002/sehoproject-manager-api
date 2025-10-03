@@ -102,6 +102,7 @@ public class Task extends BaseEntity {
         TaskAssignee ta = new TaskAssignee(this, user, OffsetDateTime.now());
         assignees.add(ta);
     }
+
     public void removeAssignee(User user) {
         assignees.removeIf(ta -> Objects.equals(ta.getUser().getId(), user.getId()));
     }
@@ -111,6 +112,7 @@ public class Task extends BaseEntity {
         TaskSprint ts = new TaskSprint(this, sprint);
         sprints.add(ts);
     }
+
     public void removeSprint(Long sprintId) {
         sprints.removeIf(ts -> Objects.equals(ts.getSprint().getId(), sprintId));
     }
@@ -120,13 +122,20 @@ public class Task extends BaseEntity {
         TaskMilestone tm = new TaskMilestone(this, milestone);
         milestones.add(tm);
     }
+
     public void removeMilestone(Long milestoneId) {
         milestones.removeIf(tm -> Objects.equals(tm.getMilestone().getId(), milestoneId));
     }
 
     // Tag
-    public void addTag(Tag tag) { TaskTag tt = new TaskTag(this, tag); tags.add(tt); }
-    public void removeTag(Long tagId) { tags.removeIf(t -> Objects.equals(t.getId(), tagId)); }
+    public void addTag(Tag tag) {
+        TaskTag tt = new TaskTag(this, tag);
+        tags.add(tt);
+    }
+
+    public void removeTag(Long tagId) {
+        tags.removeIf(t -> Objects.equals(t.getId(), tagId));
+    }
 
     // Dependency
     public void addDependency(Task dependOn) {
@@ -136,6 +145,7 @@ public class Task extends BaseEntity {
         TaskDependency d = new TaskDependency(this, dependOn);
         dependencies.add(d);
     }
+
     public void removeDependency(Long prerequisiteTaskId) {
         dependencies.removeIf(d -> Objects.equals(d.getDependsOn().getId(), prerequisiteTaskId));
     }

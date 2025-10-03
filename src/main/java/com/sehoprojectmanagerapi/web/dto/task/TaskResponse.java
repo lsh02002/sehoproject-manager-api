@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.web.dto.task;
 
 // TaskResponse.java
+
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -24,5 +25,6 @@ public record TaskResponse(
         List<Long> dependencyIds,      // 여러 선행 작업
         LocalDate dueDate,
         java.time.LocalDateTime createdAt
-) {}
+) {
+}
 

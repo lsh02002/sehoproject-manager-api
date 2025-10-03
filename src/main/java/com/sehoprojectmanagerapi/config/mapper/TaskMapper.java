@@ -1,13 +1,13 @@
 package com.sehoprojectmanagerapi.config.mapper;
 
 // TaskMapper.java
+
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class TaskMapper {
@@ -39,7 +39,7 @@ public class TaskMapper {
                                 .toList(),
                 // Tags (ManyToMany → 바로 Tag 컬렉션)
                 t.getTags() == null ? List.of() :
-                        t.getTags().stream().map(tag->tag.getTag().getId()).toList(),
+                        t.getTags().stream().map(tag -> tag.getTag().getId()).toList(),
                 // Dependencies (TaskDependency 중간 엔티티)
                 t.getDependencies() == null ? List.of() :
                         t.getDependencies().stream()

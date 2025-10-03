@@ -31,7 +31,7 @@ public class MilestoneService {
     @Transactional
     public List<MilestoneResponse> getAllMilestonesByUserId(Long userId) {
         userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         return milestoneRepository.findAllVisibleForUser(userId)
                 .stream().map(milestoneMapper::toResponse).toList();
@@ -40,13 +40,13 @@ public class MilestoneService {
     @Transactional
     public MilestoneResponse createMilestone(Long userId, MilestoneRequest request) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        if(request.title().isEmpty()){
-            throw new BadRequestException("해당 제목란이 비어있습니다.",  request.title());
+        if (request.title().isEmpty()) {
+            throw new BadRequestException("해당 제목란이 비어있습니다.", request.title());
         }
 
-        if(request.status().isEmpty()){
+        if (request.status().isEmpty()) {
             throw new BadRequestException("해당 상태란이 비어있습니다.", request.status());
         }
 
@@ -66,22 +66,22 @@ public class MilestoneService {
     @Transactional
     public MilestoneResponse updateMilestone(Long userId, Long milestoneId, MilestoneRequest request) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        if(request.title().isEmpty()){
+        if (request.title().isEmpty()) {
             throw new BadRequestException("해당 제목란이 비어있습니다.", request.title());
         }
 
-        if(request.description().isEmpty()){
+        if (request.description().isEmpty()) {
             throw new BadRequestException("해당 내용란이 비어있습니다.", request.description());
         }
 
-        if(request.status().isEmpty()){
+        if (request.status().isEmpty()) {
             throw new BadRequestException("해당 상태란이 비어있습니다.", request.status());
         }
 
         Milestone milestone = milestoneRepository.findById(milestoneId)
-                .orElseThrow(()->new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
+                .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
 
         milestone.setProject(projectMember.getProject());
         milestone.setTitle(request.title());

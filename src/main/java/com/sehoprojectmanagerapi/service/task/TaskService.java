@@ -31,7 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -164,7 +166,7 @@ public class TaskService {
         // 9) 태그 매핑
         if (!tags.isEmpty()) {
             Task finalTask = task;
-            List<TaskTag> taskTags = tags.stream().map(tag-> {
+            List<TaskTag> taskTags = tags.stream().map(tag -> {
                 TaskTag taskTag = new TaskTag();
                 taskTag.setTag(tag);
                 taskTag.setTask(finalTask);

@@ -12,5 +12,6 @@ public record NotificationResponse(
         Long relatedId,
         boolean read,
         java.time.LocalDateTime createdAt
-) {}
+) {
+}
 

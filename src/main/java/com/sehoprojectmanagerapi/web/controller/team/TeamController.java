@@ -35,7 +35,7 @@ public class TeamController {
     }
 
     @PutMapping("/teamId")
-    public ResponseEntity<TeamResponse> updateTeam(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long teamId,  @RequestBody TeamRequest teamRequest) {
+    public ResponseEntity<TeamResponse> updateTeam(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long teamId, @RequestBody TeamRequest teamRequest) {
         return ResponseEntity.ok(teamService.updateTeam(customUserDetails.getId(), teamId, teamRequest));
     }
 
