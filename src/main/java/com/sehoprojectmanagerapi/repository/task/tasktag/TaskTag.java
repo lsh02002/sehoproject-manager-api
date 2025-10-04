@@ -28,5 +28,6 @@ public class TaskTag {
 
     public TaskTag(Task task, Tag tag) {
         this.task = task;
+        this.tag = tag;
     }
 }

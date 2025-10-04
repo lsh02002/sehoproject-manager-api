@@ -152,8 +152,8 @@ public class TaskService {
         task.setStoryPoints(req.storyPoints());
         task.setDueDate(req.dueDate());
         task.addAssignee(assignee);
-        task.addSprint(sprint);
-        task.addMilestone(milestone);
+        task.setSprint(sprint);
+        task.setMilestone(milestone);
         task.setCreatedAt(OffsetDateTime.now().toLocalDateTime());
 
         // 7) 먼저 저장해서 PK 확보

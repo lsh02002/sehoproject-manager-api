@@ -19,8 +19,8 @@ public record TaskResponse(
         String type,
         Integer storyPoints,
         List<AssigneeResponse> assignees,
-        List<Long> sprintIds,          // 여러 스프린트
-        List<Long> milestoneIds,       // 여러 마일스톤
+        Long sprintIds,          // 여러 스프린트
+        Long milestoneIds,       // 여러 마일스톤
         List<Long> tagIds,             // 여러 태그
         List<Long> dependencyIds,      // 여러 선행 작업
         LocalDate dueDate,
