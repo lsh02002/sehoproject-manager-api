@@ -1,6 +1,11 @@
 package com.sehoprojectmanagerapi.service.team;
 
 import com.sehoprojectmanagerapi.config.mapper.TeamMapper;
+import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
+import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
+import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
+import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teamInvite.TeamInvite;
@@ -19,6 +24,8 @@ import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.team.TeamRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +41,8 @@ public class TeamService {
     private final TeamInviteRepository teamInviteRepository;
     private final UserRepository userRepository;
     private final TeamMapper teamMapper;
+    private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     @Transactional
     public List<TeamResponse> getAllTeamsByUser(Long userId) {
@@ -53,10 +62,32 @@ public class TeamService {
             throw new BadRequestException("팀명이 비어있습니다.", null);
         }
 
+        if (teamRequest.projectId() == null) {
+            throw new BadRequestException("프로젝트가 지정되지 않았습니다.", null);
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
+        Project project = projectRepository.findById(teamRequest.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", teamRequest.projectId()));
+
+        // 2) 권한 체크: 프로젝트 멤버이며 MANAGER 이상만 팀 생성 가능 (정책에 맞게 조정)
+        ProjectMember pm = projectMemberRepository.findByUserIdAndProjectId(userId,  project.getId())
+                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버가 아닙니다.", userId));
+
+        if (!hasAtLeast(pm.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("팀 생성 권한이 없습니다.", userId);
+        }
+
+        // 3) (선택) 같은 프로젝트 내 팀명 중복 방지
+        boolean nameExists = teamRepository.existsByProjectIdAndNameIgnoreCase(project.getId(), teamRequest.name().trim());
+        if (nameExists) {
+            throw new BadRequestException("동일한 팀명이 이미 존재합니다.", teamRequest.name());
+        }
+
         Team team = Team.builder()
+                .project(project)
                 .name(teamRequest.name())
                 .build();
 
@@ -79,10 +110,25 @@ public class TeamService {
                 .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
 
         Team team = teamMember.getTeam();
+        Project project = team.getProject();
 
-        if (teamRequest.name() != null && !teamRequest.name().trim().isEmpty()) {
-            team.setName(teamRepository.findByName(teamRequest.name())
-                    .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", teamRequest.name())).getName());
+        boolean teamOk = hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
+        boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
+                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER))
+                .orElse(false);
+
+        if (!(teamOk || projectOk)) {
+            throw new NotAcceptableException("팀 수정 권한이 없습니다.", userId);
+        }
+
+        // 3) 이름 변경 처리
+        if (teamRequest.name() != null && !teamRequest.name().equalsIgnoreCase(team.getName())) {
+            // 같은 프로젝트 내 팀명 중복 방지
+            boolean nameExists = teamRepository.existsByProjectIdAndNameIgnoreCase(project.getId(), teamRequest.name());
+            if (nameExists) {
+                throw new ConflictException("같은 프로젝트에 동일한 팀명이 이미 존재합니다.", teamRequest.name());
+            }
+            team.setName(teamRequest.name());
         }
 
         teamRepository.save(team);
@@ -91,9 +137,40 @@ public class TeamService {
 
     @Transactional
     public void deleteTeam(Long userId, Long teamId) {
+        // 1) 팀 로드
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", teamId));
+
+        Project project = team.getProject();
+
+        // 2) 권한 체크
+        // - 팀 OWNER/MANAGER 이거나
+        // - 프로젝트 ROLE이 MANAGER/ADMIN/OWNER 여야 함
+        TeamMember tm = teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
+                .orElseThrow(() -> new NotAcceptableException("해당 팀의 멤버가 아닙니다.", userId));
+
+        boolean teamOk = hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
+
+        boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
+                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER) && // 작성 정책에 맞게 조정
+                        (pm.getRole() == RoleProject.MANAGER))
+                .orElse(false);
+
+        if (!(teamOk || projectOk)) {
+            throw new NotAcceptableException("팀 삭제 권한이 없습니다.", userId);
+        }
+
+        // 3) 팀이 달린 프로젝트 참조 해제 (Project.team nullable=true 전제)
+        //    nullable=false라면, 아래 로직 대신 '팀이 연결된 프로젝트가 있으면 삭제 불가'로 막으세요.
+        project.removeTeam(team);
+        projectRepository.save(project);
+
+        // 4) 삭제 (Team.members는 orphanRemoval=true 이므로 함께 제거)
         try {
-            teamMemberRepository.deleteByUserIdAndTeamId(userId, teamId);
-            teamRepository.deleteById(teamId);
+            teamRepository.delete(team);
+            teamRepository.flush(); // 즉시 constraint 위반 감지
+        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
+            throw new ConflictException("팀을 삭제할 수 없습니다. 참조 중인 리소스가 있습니다.", teamId);
         } catch (RuntimeException e) {
             throw new ConflictException("해당 팀 삭제에 실패했습니다.", teamId);
         }
@@ -198,6 +275,32 @@ public class TeamService {
             teamInviteRepository.save(invite);
         }
         // 이미 ACCEPTED/DECLINED/EXPIRED면 멱등 처리(아무 동작 안 함)
+    }
+
+    private boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
+        return rank(actual) <= rank(required);
+    }
+
+    private boolean hasAtLeast(RoleProject actual, RoleProject required) {
+        // 예시: OWNER > MANAGER > MEMBER > VIEWER
+        int rankActual = rank(actual);
+        int rankRequired = rank(required);
+        return rankActual <= rankRequired; // 숫자 낮을수록 상위 등급이라고 가정
+    }
+
+    private int rank(RoleTeam r) {
+        return switch (r) {
+            case OWNER -> 0; case ADMIN -> 1; case MEMBER -> 2; case VIEWER -> 3; default -> 99;
+        };
+    }
+
+    private int rank(RoleProject role) {
+        return switch (role) {
+            case MANAGER   -> 0;
+            case CONTRIBUTOR -> 1;
+            case VIEWER  -> 2;
+            default      -> 99;
+        };
     }
 
     private TeamResponse convertToTeamResponse(Team team) {

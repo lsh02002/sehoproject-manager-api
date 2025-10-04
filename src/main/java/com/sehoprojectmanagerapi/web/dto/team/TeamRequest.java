@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record TeamRequest(
+        Long projectId,
         String name
 ) {
 }

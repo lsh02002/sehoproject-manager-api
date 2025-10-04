@@ -1,8 +1,11 @@
 package com.sehoprojectmanagerapi.web.dto.project;
 
+import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,7 +15,7 @@ import java.time.LocalDate;
 @ToString
 public class ProjectResponse {
     private Long projectId;
-    private Long teamId;
+    private List<TeamResponse> teams;
     private String projectKey;
     private String name;
     private String description;

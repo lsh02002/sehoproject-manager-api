@@ -7,7 +7,10 @@ import com.sehoprojectmanagerapi.repository.milestone.MilestoneStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
+import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
+import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
+import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
@@ -27,6 +30,7 @@ public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final MilestoneMapper milestoneMapper;
     private final UserRepository userRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
     public List<MilestoneResponse> getAllMilestonesByUserId(Long userId) {
@@ -108,15 +112,42 @@ public class MilestoneService {
         // 프로젝트 생성자 체크
         boolean isProjectCreator = project.getCreatedBy().getId().equals(userId);
 
-        // 팀 Owner 체크
-        boolean isTeamOwner = project.getTeam().getMembers().stream()
-                .anyMatch(m -> m.getUser().getId().equals(userId) && m.getRole() == RoleTeam.OWNER);
+        boolean isProjectManagerUp = projectMemberRepository
+                .findByUserIdAndProjectId(userId, project.getId())
+                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER))
+                .orElse(false);
 
-        if (!isProjectCreator && !isTeamOwner) {
+        if (!isProjectCreator && !isProjectManagerUp) {
             throw new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
 
         // 3. 삭제 수행
         milestoneRepository.delete(milestone);
+    }
+
+    private boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
+        return rank(actual) <= rank(required);
+    }
+
+    private boolean hasAtLeast(RoleProject actual, RoleProject required) {
+        // 예시: OWNER > MANAGER > MEMBER > VIEWER
+        int rankActual = rank(actual);
+        int rankRequired = rank(required);
+        return rankActual <= rankRequired; // 숫자 낮을수록 상위 등급이라고 가정
+    }
+
+    private int rank(RoleTeam r) {
+        return switch (r) {
+            case OWNER -> 0; case ADMIN -> 1; case MEMBER -> 2; case VIEWER -> 3; default -> 99;
+        };
+    }
+
+    private int rank(RoleProject role) {
+        return switch (role) {
+            case MANAGER   -> 0;
+            case CONTRIBUTOR -> 1;
+            case VIEWER  -> 2;
+            default      -> 99;
+        };
     }
 }

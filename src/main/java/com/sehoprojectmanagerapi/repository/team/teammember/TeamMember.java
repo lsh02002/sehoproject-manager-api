@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.team.teammember;
 
+import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;

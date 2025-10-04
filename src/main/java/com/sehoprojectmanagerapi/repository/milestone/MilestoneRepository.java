@@ -11,7 +11,7 @@ public interface MilestoneRepository extends JpaRepository<Milestone, Long> {
                 select distinct m
                   from Milestone m
                   join m.project p
-                  left join p.team t
+                  left join p.teams t
                   left join t.members tm
                  where tm.user.id = :userId
                     or p.createdBy.id = :userId
