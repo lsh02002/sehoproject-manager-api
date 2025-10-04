@@ -1,8 +1,11 @@
 package com.sehoprojectmanagerapi.web.dto.task;
 
+import lombok.Builder;
+
 import java.time.LocalDate;
 import java.util.List;
 
+@Builder
 public record TaskCreateRequest(
         Long projectId,
         String title,

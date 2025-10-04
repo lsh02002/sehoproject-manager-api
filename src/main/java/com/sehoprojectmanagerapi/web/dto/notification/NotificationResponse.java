@@ -6,11 +6,11 @@ import lombok.Builder;
 public record NotificationResponse(
         Long notificationId,
         Long receiverId,
-        String recipientName,
+        String receiverName,
         String message,
         String type,
         Long relatedId,
-        boolean read,
+        boolean readFlag,
         java.time.LocalDateTime createdAt
 ) {
 }

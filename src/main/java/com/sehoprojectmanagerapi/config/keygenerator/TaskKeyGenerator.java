@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TaskKeyGenerator {
-
     public String generate(Project project, Long taskId) {
         // 프로젝트 prefix 가져오기 (없으면 ID 기반 fallback)
         String prefix = project.getKey();

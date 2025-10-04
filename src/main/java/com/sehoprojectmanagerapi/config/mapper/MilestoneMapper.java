@@ -11,17 +11,17 @@ public class MilestoneMapper {
      * Entity → Response
      */
     public MilestoneResponse toResponse(Milestone milestone) {
-        return new MilestoneResponse(
-                milestone.getId(),
-                milestone.getProject().getId(),
-                milestone.getTitle(),
-                milestone.getDescription(),
-                milestone.getStartDate(),
-                milestone.getDueDate(),
-                milestone.getStatus().name(),
-                milestone.getCreatedAt(),
-                milestone.getUpdatedAt()
-        );
+        return MilestoneResponse.builder()
+                .id(milestone.getId())
+                .projectId(milestone.getProject().getId())
+                .title(milestone.getTitle())
+                .description(milestone.getDescription())
+                .startDate(milestone.getStartDate())
+                .dueDate(milestone.getDueDate())
+                .status(milestone.getStatus().name())
+                .createdAt(milestone.getCreatedAt())
+                .updatedAt(milestone.getUpdatedAt())
+                .build();
     }
 }
 

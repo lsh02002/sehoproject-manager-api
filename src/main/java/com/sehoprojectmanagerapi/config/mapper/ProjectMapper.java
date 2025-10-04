@@ -12,30 +12,39 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectMapper {
     public ProjectResponse toProjectResponse(Project project) {
-        return new ProjectResponse(
-                project.getId(),                              // projectId
-                project.getTeams().stream().map(t -> new TeamResponse(t.getId(), t.getName())).toList(),
-                project.getKey(),
-                project.getName(),
-                project.getDescription(),
-                project.getStatus().name(),                   // Enum → String
-                project.getStartDate(),
-                project.getDueDate(),
-                project.getCreatedBy() != null ? project.getCreatedBy().getName() : null // creatorName
-        );
+        return ProjectResponse.builder()
+                .projectId(project.getId())   // projectId
+                .teams(
+                        project.getTeams().stream()
+                                .map(t -> TeamResponse.builder()
+                                        .id(t.getId())
+                                        .name(t.getName())
+                                        .build()
+                                ).toList()
+                )
+                .projectKey(project.getKey())
+                .name(project.getName())
+                .description(project.getDescription())
+                .status(project.getStatus().name())   // Enum → String
+                .startDate(project.getStartDate())
+                .dueDate(project.getDueDate())
+                .creatorName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
+                .build();
+
     }
 
     public ProjectInviteResponse toInviteResponse(ProjectInvite invite) {
-        return new ProjectInviteResponse(
-                invite.getId(),
-                invite.getProject().getId(),
-                invite.getInviter().getId(),
-                invite.getInvitedUser().getId(),
-                invite.getMessage(),
-                invite.getRequestedRole(),
-                invite.getStatus().name(),
-                invite.getExpiresAt(),
-                invite.getCreatedAt()
-        );
+        return ProjectInviteResponse.builder()
+                .id(invite.getId())
+                .projectId(invite.getProject().getId())
+                .inviterId(invite.getInviter().getId())
+                .invitedUserId(invite.getInvitedUser().getId())
+                .message(invite.getMessage())
+                .requestedRole(invite.getRequestedRole())
+                .status(invite.getStatus().name())
+                .expiresAt(invite.getExpiresAt())
+                .createdAt(invite.getCreatedAt())
+                .build();
+
     }
 }

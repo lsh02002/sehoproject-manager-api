@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class SprintMapper {
     public SprintResponse toResponse(Sprint sprint) {
-        return new SprintResponse(
-                sprint.getId(),
-                sprint.getProject().getId(),
-                sprint.getName(),
-                sprint.getState().name(),
-                sprint.getStartDate(),
-                sprint.getEndDate(),
-                sprint.getCreatedAt(),
-                sprint.getUpdatedAt()
-        );
+        return SprintResponse.builder()
+                .id(sprint.getId())
+                .projectId(sprint.getProject().getId())
+                .name(sprint.getName())
+                .state(sprint.getState().name())
+                .startDate(sprint.getStartDate())
+                .endDate(sprint.getEndDate())
+                .createdAt(sprint.getCreatedAt())
+                .updatedAt(sprint.getUpdatedAt())
+                .build();
     }
 }

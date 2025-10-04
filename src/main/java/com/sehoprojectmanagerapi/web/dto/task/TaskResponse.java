@@ -10,17 +10,17 @@ import java.util.List;
 @Builder
 public record TaskResponse(
         Long id,
-        String key,                 // 예: PROJ-123
+        String projectKey,                 // 예: PROJ-123
         Long projectId,
         String title,
         String description,
-        String status,              // OPEN/BACKLOG/IN_PROGRESS...
+        String state,              // OPEN/BACKLOG/IN_PROGRESS...
         String priority,
         String type,
         Integer storyPoints,
         List<AssigneeResponse> assignees,
-        Long sprintIds,          // 여러 스프린트
-        Long milestoneIds,       // 여러 마일스톤
+        Long sprintId,
+        Long milestoneId,
         List<Long> tagIds,             // 여러 태그
         List<Long> dependencyIds,      // 여러 선행 작업
         LocalDate dueDate,

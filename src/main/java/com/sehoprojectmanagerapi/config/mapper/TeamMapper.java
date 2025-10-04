@@ -11,17 +11,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class TeamMapper {
     public TeamInviteResponse toInviteResponse(TeamInvite invite) {
-        return new TeamInviteResponse(
-                invite.getId(),
-                invite.getTeam().getId(),
-                invite.getInviter().getId(),
-                invite.getInvitedUser().getId(),
-                invite.getMessage(),
-                invite.getRequestedRole(),
-                invite.getStatus().name(),
-                invite.getExpiresAt(),
-                invite.getCreatedAt()
-        );
+        return TeamInviteResponse.builder()
+                .id(invite.getId())
+                .teamId(invite.getTeam().getId())
+                .inviterId(invite.getInviter().getId())
+                .invitedUserId(invite.getInvitedUser().getId())
+                .message(invite.getMessage())
+                .requestedRole(invite.getRequestedRole())
+                .status(invite.getStatus().name())
+                .expiresAt(invite.getExpiresAt())
+                .createdAt(invite.getCreatedAt())
+                .build();
+
     }
 
     public TeamResponse toTeamResponse(Team team) {

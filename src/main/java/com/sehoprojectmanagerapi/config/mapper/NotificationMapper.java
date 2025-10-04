@@ -7,15 +7,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationMapper {
     public NotificationResponse toResponse(Notification n) {
-        return new NotificationResponse(
-                n.getId(),
-                n.getReceiver().getId(),
-                n.getReceiver().getName(),
-                n.getMessage(),
-                n.getType().name(),
-                n.getRelatedId(),
-                n.isReadFlag(),
-                n.getCreatedAt()
-        );
+        return NotificationResponse.builder()
+                .notificationId(n.getId())
+                .receiverId(n.getReceiver().getId())
+                .receiverName(n.getReceiver().getName())
+                .message(n.getMessage())
+                .type(n.getType().name())
+                .relatedId(n.getRelatedId())
+                .readFlag(n.isReadFlag())
+                .createdAt(n.getCreatedAt())
+                .build();
+
     }
 }

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class TagMapper {
     public TagResponse toResponse(Tag tag) {
-        return new TagResponse(
-                tag.getId(),
-                tag.getProject() != null ? tag.getProject().getId() : null,
-                tag.getName(),
-                tag.getDescription()
-        );
+        return TagResponse.builder()
+                .id(tag.getId())
+                .projectId(tag.getProject() != null ? tag.getProject().getId() : null)
+                .name(tag.getName())
+                .description(tag.getDescription())
+                .build();
     }
 }
