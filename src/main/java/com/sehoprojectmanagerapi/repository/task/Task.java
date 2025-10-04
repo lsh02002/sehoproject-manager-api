@@ -7,8 +7,6 @@ import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
-import com.sehoprojectmanagerapi.repository.task.taskmilestone.TaskMilestone;
-import com.sehoprojectmanagerapi.repository.task.tasksprint.TaskSprint;
 import com.sehoprojectmanagerapi.repository.task.tasktag.TaskTag;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -20,6 +18,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "tasks", indexes = {
@@ -35,11 +35,11 @@ public class Task extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
     private Task parent;
 
@@ -68,24 +68,26 @@ public class Task extends BaseEntity {
     private LocalDate startDate;
     private LocalDate dueDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "closed_by")
     private User closedBy;
 
     private OffsetDateTime closedAt;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "sprint_id")
+    private Sprint sprint;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "milestone_id")
+    private Milestone milestone; // null 가능
+
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskAssignee> assignees = new ArrayList<>();
-
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskSprint> sprints = new ArrayList<>();
-
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskMilestone> milestones = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskTag> tags = new ArrayList<>();
@@ -107,26 +109,6 @@ public class Task extends BaseEntity {
         assignees.removeIf(ta -> Objects.equals(ta.getUser().getId(), user.getId()));
     }
 
-    // Sprint
-    public void addSprint(Sprint sprint) {
-        TaskSprint ts = new TaskSprint(this, sprint);
-        sprints.add(ts);
-    }
-
-    public void removeSprint(Long sprintId) {
-        sprints.removeIf(ts -> Objects.equals(ts.getSprint().getId(), sprintId));
-    }
-
-    // Milestone
-    public void addMilestone(Milestone milestone) {
-        TaskMilestone tm = new TaskMilestone(this, milestone);
-        milestones.add(tm);
-    }
-
-    public void removeMilestone(Long milestoneId) {
-        milestones.removeIf(tm -> Objects.equals(tm.getMilestone().getId(), milestoneId));
-    }
-
     // Tag
     public void addTag(Tag tag) {
         TaskTag tt = new TaskTag(this, tag);
@@ -134,8 +116,9 @@ public class Task extends BaseEntity {
     }
 
     public void removeTag(Long tagId) {
-        tags.removeIf(t -> Objects.equals(t.getId(), tagId));
+        tags.removeIf(t -> t.getTag() != null && Objects.equals(t.getTag().getId(), tagId));
     }
+
 
     // Dependency
     public void addDependency(Task dependOn) {
