@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.tag;
 
 import com.sehoprojectmanagerapi.config.mapper.TagMapper;
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
@@ -28,6 +29,7 @@ public class TagService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
     private final TagMapper tagMapper;
+    private final RoleFunc roleFunc;
 
     /* 목록 조회: 프로젝트 멤버면 누구나 열람 가능 */
     @Transactional(readOnly = true)
@@ -58,7 +60,7 @@ public class TagService {
     public TagResponse createTag(Long userId, TagRequest request) {
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 생성할 수 있습니다.", userId));
-        requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", userId);
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", userId);
 
         if (request.name() == null || request.name().trim().isEmpty()) {
             throw new BadRequestException("태그명이 비어있습니다.", request.name());
@@ -91,7 +93,7 @@ public class TagService {
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 수정할 수 있습니다.", userId));
-        requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 수정 권한이 없습니다.", userId);
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 수정 권한이 없습니다.", userId);
 
         if (request.name() != null && !request.name().trim().isEmpty()) {
             String newName = request.name().trim();
@@ -117,26 +119,10 @@ public class TagService {
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
-        requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
 
         // 연결된 TaskTag가 있으면 FK/제약 위반될 수 있습니다.
         // orphanRemoval/ON DELETE CASCADE 설정에 맞춰 예외 처리
         tagRepository.delete(tag);
-    }
-
-    /* ===== 권한 비교 유틸 ===== */
-    private void requireAtLeast(RoleProject actual, RoleProject required, String msg, Object ctx) {
-        if (rank(actual) > rank(required)) {
-            throw new NotAcceptableException(msg, ctx);
-        }
-    }
-    private int rank(RoleProject r) {
-        // 질문에서 사용하신 등급 예시: MANAGER(0), CONTRIBUTOR(1), VIEWER(2)
-        return switch (r) {
-            case MANAGER -> 0;
-            case CONTRIBUTOR -> 1;
-            case VIEWER -> 2;
-            default -> 99;
-        };
     }
 }

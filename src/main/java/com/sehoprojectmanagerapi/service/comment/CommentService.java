@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.service.comment;
 
+import com.sehoprojectmanagerapi.config.mapper.CommentMapper;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.repository.comment.CommentRepository;
 import com.sehoprojectmanagerapi.repository.task.Task;
@@ -15,33 +16,33 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getCommentByTaskId(Long taskId) {
         return commentRepository.findByTaskId(taskId)
-                .stream().map(this::convertToCommentResponse).toList();
+                .stream().map(commentMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public CommentResponse getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
-        return convertToCommentResponse(comment);
+        return commentMapper.toResponse(comment);
     }
 
     @Transactional
     public List<CommentResponse> getCommentsByUserId(Long userId) {
         return commentRepository.findByAuthorId(userId)
-                .stream().map(this::convertToCommentResponse).toList();
+                .stream().map(commentMapper::toResponse).toList();
     }
 
     @Transactional
@@ -64,7 +65,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        return convertToCommentResponse(savedComment);
+        return commentMapper.toResponse(savedComment);
     }
 
     @Transactional
@@ -84,7 +85,7 @@ public class CommentService {
         }
 
         Comment savedComment = commentRepository.save(comment);
-        return convertToCommentResponse(savedComment);
+        return commentMapper.toResponse(savedComment);
     }
 
     @Transactional
@@ -94,18 +95,5 @@ public class CommentService {
         } catch (RuntimeException e) {
             throw new ConflictException("해당 댓그을 삭제할 수 없습니다.", commentId);
         }
-    }
-
-    private CommentResponse convertToCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .commentId(comment.getId())
-                .taskId(comment.getTask().getId())
-                .authorId(comment.getAuthor().getId())
-                .authorName(comment.getAuthor().getName())
-                .avatarUrl(comment.getAuthor().getAvatarUrl())
-                .content(comment.getBody())
-                .createdAt(OffsetDateTime.from(comment.getCreatedAt()))
-                .updatedAt(OffsetDateTime.from(comment.getUpdatedAt()))
-                .build();
     }
 }

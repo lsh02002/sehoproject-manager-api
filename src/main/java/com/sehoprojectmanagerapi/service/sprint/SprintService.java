@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
 import com.sehoprojectmanagerapi.config.mapper.SprintMapper;
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
@@ -27,6 +28,7 @@ public class SprintService {
     private final SprintRepository sprintRepository;
     private final SprintMapper sprintMapper;
     private final UserRepository userRepository;
+    private final RoleFunc roleFunc;
 
     /** 사용자 기준 가시한 스프린트 전체 조회 */
     @Transactional(readOnly = true)
@@ -108,7 +110,7 @@ public class SprintService {
 
         boolean isProjectManagerUp = projectMemberRepository
                 .findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER))
+                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER))
                 .orElse(false);
 
         if (!(isProjectCreator || isProjectManagerUp)) {
@@ -116,18 +118,5 @@ public class SprintService {
         }
 
         sprintRepository.delete(sprint);
-    }
-
-    /* ===== 권한 비교 유틸 ===== */
-    private boolean hasAtLeast(RoleProject actual, RoleProject required) {
-        return rank(actual) <= rank(required); // 숫자 낮을수록 상위
-    }
-    private int rank(RoleProject role) {
-        return switch (role) {
-            case MANAGER      -> 0;
-            case CONTRIBUTOR  -> 1;
-            case VIEWER       -> 2;
-            default           -> 99;
-        };
     }
 }

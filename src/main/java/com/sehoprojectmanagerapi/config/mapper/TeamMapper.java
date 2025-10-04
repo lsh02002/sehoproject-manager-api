@@ -2,8 +2,10 @@ package com.sehoprojectmanagerapi.config.mapper;
 
 // TeamMapper.java
 
+import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.teamInvite.TeamInvite;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
+import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,6 +24,11 @@ public class TeamMapper {
         );
     }
 
-    // convertToTeamResponse(..) 는 기존 구현 사용
+    public TeamResponse toTeamResponse(Team team) {
+        return TeamResponse.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .build();
+    }
 }
 

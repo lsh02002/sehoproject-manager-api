@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.team;
 
 import com.sehoprojectmanagerapi.config.mapper.TeamMapper;
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
@@ -43,17 +44,18 @@ public class TeamService {
     private final TeamMapper teamMapper;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final RoleFunc roleFunc;
 
     @Transactional
     public List<TeamResponse> getAllTeamsByUser(Long userId) {
         return teamMemberRepository.findByUserId(userId)
-                .stream().map(teamMember -> convertToTeamResponse(teamMember.getTeam())).toList();
+                .stream().map(teamMember -> teamMapper.toTeamResponse(teamMember.getTeam())).toList();
 
     }
 
     public TeamResponse getTeamByUserIdAndTeamId(Long userId, Long teamId) {
         return teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
-                .stream().map(teamMember -> convertToTeamResponse(teamMember.getTeam())).toList().get(0);
+                .stream().map(teamMember -> teamMapper.toTeamResponse(teamMember.getTeam())).toList().get(0);
     }
 
     @Transactional
@@ -76,7 +78,7 @@ public class TeamService {
         ProjectMember pm = projectMemberRepository.findByUserIdAndProjectId(userId,  project.getId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버가 아닙니다.", userId));
 
-        if (!hasAtLeast(pm.getRole(), RoleProject.MANAGER)) {
+        if (!roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("팀 생성 권한이 없습니다.", userId);
         }
 
@@ -101,7 +103,7 @@ public class TeamService {
 
         teamMemberRepository.save(teamMember);
 
-        return convertToTeamResponse(savedTeam);
+        return teamMapper.toTeamResponse(savedTeam);
     }
 
     @Transactional
@@ -112,9 +114,9 @@ public class TeamService {
         Team team = teamMember.getTeam();
         Project project = team.getProject();
 
-        boolean teamOk = hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
+        boolean teamOk = roleFunc.hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
         boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER))
+                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER))
                 .orElse(false);
 
         if (!(teamOk || projectOk)) {
@@ -132,7 +134,7 @@ public class TeamService {
         }
 
         teamRepository.save(team);
-        return convertToTeamResponse(team);
+        return teamMapper.toTeamResponse(team);
     }
 
     @Transactional
@@ -149,10 +151,10 @@ public class TeamService {
         TeamMember tm = teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
                 .orElseThrow(() -> new NotAcceptableException("해당 팀의 멤버가 아닙니다.", userId));
 
-        boolean teamOk = hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
+        boolean teamOk = roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
 
         boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> hasAtLeast(pm.getRole(), RoleProject.MANAGER) && // 작성 정책에 맞게 조정
+                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER) && // 작성 정책에 맞게 조정
                         (pm.getRole() == RoleProject.MANAGER))
                 .orElse(false);
 
@@ -258,7 +260,7 @@ public class TeamService {
         teamInviteRepository.save(invite);
         teamInviteRepository.expireOtherPendings(teamId, userId, invite.getId(), OffsetDateTime.now());
 
-        return convertToTeamResponse(invite.getTeam()); // 기존 변환기 재사용
+        return teamMapper.toTeamResponse(invite.getTeam()); // 기존 변환기 재사용
     }
 
     @Transactional
@@ -275,38 +277,5 @@ public class TeamService {
             teamInviteRepository.save(invite);
         }
         // 이미 ACCEPTED/DECLINED/EXPIRED면 멱등 처리(아무 동작 안 함)
-    }
-
-    private boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
-        return rank(actual) <= rank(required);
-    }
-
-    private boolean hasAtLeast(RoleProject actual, RoleProject required) {
-        // 예시: OWNER > MANAGER > MEMBER > VIEWER
-        int rankActual = rank(actual);
-        int rankRequired = rank(required);
-        return rankActual <= rankRequired; // 숫자 낮을수록 상위 등급이라고 가정
-    }
-
-    private int rank(RoleTeam r) {
-        return switch (r) {
-            case OWNER -> 0; case ADMIN -> 1; case MEMBER -> 2; case VIEWER -> 3; default -> 99;
-        };
-    }
-
-    private int rank(RoleProject role) {
-        return switch (role) {
-            case MANAGER   -> 0;
-            case CONTRIBUTOR -> 1;
-            case VIEWER  -> 2;
-            default      -> 99;
-        };
-    }
-
-    private TeamResponse convertToTeamResponse(Team team) {
-        return TeamResponse.builder()
-                .id(team.getId())
-                .name(team.getName())
-                .build();
     }
 }

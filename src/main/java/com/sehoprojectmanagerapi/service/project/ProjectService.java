@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.project;
 
 import com.sehoprojectmanagerapi.config.mapper.ProjectMapper;
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.ProjectStatus;
@@ -47,16 +48,17 @@ public class ProjectService {
     private final ProjectInviteRepository projectInviteRepository;
     private final ProjectMapper projectMapper;
     private final TeamMemberRepository teamMemberRepository;
+    private final RoleFunc roleFunc;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
         return projectMemberRepository.findByUserId(userId)
-                .stream().map(projectMember -> convertToProjectResponse(projectMember.getProject())).toList();
+                .stream().map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject())).toList();
     }
 
     public ProjectResponse getProjectById(Long userId, Long projectId) {
         return projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .stream().map(projectMember -> convertToProjectResponse(projectMember.getProject())).toList().get(0);
+                .stream().map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject())).toList().get(0);
     }
 
     @Transactional
@@ -79,7 +81,7 @@ public class ProjectService {
             TeamMember tm = teamMemberRepository.findByUserIdAndTeamId(userId, team.getId())
                     .orElseThrow(() -> new NotAcceptableException("해당 팀에 속하지 않습니다.", userId));
 
-            if (!hasAtLeast(tm.getRole(), RoleTeam.ADMIN)) {
+            if (!roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN)) {
                 throw new NotAcceptableException("해당 팀에 프로젝트를 연결할 권한이 없습니다.", userId);
             }
         }
@@ -105,7 +107,7 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
 
-        return convertToProjectResponse(savedProject);
+        return projectMapper.toProjectResponse(savedProject);
     }
 
     @Transactional
@@ -115,7 +117,7 @@ public class ProjectService {
 
         Project project = projectMember.getProject();
 
-        if (!hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId);
         }
 
@@ -154,7 +156,7 @@ public class ProjectService {
         }
 
         projectRepository.save(project);
-        return convertToProjectResponse(project);
+        return projectMapper.toProjectResponse(project);
     }
 
     @Transactional
@@ -298,60 +300,5 @@ public class ProjectService {
         projectInviteRepository.save(invite);
         // (옵션) 대체 초대를 위해 알림/이벤트 발행 가능
         // notificationService.notifyUser(invite.getInviter().getId(), ...);
-    }
-
-    /** 팀 역할 등급 비교 유틸 (enum 순서 또는 별도 우선순위 맵 기준으로 구현) */
-    private boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
-        // 예시: OWNER > MANAGER > MEMBER > VIEWER
-        int rankActual = rank(actual);
-        int rankRequired = rank(required);
-        return rankActual <= rankRequired; // 숫자 낮을수록 상위 등급이라고 가정
-    }
-
-    private boolean hasAtLeast(RoleProject actual, RoleProject required) {
-        // 예시: OWNER > MANAGER > MEMBER > VIEWER
-        int rankActual = rank(actual);
-        int rankRequired = rank(required);
-        return rankActual <= rankRequired; // 숫자 낮을수록 상위 등급이라고 가정
-    }
-
-    private int rank(RoleTeam role) {
-        return switch (role) {
-            case OWNER   -> 0;
-            case ADMIN -> 1;
-            case MEMBER  -> 2;
-            case VIEWER  -> 3;
-            default      -> 99;
-        };
-    }
-
-    private int rank(RoleProject role) {
-        return switch (role) {
-            case MANAGER   -> 0;
-            case CONTRIBUTOR -> 1;
-            case VIEWER  -> 2;
-            default      -> 99;
-        };
-    }
-
-    private ProjectResponse convertToProjectResponse(Project project) {
-        return ProjectResponse.builder()
-                .projectId(project.getId())
-                .teams(project.getTeams().stream().map(this::convertToTeamResponse).toList())
-                .projectKey(project.getKey())
-                .name(project.getName())
-                .description(project.getDescription())
-                .status(project.getStatus().toString())
-                .startDate(project.getStartDate())
-                .dueDate(project.getDueDate())
-                .creatorName(project.getCreatedBy().getName())
-                .build();
-    }
-
-    private TeamResponse convertToTeamResponse(Team team) {
-        return TeamResponse.builder()
-                .id(team.getId())
-                .name(team.getName())
-                .build();
     }
 }
