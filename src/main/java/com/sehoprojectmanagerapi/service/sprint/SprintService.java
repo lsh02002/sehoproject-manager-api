@@ -30,7 +30,9 @@ public class SprintService {
     private final UserRepository userRepository;
     private final RoleFunc roleFunc;
 
-    /** 사용자 기준 가시한 스프린트 전체 조회 */
+    /**
+     * 사용자 기준 가시한 스프린트 전체 조회
+     */
     @Transactional(readOnly = true)
     public List<SprintResponse> getAllSprintsByUserId(Long userId) {
         userRepository.findById(userId)
@@ -40,7 +42,9 @@ public class SprintService {
                 .stream().map(sprintMapper::toResponse).toList();
     }
 
-    /** 스프린트 생성 */
+    /**
+     * 스프린트 생성
+     */
     @Transactional
     public SprintResponse createSprint(Long userId, SprintRequest request) {
         ProjectMember projectMember = projectMemberRepository
@@ -65,7 +69,9 @@ public class SprintService {
         return sprintMapper.toResponse(sprint);
     }
 
-    /** 스프린트 수정 */
+    /**
+     * 스프린트 수정
+     */
     @Transactional
     public SprintResponse updateSprint(Long userId, Long sprintId, SprintRequest request) {
         ProjectMember projectMember = projectMemberRepository
@@ -93,7 +99,9 @@ public class SprintService {
         return sprintMapper.toResponse(sprint);
     }
 
-    /** 스프린트 삭제 */
+    /**
+     * 스프린트 삭제
+     */
     @Transactional
     public void deleteSprint(Long userId, Long sprintId) {
         Sprint sprint = sprintRepository.findById(sprintId)

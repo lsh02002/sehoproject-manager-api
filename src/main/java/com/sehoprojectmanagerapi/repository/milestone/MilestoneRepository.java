@@ -11,10 +11,13 @@ public interface MilestoneRepository extends JpaRepository<Milestone, Long> {
                 select distinct m
                   from Milestone m
                   join m.project p
-                  left join p.teams t
-                  left join t.members tm
-                 where tm.user.id = :userId
-                    or p.createdBy.id = :userId
+                 where p.createdBy.id = :userId
+                    or exists (
+                        select 1
+                          from ProjectMember pm
+                         where pm.project = p
+                           and pm.user.id = :userId
+                    )
             """)
     List<Milestone> findAllVisibleForUser(@Param("userId") Long userId);
 }

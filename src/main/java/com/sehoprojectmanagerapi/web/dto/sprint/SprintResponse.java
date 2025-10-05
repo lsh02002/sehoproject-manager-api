@@ -18,4 +18,5 @@ public record SprintResponse(
         LocalDate endDate,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {}
+) {
+}

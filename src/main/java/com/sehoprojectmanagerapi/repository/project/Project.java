@@ -1,8 +1,13 @@
 package com.sehoprojectmanagerapi.repository.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
-import com.sehoprojectmanagerapi.repository.team.Team;
+import com.sehoprojectmanagerapi.repository.common.CommonStatus;
+import com.sehoprojectmanagerapi.repository.common.Visibility;
+import com.sehoprojectmanagerapi.repository.milestone.Milestone;
+import com.sehoprojectmanagerapi.repository.space.Space;
+import com.sehoprojectmanagerapi.repository.sprint.Sprint;
+import com.sehoprojectmanagerapi.repository.tag.Tag;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,8 +40,14 @@ public class Project extends BaseEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 16)
-    private ProjectStatus status = ProjectStatus.ACTIVE;
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private CommonStatus status = CommonStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Visibility visibility = Visibility.INTERNAL;
 
     private LocalDate startDate;
     private LocalDate dueDate;
@@ -45,38 +56,23 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    /**
-     * 이 프로젝트에 속한 모든 팀(1:N).
-     * Team 쪽에 @ManyToOne Project project 가 있어야 합니다.
-     * JSON 순환 방지를 위해 @JsonIgnore 권장(필요 시 DTO로 분리).
-     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "space_id", nullable = false)
+    private Space space;
+
+    // 마일스톤
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    @Builder.Default
-    private List<Team> teams = new ArrayList<>();
+    private List<Milestone> milestones = new ArrayList<>();
 
-    public void addTeam(Team team) {
-        if (team == null) return;
+    // 스프린트
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sprint> sprints = new ArrayList<>();
 
-        // 다른 프로젝트에 붙어 있으면 먼저 떼기 (선택)
-        if (team.getProject() != null && team.getProject() != this) {
-            team.getProject().removeTeam(team);
-        }
+    // 태그
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Tag> tags = new ArrayList<>();
 
-        if (!this.teams.contains(team)) { // 중복 방지
-            this.teams.add(team);
-        }
-        // 역방향 동기화
-        if (team.getProject() != this) {
-            team.setProject(this);
-        }
-    }
-
-    public void removeTeam(Team team) {
-        if (team == null) return;
-        this.teams.remove(team);
-        if (team.getProject() == this) {
-            team.setProject(null);
-        }
-    }
+    // 태스크
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<>();
 }

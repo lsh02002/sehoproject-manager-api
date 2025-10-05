@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record AssigneeResponse(
         Long userId,
-        String username
+        String username,
+        String type
 ) {
 }

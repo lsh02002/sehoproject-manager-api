@@ -2,10 +2,13 @@ package com.sehoprojectmanagerapi.repository.sprint;
 
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "sprints")
@@ -32,4 +35,7 @@ public class Sprint extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private SprintState state = SprintState.PLANNED;
+
+    @OneToMany(mappedBy = "sprint")
+    private List<Task> tasks = new ArrayList<>();
 }

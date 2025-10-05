@@ -2,11 +2,11 @@ package com.sehoprojectmanagerapi.service.tag;
 
 import com.sehoprojectmanagerapi.config.mapper.TagMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.tag.TagRepository;
-import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
@@ -52,7 +52,7 @@ public class TagService {
     public TagResponse getTagByUserIdAndProjectIdAndId(Long userId, Long projectId, Long tagId) {
         return tagRepository.findByUserIdAndProjectIdAndId(userId, projectId, tagId)
                 .map(tagMapper::toResponse)
-                .orElseThrow(()->new NotFoundException("해당 태그를 찾지 못했습니다.", tagId));
+                .orElseThrow(() -> new NotFoundException("해당 태그를 찾지 못했습니다.", tagId));
     }
 
     /* 태그 생성: 프로젝트 멤버 중 최소 CONTRIBUTOR 이상 권장 */

@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.repository.team.teammember;
 
-import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -34,6 +33,9 @@ public class TeamMember {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private RoleTeam role = RoleTeam.MEMBER;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 
     private OffsetDateTime joinedAt;
 }

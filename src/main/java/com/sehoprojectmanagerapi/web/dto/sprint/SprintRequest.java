@@ -15,4 +15,5 @@ public record SprintRequest(
         LocalDate startDate,
         LocalDate endDate,
         String status         // 예: PLANNED, ACTIVE, CLOSED ...
-) {}
+) {
+}

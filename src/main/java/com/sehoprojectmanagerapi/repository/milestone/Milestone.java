@@ -2,10 +2,13 @@ package com.sehoprojectmanagerapi.repository.milestone;
 
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "milestones")
@@ -35,4 +38,7 @@ public class Milestone extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private MilestoneStatus status = MilestoneStatus.PLANNED;
+
+    @OneToMany(mappedBy = "milestone")
+    private List<Task> tasks = new ArrayList<>();
 }

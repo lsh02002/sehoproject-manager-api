@@ -5,9 +5,10 @@ import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
+import com.sehoprojectmanagerapi.repository.task.taskassignee.AssigneeType;
 import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
-import com.sehoprojectmanagerapi.repository.task.tasktag.TaskTag;
+import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -86,11 +87,14 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "milestone_id")
     private Milestone milestone; // null 가능
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskAssignee> assignees = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "task_tag",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskTag> tags = new ArrayList<>();
+    private List<TaskAssignee> assignees = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskDependency> dependencies = new ArrayList<>();
@@ -100,25 +104,48 @@ public class Task extends BaseEntity {
        ------------------------- */
 
     // Assignee
-    public void addAssignee(User user) {
-        TaskAssignee ta = new TaskAssignee(this, user, OffsetDateTime.now());
+    // Task 엔티티 내부
+    public void addAssignee(User user, User actor) {
+        TaskAssignee ta = TaskAssignee.forUser(this, user, actor, OffsetDateTime.now());
+        ta.setTask(this);
+        assignees.add(ta);
+    }
+
+    public void addAssignee(Team team, User actor, boolean dynamic) {
+        TaskAssignee ta = TaskAssignee.forTeam(this, team, actor, dynamic, OffsetDateTime.now());
+        ta.setTask(this);
         assignees.add(ta);
     }
 
     public void removeAssignee(User user) {
-        assignees.removeIf(ta -> Objects.equals(ta.getUser().getId(), user.getId()));
+        assignees.removeIf(ta ->
+                ta.getAssigneeType() == AssigneeType.USER &&
+                        Objects.equals(ta.getAssigneeId(), user.getId())
+        );
+    }
+
+    public void removeAssignee(Team team) {
+        assignees.removeIf(ta ->
+                ta.getAssigneeType() == AssigneeType.TEAM &&
+                        Objects.equals(ta.getAssigneeId(), team.getId())
+        );
     }
 
     // Tag
     public void addTag(Tag tag) {
-        TaskTag tt = new TaskTag(this, tag);
-        tags.add(tt);
+        if (tag == null) return;
+        if (!tags.contains(tag)) {
+            tags.add(tag);
+            // 역방향 동기화 (선택)
+            tag.getTasks().add(this);
+        }
     }
 
-    public void removeTag(Long tagId) {
-        tags.removeIf(t -> t.getTag() != null && Objects.equals(t.getTag().getId(), tagId));
+    public void removeTag(Tag tag) {
+        if (tag == null) return;
+        tags.remove(tag);
+        tag.getTasks().remove(this);
     }
-
 
     // Dependency
     public void addDependency(Task dependOn) {

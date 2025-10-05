@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @ToString
 public class ProjectRequest {
-    private Long teamId;
+    private Long spaceId;
     private String projectKey;
     private String name;
     private String description;

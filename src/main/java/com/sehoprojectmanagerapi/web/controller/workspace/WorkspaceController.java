@@ -1,0 +1,54 @@
+package com.sehoprojectmanagerapi.web.controller.workspace;
+
+import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
+import com.sehoprojectmanagerapi.service.workspace.WorkspaceService;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/workspaces")
+public class WorkspaceController {
+
+    private final WorkspaceService workspaceService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<WorkspaceResponse> createWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                   @RequestBody WorkspaceRequest request) {
+        return ResponseEntity.ok(workspaceService.createWorkspace(customUserDetails.getId(), request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WorkspaceResponse>> listWorkspaces() {
+        return ResponseEntity.ok(workspaceService.listWorkspaces());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WorkspaceResponse> getWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                 @PathVariable Long id) {
+        return ResponseEntity.ok(workspaceService.getWorkspace(customUserDetails.getId(), id));
+    }
+
+    @PutMapping("/{id}")
+    public WorkspaceResponse updateWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                    @PathVariable Long id,
+                                    @RequestBody WorkspaceRequest request) {
+        return workspaceService.updateWorkspace(customUserDetails.getId(), id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deleteWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                       @PathVariable Long id) {
+        workspaceService.deleteWorkspace(customUserDetails.getId(), id);
+        return ResponseEntity.noContent().build();
+    }
+}

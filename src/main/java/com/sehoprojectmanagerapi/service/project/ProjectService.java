@@ -2,19 +2,14 @@ package com.sehoprojectmanagerapi.service.project;
 
 import com.sehoprojectmanagerapi.config.mapper.ProjectMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
-import com.sehoprojectmanagerapi.repository.project.ProjectStatus;
 import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInvite;
 import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInviteRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
-import com.sehoprojectmanagerapi.repository.team.Team;
-import com.sehoprojectmanagerapi.repository.team.TeamRepository;
-import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
-import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
-import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
@@ -25,15 +20,12 @@ import com.sehoprojectmanagerapi.web.dto.project.ProjectInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
-import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
@@ -43,11 +35,9 @@ public class ProjectService {
     private static final int DEFAULT_INVITE_TTL_DAYS = 14;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
-    private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final ProjectInviteRepository projectInviteRepository;
     private final ProjectMapper projectMapper;
-    private final TeamMemberRepository teamMemberRepository;
     private final RoleFunc roleFunc;
 
     @Transactional
@@ -70,28 +60,11 @@ public class ProjectService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
-        Team team = null;
-        if (projectRequest.getTeamId() != null) {
-            team = teamRepository.findById(projectRequest.getTeamId())
-                    .orElseThrow(() -> new NotFoundException("지정한 팀을 찾을 수 없습니다.", projectRequest.getTeamId()));
-
-            // (선택) 조직/워크스페이스 정합성 검사 필요 시 여기서 수행
-            // if (!Objects.equals(team.getOrganizationId(), projectRequest.getOrganizationId())) throw new BadRequestException(...);
-
-            TeamMember tm = teamMemberRepository.findByUserIdAndTeamId(userId, team.getId())
-                    .orElseThrow(() -> new NotAcceptableException("해당 팀에 속하지 않습니다.", userId));
-
-            if (!roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN)) {
-                throw new NotAcceptableException("해당 팀에 프로젝트를 연결할 권한이 없습니다.", userId);
-            }
-        }
-
         Project project = Project.builder()
-                .teams(new ArrayList<>(List.of(Objects.requireNonNull(team))))
                 .key(projectRequest.getProjectKey())
                 .name(projectRequest.getName())
                 .description(projectRequest.getDescription())
-                .status(ProjectStatus.ACTIVE)
+                .status(CommonStatus.ACTIVE)
                 .startDate(projectRequest.getStartDate())
                 .dueDate(projectRequest.getDueDate())
                 .createdBy(user)
@@ -119,19 +92,6 @@ public class ProjectService {
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId);
-        }
-
-        if (projectRequest.getTeamId() != null && projectRequest.getTeamId() > 0) {
-
-            Team team = teamRepository.findById(projectRequest.getTeamId())
-                    .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", projectRequest.getTeamId()));
-
-            // 무결성: 팀은 같은 프로젝트 소속이어야 함
-            if (!team.getProject().getId().equals(project.getId())) {
-                throw new BadRequestException("다른 프로젝트의 팀으로 변경할 수 없습니다.", projectRequest.getTeamId());
-            }
-
-            project.addTeam(team);
         }
 
         if (projectRequest.getName() != null && !projectRequest.getName().trim().isEmpty()) {

@@ -2,11 +2,6 @@ package com.sehoprojectmanagerapi.service.team;
 
 import com.sehoprojectmanagerapi.config.mapper.TeamMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
-import com.sehoprojectmanagerapi.repository.project.Project;
-import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
-import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
-import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
-import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teamInvite.TeamInvite;
@@ -42,8 +37,6 @@ public class TeamService {
     private final TeamInviteRepository teamInviteRepository;
     private final UserRepository userRepository;
     private final TeamMapper teamMapper;
-    private final ProjectRepository projectRepository;
-    private final ProjectMemberRepository projectMemberRepository;
     private final RoleFunc roleFunc;
 
     @Transactional
@@ -64,32 +57,10 @@ public class TeamService {
             throw new BadRequestException("팀명이 비어있습니다.", null);
         }
 
-        if (teamRequest.projectId() == null) {
-            throw new BadRequestException("프로젝트가 지정되지 않았습니다.", null);
-        }
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
-        Project project = projectRepository.findById(teamRequest.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", teamRequest.projectId()));
-
-        // 2) 권한 체크: 프로젝트 멤버이며 MANAGER 이상만 팀 생성 가능 (정책에 맞게 조정)
-        ProjectMember pm = projectMemberRepository.findByUserIdAndProjectId(userId,  project.getId())
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버가 아닙니다.", userId));
-
-        if (!roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("팀 생성 권한이 없습니다.", userId);
-        }
-
-        // 3) (선택) 같은 프로젝트 내 팀명 중복 방지
-        boolean nameExists = teamRepository.existsByProjectIdAndNameIgnoreCase(project.getId(), teamRequest.name().trim());
-        if (nameExists) {
-            throw new BadRequestException("동일한 팀명이 이미 존재합니다.", teamRequest.name());
-        }
-
         Team team = Team.builder()
-                .project(project)
                 .name(teamRequest.name())
                 .build();
 
@@ -112,21 +83,17 @@ public class TeamService {
                 .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
 
         Team team = teamMember.getTeam();
-        Project project = team.getProject();
 
         boolean teamOk = roleFunc.hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
-        boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER))
-                .orElse(false);
 
-        if (!(teamOk || projectOk)) {
+        if (!teamOk) {
             throw new NotAcceptableException("팀 수정 권한이 없습니다.", userId);
         }
 
         // 3) 이름 변경 처리
         if (teamRequest.name() != null && !teamRequest.name().equalsIgnoreCase(team.getName())) {
             // 같은 프로젝트 내 팀명 중복 방지
-            boolean nameExists = teamRepository.existsByProjectIdAndNameIgnoreCase(project.getId(), teamRequest.name());
+            boolean nameExists = teamRepository.existsByNameIgnoreCase(teamRequest.name());
             if (nameExists) {
                 throw new ConflictException("같은 프로젝트에 동일한 팀명이 이미 존재합니다.", teamRequest.name());
             }
@@ -143,8 +110,6 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new NotFoundException("해당 팀을 찾을 수 없습니다.", teamId));
 
-        Project project = team.getProject();
-
         // 2) 권한 체크
         // - 팀 OWNER/MANAGER 이거나
         // - 프로젝트 ROLE이 MANAGER/ADMIN/OWNER 여야 함
@@ -153,19 +118,9 @@ public class TeamService {
 
         boolean teamOk = roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
 
-        boolean projectOk = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER) && // 작성 정책에 맞게 조정
-                        (pm.getRole() == RoleProject.MANAGER))
-                .orElse(false);
-
-        if (!(teamOk || projectOk)) {
+        if (!teamOk) {
             throw new NotAcceptableException("팀 삭제 권한이 없습니다.", userId);
         }
-
-        // 3) 팀이 달린 프로젝트 참조 해제 (Project.team nullable=true 전제)
-        //    nullable=false라면, 아래 로직 대신 '팀이 연결된 프로젝트가 있으면 삭제 불가'로 막으세요.
-        project.removeTeam(team);
-        projectRepository.save(project);
 
         // 4) 삭제 (Team.members는 orphanRemoval=true 이므로 함께 제거)
         try {

@@ -12,7 +12,10 @@ public class RoleFunc {
             throw new NotAcceptableException(msg, ctx);
         }
     }
-    /** 팀 역할 등급 비교 유틸 (enum 순서 또는 별도 우선순위 맵 기준으로 구현) */
+
+    /**
+     * 팀 역할 등급 비교 유틸 (enum 순서 또는 별도 우선순위 맵 기준으로 구현)
+     */
     public boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
         // 예시: OWNER > MANAGER > MEMBER > VIEWER
         int rankActual = rank(actual);
@@ -29,20 +32,20 @@ public class RoleFunc {
 
     public int rank(RoleTeam role) {
         return switch (role) {
-            case OWNER   -> 0;
+            case OWNER -> 0;
             case ADMIN -> 1;
-            case MEMBER  -> 2;
-            case VIEWER  -> 3;
-            default      -> 99;
+            case MEMBER -> 2;
+            case VIEWER -> 3;
+            default -> 99;
         };
     }
 
     public int rank(RoleProject role) {
         return switch (role) {
-            case MANAGER   -> 0;
+            case MANAGER -> 0;
             case CONTRIBUTOR -> 1;
-            case VIEWER  -> 2;
-            default      -> 99;
+            case VIEWER -> 2;
+            default -> 99;
         };
     }
 }
