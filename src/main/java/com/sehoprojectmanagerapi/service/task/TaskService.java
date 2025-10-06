@@ -1,7 +1,7 @@
 package com.sehoprojectmanagerapi.service.task;
 
 import com.sehoprojectmanagerapi.config.keygenerator.TaskKeyGenerator;
-import com.sehoprojectmanagerapi.config.mapper.TaskMapper;
+import com.sehoprojectmanagerapi.web.mapper.TaskMapper;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
 import com.sehoprojectmanagerapi.repository.project.Project;

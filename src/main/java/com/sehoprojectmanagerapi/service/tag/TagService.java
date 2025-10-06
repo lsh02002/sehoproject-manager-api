@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.tag;
 
-import com.sehoprojectmanagerapi.config.mapper.TagMapper;
+import com.sehoprojectmanagerapi.web.mapper.TagMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;

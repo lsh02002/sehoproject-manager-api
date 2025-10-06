@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
-import com.sehoprojectmanagerapi.config.mapper.SprintMapper;
+import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;

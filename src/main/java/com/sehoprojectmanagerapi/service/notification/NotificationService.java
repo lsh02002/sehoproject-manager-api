@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.notification;
 
-import com.sehoprojectmanagerapi.config.mapper.NotificationMapper;
+import com.sehoprojectmanagerapi.web.mapper.NotificationMapper;
 import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.repository.notification.NotificationRepository;
 import com.sehoprojectmanagerapi.repository.notification.NotificationType;

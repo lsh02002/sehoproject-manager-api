@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.project;
 
-import com.sehoprojectmanagerapi.config.mapper.ProjectMapper;
+import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;

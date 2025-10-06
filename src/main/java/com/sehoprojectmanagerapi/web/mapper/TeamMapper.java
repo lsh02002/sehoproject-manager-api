@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.config.mapper;
+package com.sehoprojectmanagerapi.web.mapper;
 
 // TeamMapper.java
 

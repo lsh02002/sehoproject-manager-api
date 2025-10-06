@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.config.mapper;
+package com.sehoprojectmanagerapi.web.mapper;
 
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;

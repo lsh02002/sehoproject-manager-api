@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.config.mapper;
+package com.sehoprojectmanagerapi.web.mapper;
 
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentResponse;

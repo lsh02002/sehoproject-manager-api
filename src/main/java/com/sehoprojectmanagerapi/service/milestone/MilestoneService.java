@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.milestone;
 
-import com.sehoprojectmanagerapi.config.mapper.MilestoneMapper;
+import com.sehoprojectmanagerapi.web.mapper.MilestoneMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;

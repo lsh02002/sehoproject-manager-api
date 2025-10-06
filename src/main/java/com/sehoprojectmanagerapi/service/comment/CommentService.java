@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.comment;
 
-import com.sehoprojectmanagerapi.config.mapper.CommentMapper;
+import com.sehoprojectmanagerapi.web.mapper.CommentMapper;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.repository.comment.CommentRepository;
 import com.sehoprojectmanagerapi.repository.task.Task;

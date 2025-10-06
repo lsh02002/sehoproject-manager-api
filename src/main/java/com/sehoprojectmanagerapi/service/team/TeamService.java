@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.team;
 
-import com.sehoprojectmanagerapi.config.mapper.TeamMapper;
+import com.sehoprojectmanagerapi.web.mapper.TeamMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;

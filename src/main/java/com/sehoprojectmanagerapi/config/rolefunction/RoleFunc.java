@@ -13,9 +13,6 @@ public class RoleFunc {
         }
     }
 
-    /**
-     * 팀 역할 등급 비교 유틸 (enum 순서 또는 별도 우선순위 맵 기준으로 구현)
-     */
     public boolean hasAtLeast(RoleTeam actual, RoleTeam required) {
         // 예시: OWNER > MANAGER > MEMBER > VIEWER
         int rankActual = rank(actual);

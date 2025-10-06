@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.space;
 
-import com.sehoprojectmanagerapi.config.mapper.SpaceMapper;
+import com.sehoprojectmanagerapi.web.mapper.SpaceMapper;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.space.SpaceRole;
@@ -11,7 +11,6 @@ import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
-import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;

@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.workspace;
 
-import com.sehoprojectmanagerapi.config.mapper.WorkspaceMapper;
+import com.sehoprojectmanagerapi.web.mapper.WorkspaceMapper;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;

@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.attachment;
 
-import com.sehoprojectmanagerapi.config.mapper.AttachmentMapper;
+import com.sehoprojectmanagerapi.web.mapper.AttachmentMapper;
 import com.sehoprojectmanagerapi.repository.attachment.Attachment;
 import com.sehoprojectmanagerapi.repository.attachment.AttachmentRepository;
 import com.sehoprojectmanagerapi.repository.task.Task;
