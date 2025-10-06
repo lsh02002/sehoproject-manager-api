@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.dto.users;
+package com.sehoprojectmanagerapi.web.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

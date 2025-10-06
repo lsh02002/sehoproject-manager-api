@@ -27,7 +27,7 @@ import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
-import com.sehoprojectmanagerapi.web.dto.task.TaskCreateRequest;
+import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -73,12 +73,12 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(Long userId, TaskCreateRequest req) {
+    public TaskResponse createTask(Long userId, TaskRequest request) {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
 
-        Project project = projectRepository.findById(req.projectId())
-                .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", req.projectId()));
+        Project project = projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         boolean isMember = projectMemberRepository.existsByProjectIdAndUserId(project.getId(), userId);
         if (!isMember) {
@@ -87,28 +87,28 @@ public class TaskService {
 
         // 3) Sprint/Milestone 검증 (same project)
         Sprint sprint = null;
-        if (req.sprintId() != null) {
-            sprint = sprintRepository.findById(req.sprintId())
-                    .orElseThrow(() -> new NotFoundException("스프린트를 찾을 수 없습니다.", req.sprintId()));
+        if (request.sprintId() != null) {
+            sprint = sprintRepository.findById(request.sprintId())
+                    .orElseThrow(() -> new NotFoundException("스프린트를 찾을 수 없습니다.", request.sprintId()));
             if (!Objects.equals(sprint.getProject().getId(), project.getId())) {
-                throw new ConflictException("스프린트가 프로젝트에 속해 있지 않습니다.", req.sprintId());
+                throw new ConflictException("스프린트가 프로젝트에 속해 있지 않습니다.", request.sprintId());
             }
         }
 
         Milestone milestone = null;
-        if (req.milestoneId() != null) {
-            milestone = milestoneRepository.findById(req.milestoneId())
-                    .orElseThrow(() -> new NotFoundException("마일스톤을 찾을 수 없습니다.", req.milestoneId()));
+        if (request.milestoneId() != null) {
+            milestone = milestoneRepository.findById(request.milestoneId())
+                    .orElseThrow(() -> new NotFoundException("마일스톤을 찾을 수 없습니다.", request.milestoneId()));
             if (!Objects.equals(milestone.getProject().getId(), project.getId())) {
-                throw new ConflictException("마일스톤이 프로젝트에 속해 있지 않습니다.", req.milestoneId());
+                throw new ConflictException("마일스톤이 프로젝트에 속해 있지 않습니다.", request.milestoneId());
             }
         }
 
         // 4) 태그 로드 (same project 정책이라면 검증)
         List<Tag> tags = List.of();
-        if (req.tagIds() != null && !req.tagIds().isEmpty()) {
-            tags = tagRepository.findAllById(req.tagIds());
-            if (tags.size() != req.tagIds().size()) {
+        if (request.tagIds() != null && !request.tagIds().isEmpty()) {
+            tags = tagRepository.findAllById(request.tagIds());
+            if (tags.size() != request.tagIds().size()) {
                 throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
             }
             // 프로젝트 범위 태그 정책이면 아래 검증 추가
@@ -121,9 +121,9 @@ public class TaskService {
 
         // 5) 선행 작업(Dependency) 로드 및 검증
         List<Task> dependencies = List.of();
-        if (req.dependencyTaskIds() != null && !req.dependencyTaskIds().isEmpty()) {
-            dependencies = taskRepository.findAllById(req.dependencyTaskIds());
-            if (dependencies.size() != req.dependencyTaskIds().size()) {
+        if (request.dependencyTaskIds() != null && !request.dependencyTaskIds().isEmpty()) {
+            dependencies = taskRepository.findAllById(request.dependencyTaskIds());
+            if (dependencies.size() != request.dependencyTaskIds().size()) {
                 throw new NotFoundException("하나 이상의 선행 작업을 찾을 수 없습니다.", null);
             }
             for (Task dep : dependencies) {
@@ -132,7 +132,7 @@ public class TaskService {
                 }
                 if (dep.getId() == null) continue;
                 // 새 작업이므로 자기참조는 애초에 불가하지만 방어적으로 체크
-                if (req.dependencyTaskIds().contains(dep.getId()) && Objects.equals(dep.getId(), null)) {
+                if (request.dependencyTaskIds().contains(dep.getId()) && Objects.equals(dep.getId(), null)) {
                     throw new BadRequestException("자기 자신을 의존성으로 설정할 수 없습니다.", null);
                 }
             }
@@ -142,13 +142,14 @@ public class TaskService {
 
         // 6) Task 엔티티 생성
         Task task = new Task();
+        task.setCreatedBy(creator);
         task.setProject(project);
-        task.setTitle(req.title());
-        task.setDescription(req.description());
-        task.setPriority(TaskPriority.from(req.priority())); // 문자열 -> Enum 변환 유틸
-        task.setType(TaskType.from(req.type()));             // 문자열 -> Enum 변환 유틸
-        task.setStoryPoints(req.storyPoints());
-        task.setDueDate(req.dueDate());
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setPriority(TaskPriority.from(request.priority())); // 문자열 -> Enum 변환 유틸
+        task.setType(TaskType.from(request.type()));             // 문자열 -> Enum 변환 유틸
+        task.setStoryPoints(request.storyPoints());
+        task.setDueDate(request.dueDate());
         task.setSprint(sprint);
         task.setMilestone(milestone);
         task.setCreatedAt(OffsetDateTime.now().toLocalDateTime());
@@ -158,18 +159,18 @@ public class TaskService {
 
         // 다형 담당자 처리 (없으면 스킵)
         TaskAssignee assigneeSource = null;
-        if (req.assigneeId() != null && req.assigneeType() != null) {
+        if (request.assigneeId() != null && request.assigneeType() != null) {
             AssigneeType type;
             try {
-                type = AssigneeType.valueOf(req.assigneeType());
+                type = AssigneeType.valueOf(request.assigneeType());
             } catch (IllegalArgumentException e) {
-                throw new BadRequestException("유효하지 않은 assigneeType입니다.", req.assigneeType());
+                throw new BadRequestException("유효하지 않은 assigneeType입니다.", request.assigneeType());
             }
 
             switch (type) {
                 case USER -> {
-                    User assignee = userRepository.findById(req.assigneeId())
-                            .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", req.assigneeId()));
+                    User assignee = userRepository.findById(request.assigneeId())
+                            .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", request.assigneeId()));
 
                     // 정책: 담당자는 프로젝트 멤버여야 함
                     if (!projectMemberRepository.existsByProjectIdAndUserId(project.getId(), assignee.getId())) {
@@ -186,10 +187,10 @@ public class TaskService {
                     }
                 }
                 case TEAM -> {
-                    Team team = teamRepository.findById(req.assigneeId())
-                            .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", req.assigneeId()));
+                    Team team = teamRepository.findById(request.assigneeId())
+                            .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", request.assigneeId()));
 
-                    boolean dynamic = Boolean.TRUE.equals(req.dynamicAssign()); // 팀 변동 자동 반영 여부
+                    boolean dynamic = Boolean.TRUE.equals(request.dynamicAssign()); // 팀 변동 자동 반영 여부
                     // 정책: 팀 구성원 모두가 해당 프로젝트 멤버여야 함(엄격)
                     boolean allMembersInProject =
                             teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;

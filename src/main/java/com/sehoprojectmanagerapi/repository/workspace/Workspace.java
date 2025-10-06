@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.repository.workspace;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
-import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.user.User;
@@ -31,15 +30,9 @@ public class Workspace extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 사람에게 보이는 이름
-     */
     @Column(nullable = false, length = 120)
     private String name;
 
-    /**
-     * URL 친화적인 식별자 (회사/조직 코드 등)
-     */
     @Column(nullable = false, length = 100)
     private String slug;
 

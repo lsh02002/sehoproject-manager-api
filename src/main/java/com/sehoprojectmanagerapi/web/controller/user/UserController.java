@@ -1,12 +1,12 @@
-package com.sehoprojectmanagerapi.web.controller.users;
+package com.sehoprojectmanagerapi.web.controller.user;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.user.UserService;
-import com.sehoprojectmanagerapi.web.dto.users.LoginRequest;
-import com.sehoprojectmanagerapi.web.dto.users.SignupRequest;
-import com.sehoprojectmanagerapi.web.dto.users.UserResponse;
+import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
+import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

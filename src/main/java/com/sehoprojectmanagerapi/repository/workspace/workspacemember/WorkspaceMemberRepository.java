@@ -1,14 +1,16 @@
 package com.sehoprojectmanagerapi.repository.workspace.workspacemember;
 
+import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember, Long> {
-
+    List<WorkspaceMember> findByUserId(Long userId);
     // ✅ 오타 수정: useId -> userId
     boolean existsByUserIdAndWorkspaceId(Long userId, Long workspaceId);
 

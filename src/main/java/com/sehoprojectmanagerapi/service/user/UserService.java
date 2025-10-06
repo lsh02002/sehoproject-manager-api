@@ -9,10 +9,10 @@ import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshTokenReposi
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
-import com.sehoprojectmanagerapi.web.dto.users.LoginRequest;
-import com.sehoprojectmanagerapi.web.dto.users.SignupRequest;
-import com.sehoprojectmanagerapi.web.dto.users.SignupResponse;
-import com.sehoprojectmanagerapi.web.dto.users.UserResponse;
+import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
+import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

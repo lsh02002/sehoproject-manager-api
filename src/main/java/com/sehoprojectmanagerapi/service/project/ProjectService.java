@@ -10,6 +10,8 @@ import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInviteR
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
+import com.sehoprojectmanagerapi.repository.space.Space;
+import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
@@ -39,6 +41,7 @@ public class ProjectService {
     private final ProjectInviteRepository projectInviteRepository;
     private final ProjectMapper projectMapper;
     private final RoleFunc roleFunc;
+    private final SpaceRepository spaceRepository;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -57,10 +60,14 @@ public class ProjectService {
             throw new BadRequestException("프로젝트명이 비어있습니다.", null);
         }
 
+        Space space = spaceRepository.findById(projectRequest.getSpaceId())
+                .orElseThrow(()->new NotFoundException("해당 스페이스를 찾을 수 없습니다.", projectRequest.getSpaceId()));
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         Project project = Project.builder()
+                .space(space)
                 .key(projectRequest.getProjectKey())
                 .name(projectRequest.getName())
                 .description(projectRequest.getDescription())

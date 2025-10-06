@@ -5,15 +5,15 @@ import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "workspace_members",
         uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "user_id"}))
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

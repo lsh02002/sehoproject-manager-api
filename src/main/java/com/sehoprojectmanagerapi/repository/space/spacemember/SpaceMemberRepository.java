@@ -30,4 +30,6 @@ public interface SpaceMemberRepository extends JpaRepository<SpaceMember, Long> 
            and sm.status = com.sehoprojectmanagerapi.repository.common.CommonStatus.ACTIVE
     """)
     List<SpaceMember> findActiveMembers(@Param("spaceId") Long spaceId);
+
+    void deleteAllBySpaceId(Long spaceId);
 }

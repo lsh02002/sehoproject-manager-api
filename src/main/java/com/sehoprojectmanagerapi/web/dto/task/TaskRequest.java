@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record TaskCreateRequest(
+public record TaskRequest(
         Long projectId,
         String title,
         String description,

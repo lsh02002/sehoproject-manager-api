@@ -41,6 +41,7 @@ public class WorkspaceService {
         Workspace workspace = Workspace.builder()
                 .name(request.name())
                 .slug(request.slug())
+                .createdBy(creator)
                 .build();
         workspace = workspaceRepository.save(workspace);
 
@@ -57,9 +58,11 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponse> listWorkspaces() {
-        return workspaceRepository.findAll()
-                .stream().map(workspaceMapper::toResponse).toList();
+    public List<WorkspaceResponse> listWorkspaces(Long userId) {
+        List<WorkspaceMember> workspaceMembers = workspaceMemberRepository.findByUserId(userId);
+
+        return workspaceMembers
+                .stream().map(member->workspaceMapper.toResponse(member.getWorkspace())).toList();
     }
 
     @Transactional(readOnly = true)

@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.dto.users;
+package com.sehoprojectmanagerapi.web.dto.user;
 
 import lombok.Builder;
 

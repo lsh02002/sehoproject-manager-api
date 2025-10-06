@@ -2,7 +2,7 @@ package com.sehoprojectmanagerapi.web.controller.task;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.task.TaskService;
-import com.sehoprojectmanagerapi.web.dto.task.TaskCreateRequest;
+import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskCreateRequest request) {
+    public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
     }
 }

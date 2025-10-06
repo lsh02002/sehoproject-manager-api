@@ -20,15 +20,14 @@ public class WorkspaceController {
     private final WorkspaceService workspaceService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<WorkspaceResponse> createWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                    @RequestBody WorkspaceRequest request) {
         return ResponseEntity.ok(workspaceService.createWorkspace(customUserDetails.getId(), request));
     }
 
     @GetMapping
-    public ResponseEntity<List<WorkspaceResponse>> listWorkspaces() {
-        return ResponseEntity.ok(workspaceService.listWorkspaces());
+    public ResponseEntity<List<WorkspaceResponse>> listWorkspaces(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(workspaceService.listWorkspaces(customUserDetails.getId()));
     }
 
     @GetMapping("/{id}")
@@ -45,7 +44,6 @@ public class WorkspaceController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                        @PathVariable Long id) {
         workspaceService.deleteWorkspace(customUserDetails.getId(), id);
