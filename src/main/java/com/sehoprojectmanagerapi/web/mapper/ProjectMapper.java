@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class ProjectMapper {
     public ProjectResponse toProjectResponse(Project project) {
         return ProjectResponse.builder()
-                .projectId(project.getId())   // projectId
+                .id(project.getId())   // projectId
                 .projectKey(project.getKey())
                 .spaceId(project.getSpace().getId())
                 .spaceName(project.getSpace().getName())
@@ -21,9 +21,9 @@ public class ProjectMapper {
                 .status(project.getStatus().name())   // Enum → String
                 .startDate(project.getStartDate())
                 .dueDate(project.getDueDate())
+                .creatorId(project.getCreatedBy() != null ? project.getCreatedBy().getId() : null)
                 .creatorName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
                 .build();
-
     }
 
     public ProjectInviteResponse toInviteResponse(ProjectInvite invite) {

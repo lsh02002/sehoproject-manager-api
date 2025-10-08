@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @ToString
 public class ProjectResponse {
-    private Long projectId;
+    private Long id;
     private Long spaceId;
     private String spaceName;
     private String projectKey;
@@ -20,5 +20,6 @@ public class ProjectResponse {
     private String status;
     private LocalDate startDate;
     private LocalDate dueDate;
+    private Long creatorId;
     private String creatorName;
 }

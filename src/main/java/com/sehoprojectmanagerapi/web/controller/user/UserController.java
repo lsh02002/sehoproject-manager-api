@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -37,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok((UserResponse) accessTokenAndRefreshTokenAndResponse.get(2));
     }
 
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<UserResponse> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(userService.logout(Objects.requireNonNull(customUserDetails).getEmail(), request, response));
     }

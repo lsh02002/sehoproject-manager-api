@@ -15,7 +15,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/projects")
+@RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -24,18 +24,24 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getAllTeamsByUser(customUserDetails.getId()));
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/spaces/{spaceId}")
+    public ResponseEntity<List<ProjectResponse>> getAllProjectsByUserAndSpace(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long spaceId) {
+        return ResponseEntity.ok(projectService.getAllProjectsByUserAndSpace(customUserDetails.getId(), spaceId));
+    }
+
+    @GetMapping("/{projectId}/edit")
     public ResponseEntity<ProjectResponse> getProjectById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getProjectById(customUserDetails.getId(), projectId));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ProjectResponse> createProject(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody ProjectRequest projectRequest) {
         return ResponseEntity.ok(projectService.createProject(customUserDetails.getId(), projectRequest));
     }
 
-    @PutMapping("/{projectId}")
+    @PutMapping("/{projectId}/edit")
     public ResponseEntity<ProjectResponse> updateProject(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId, @RequestBody ProjectRequest projectRequest) {
+        System.out.println("asdfasdfasdfasdfasdfsafd");
         return ResponseEntity.ok(projectService.updateProject(customUserDetails.getId(), projectId, projectRequest));
     }
 

@@ -26,13 +26,13 @@ public class CommentService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<CommentResponse> getCommentByTaskId(Long taskId) {
         return commentRepository.findByTaskId(taskId)
                 .stream().map(commentMapper::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CommentResponse getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));

@@ -1,6 +1,8 @@
 package com.sehoprojectmanagerapi.service.task;
 
 import com.sehoprojectmanagerapi.config.keygenerator.TaskKeyGenerator;
+import com.sehoprojectmanagerapi.service.exceptions.*;
+import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
 import com.sehoprojectmanagerapi.web.mapper.TaskMapper;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
@@ -23,10 +25,6 @@ import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +54,7 @@ public class TaskService {
     private final TagRepository tagRepository;
     private final TaskKeyGenerator taskKeyGenerator; // 예: "PROJ-123" 생성
     private final TaskMapper taskMapper;             // Entity -> Response
+    private final ProjectMapper projectMapper;
 
     @Transactional
     public List<TaskResponse> getAllTasksByUser(Long userId) {
@@ -73,6 +72,22 @@ public class TaskService {
     }
 
     @Transactional
+    public List<TaskResponse> getAllTasksByUserAndProject(Long userId, Long projectId) {
+        projectRepository.findById(projectId)
+                        .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+        // 멤버십 확인: 권한 예외 사용(403)
+        projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
+
+        // 정렬 보장: 리포지토리 쿼리에서 ORDER BY 권장 (createdAt or custom position)
+        var tasks = taskRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
+
+        return tasks.stream()
+                .map(taskMapper::toTaskResponse)
+                .toList();
+    }
+
+    @Transactional
     public TaskResponse createTask(Long userId, TaskRequest request) {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
@@ -80,7 +95,7 @@ public class TaskService {
         Project project = projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        boolean isMember = projectMemberRepository.existsByProjectIdAndUserId(project.getId(), userId);
+        boolean isMember = projectMemberRepository.existsByUserIdAndProjectId(userId, project.getId());
         if (!isMember) {
             throw new NotAcceptableException("해당 프로젝트에 대한 권한이 없습니다.", userId);
         }
@@ -173,7 +188,7 @@ public class TaskService {
                             .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", request.assigneeId()));
 
                     // 정책: 담당자는 프로젝트 멤버여야 함
-                    if (!projectMemberRepository.existsByProjectIdAndUserId(project.getId(), assignee.getId())) {
+                    if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
                         throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                     }
 
@@ -206,7 +221,7 @@ public class TaskService {
                     // (선택) 확장: 팀 멤버 전원 사용자 단위로 upsert
                     List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
                     for (User u : members) {
-                        if (projectMemberRepository.existsByProjectIdAndUserId(project.getId(), u.getId()) &&
+                        if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
                                 !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
                             taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
                         }

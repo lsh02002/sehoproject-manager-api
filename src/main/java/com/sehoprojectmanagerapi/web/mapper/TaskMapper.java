@@ -11,14 +11,16 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class TaskMapper {
-    UserRepository userRepository;
-    TeamRepository teamRepository;
+    private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
 
     public TaskResponse toTaskResponse(Task t) {
         return TaskResponse.builder()
@@ -31,7 +33,7 @@ public class TaskMapper {
                 .priority(t.getPriority().name())
                 .type(t.getType().name())
                 .storyPoints(t.getStoryPoints())
-                .assignees(
+                .assignees(t.getAssignees() != null ?
                         t.getAssignees().stream()
                                 .map(a -> {
                                     if (a.getAssigneeType() == AssigneeType.USER) {
@@ -54,7 +56,7 @@ public class TaskMapper {
                                         return null;
                                     }
                                 }).filter(Objects::nonNull)
-                                .toList())
+                                .toList() : null)
                 .sprintId(t.getSprint() == null ? null : t.getSprint().getId())
                 .milestoneId(t.getMilestone() == null ? null : t.getMilestone().getId())
                 .tagIds(

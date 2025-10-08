@@ -34,13 +34,13 @@ public class TeamController {
         return ResponseEntity.ok(teamService.createTeam(customUserDetails.getId(), teamRequest));
     }
 
-    @PutMapping("/teamId")
+    @PutMapping("/{teamId}")
     public ResponseEntity<TeamResponse> updateTeam(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long teamId, @RequestBody TeamRequest teamRequest) {
         return ResponseEntity.ok(teamService.updateTeam(customUserDetails.getId(), teamId, teamRequest));
     }
 
-    @DeleteMapping("/teamId")
-    public ResponseEntity<?> deleteByUserIdAndTeamId(@AuthenticationPrincipal CustomUserDetails customUserDetails, Long teamId) {
+    @DeleteMapping("/{teamId}")
+    public ResponseEntity<?> deleteByUserIdAndTeamId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long teamId) {
         teamService.deleteTeam(customUserDetails.getId(), teamId);
         return ResponseEntity.ok().build();
     }

@@ -5,6 +5,7 @@ import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMember;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import jakarta.persistence.*;
@@ -54,6 +55,9 @@ public class Space extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)              // ✅ 작성자
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SpaceMember> spaceMembers = new ArrayList<>();
 
     @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -32,7 +32,7 @@ public class TagService {
     private final RoleFunc roleFunc;
 
     /* 목록 조회: 프로젝트 멤버면 누구나 열람 가능 */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TagResponse> getTagsByProject(Long userId, Long projectId) {
         // 사용자/프로젝트 존재 체크
         userRepository.findById(userId)

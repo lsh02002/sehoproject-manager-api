@@ -13,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/tasks")
 public class TaskController {
     private final TaskService taskService;
 
@@ -22,7 +22,12 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasksByUser(customUserDetails.getId()));
     }
 
-    @PostMapping
+    @GetMapping("/projects/{projectId}")
+    public ResponseEntity<List<TaskResponse>> getAllTasksByUserAndProject(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(taskService.getAllTasksByUserAndProject(customUserDetails.getId(), projectId));
+    }
+
+    @PostMapping("/create")
     public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
     }

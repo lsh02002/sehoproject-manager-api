@@ -74,7 +74,7 @@ public class SpaceService {
         return spaceMapper.toResponse(space);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<SpaceResponse> listSpaces(Long currentUserId, Long workspaceId) {
         if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(currentUserId, workspaceId)) {
             throw new NotAcceptableException("워크스페이스 멤버만 스페이스 목록을 조회할 수 있습니다.", null);
@@ -84,7 +84,7 @@ public class SpaceService {
                 .stream().map(spaceMapper::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public SpaceResponse getSpace(Long currentUserId, Long workspaceId, Long spaceId) {
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new NotFoundException("스페이스를 찾을 수 없습니다.", spaceId));

@@ -4,8 +4,8 @@ import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.workspace.WorkspaceService;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceTreeResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,15 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/workspaces")
+@RequestMapping("/workspaces")
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
+
+    @GetMapping("/{workspaceId}/tree")
+    public WorkspaceTreeResponse getWorkspaceTree(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
+        return workspaceService.getWorkspaceTree(customUserDetails.getId(), workspaceId);
+    }
 
     @PostMapping
     public ResponseEntity<WorkspaceResponse> createWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,

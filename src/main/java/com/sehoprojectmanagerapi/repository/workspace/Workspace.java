@@ -5,6 +5,7 @@ import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.user.User;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -44,6 +45,10 @@ public class Workspace extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)              // ✅ 작성자
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkspaceMember> workspaceMembers = new ArrayList<>();
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

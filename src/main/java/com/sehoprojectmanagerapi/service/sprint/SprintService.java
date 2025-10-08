@@ -33,7 +33,7 @@ public class SprintService {
     /**
      * 사용자 기준 가시한 스프린트 전체 조회
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<SprintResponse> getAllSprintsByUserId(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));

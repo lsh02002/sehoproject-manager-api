@@ -22,7 +22,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getCommentsByUserId(customUserDetails.getId()));
     }
 
-    @GetMapping("/{taskId}")
+    @GetMapping("/{taskId}/task")
     public ResponseEntity<List<CommentResponse>> getAllCommentsByTaskId(@PathVariable Long taskId) {
         return ResponseEntity.ok(commentService.getCommentByTaskId(taskId));
     }
