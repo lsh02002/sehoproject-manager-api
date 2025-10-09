@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.service.workspace;
 
 import com.sehoprojectmanagerapi.repository.common.MenuType;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
-import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.project.ProjectService;
 import com.sehoprojectmanagerapi.service.space.SpaceService;
 import com.sehoprojectmanagerapi.service.task.TaskService;
@@ -55,7 +54,7 @@ public class WorkspaceService {
         List<Long> workspaceIds = workspaceMemberRepository.findWorkspaceIdsByUserId(userId);
         if (workspaceIds.isEmpty()) {
             // 멤버십이 하나도 없으면 접근 금지 혹은 빈 리스트 반환 중 정책 선택
-            throw new AccessDeniedException("소속된 워크스페이스가 없습니다.", null);
+            throw new NotAcceptableException("소속된 워크스페이스가 없습니다.", null);
             // return List.of();
         }
 

@@ -47,7 +47,7 @@ public class TeamService {
     public TeamResponse getTeamByUserIdAndTeamId(Long userId, Long teamId) {
         return teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
                 .map(teamMember -> teamMapper.toTeamResponse(teamMember.getTeam()))
-                .orElseThrow(()->new AccessDeniedException("해당 정보에 접근할 수 없습니다.", null));
+                .orElseThrow(()->new NotAcceptableException("해당 정보에 접근할 수 없습니다.", null));
     }
 
     @Transactional

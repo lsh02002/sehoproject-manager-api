@@ -78,7 +78,7 @@ public class TaskService {
                         .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
         // 멤버십 확인: 권한 예외 사용(403)
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
         // 정렬 보장: 리포지토리 쿼리에서 ORDER BY 권장 (createdAt or custom position)
         var tasks = taskRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
@@ -466,7 +466,7 @@ public class TaskService {
     @Transactional
     public void deleteTask(Long userId, Long projectId, Long taskId) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)
                 .orElseThrow(()->new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
