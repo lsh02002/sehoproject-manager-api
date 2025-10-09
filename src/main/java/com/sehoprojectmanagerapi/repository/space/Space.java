@@ -56,6 +56,9 @@ public class Space extends BaseEntity {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @Column(nullable = false)
+    private int position = 0;
+
     @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SpaceMember> spaceMembers = new ArrayList<>();
 

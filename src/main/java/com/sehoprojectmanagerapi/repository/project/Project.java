@@ -61,6 +61,9 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "space_id", nullable = false)
     private Space space;
 
+    @Column(nullable = false)
+    private int position = 0;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectMember> projectMembers = new ArrayList<>();
 

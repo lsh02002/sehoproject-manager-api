@@ -46,6 +46,9 @@ public class Workspace extends BaseEntity {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @Column(nullable = false)
+    private int position = 0;
+
     @JsonIgnore
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkspaceMember> workspaceMembers = new ArrayList<>();

@@ -1,10 +1,18 @@
 package com.sehoprojectmanagerapi.web.dto.workspace;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Builder
-public record TreeRow(
-        Long spaceId, String spaceName,
-        Long projectId, String projectName
-) {
+@AllArgsConstructor
+@NoArgsConstructor
+public class TreeRow {
+    private Long workspaceId;
+    private Long spaceId;
+    private String spaceName;
+    private Long projectId;
+    private String projectName;
 }

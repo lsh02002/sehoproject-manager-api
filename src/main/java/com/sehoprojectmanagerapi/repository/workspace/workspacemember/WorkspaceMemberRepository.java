@@ -35,4 +35,13 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
     """)
     Optional<WorkspaceMember> findActiveByUserIdAndWorkspaceId(@Param("userId") Long userId,
                                                                @Param("workspaceId") Long workspaceId);
+
+    // 유저가 속한 워크스페이스 ID 목록
+    @Query("""
+        select wm.workspace.id
+        from WorkspaceMember wm
+        where wm.user.id = :userId
+        order by wm.workspace.position asc, wm.workspace.id asc
+    """)
+    List<Long> findWorkspaceIdsByUserId(@Param("userId") Long userId);
 }

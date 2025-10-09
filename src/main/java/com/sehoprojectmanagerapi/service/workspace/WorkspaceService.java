@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,62 +49,95 @@ public class WorkspaceService {
     private final TaskService taskService;
 
     @Transactional
-    public WorkspaceTreeResponse getWorkspaceTree(Long userId, Long workspaceId) {
-        // 1) 멤버십 먼저 확인 (권한 노출 방지)
-        boolean isMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(userId, workspaceId);
-        if (!isMember) {
-            throw new AccessDeniedException("워크스페이스 멤버만 조회할 수 있습니다.", null); // 403에 매핑
+    public List<WorkspaceTreeResponse> getWorkspaceTrees(Long userId) {
+        // 0) 유저가 속한 워크스페이스 목록을 먼저 전부 조회 (권한 노출 방지)
+        //    존재 안 하면 403/404 중 정책에 맞게 처리
+        List<Long> workspaceIds = workspaceMemberRepository.findWorkspaceIdsByUserId(userId);
+        if (workspaceIds.isEmpty()) {
+            // 멤버십이 하나도 없으면 접근 금지 혹은 빈 리스트 반환 중 정책 선택
+            throw new AccessDeniedException("소속된 워크스페이스가 없습니다.", null);
+            // return List.of();
         }
 
-        // 2) 워크스페이스 존재 확인 (이 시점에는 멤버만 알 수 있음)
-        var workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", workspaceId));
+        // 1) 워크스페이스 엔티티 일괄 조회 (멤버만 이름을 알 수 있음)
+        //    Map으로 빠른 참조
+        List<Workspace> workspaces = workspaceRepository.findAllById(workspaceIds);
+        Map<Long, Workspace> workspaceById = workspaces.stream()
+                .collect(Collectors.toMap(Workspace::getId, Function.identity()));
 
-        // 3) 트리 로우 조회 (정렬 보장: space ASC, project ASC 등)
-        //    쿼리 자체를 ORDER BY space_position, project_position 로 보장하는 걸 권장
-        List<TreeRow> rows = spaceRepository.findTreeRowsByWorkspaceId(workspaceId);
+        // 2) 모든 워크스페이스에 대한 트리 로우를 한 번에 조회 (정렬 보장)
+        //    ORDER BY 는 쿼리에서 workspace_position, space_position, project_position 등으로 보장
+        List<TreeRow> rows = spaceRepository.findTreeRowsByWorkspaceIds(workspaceIds);
 
-        // 4) 중복 방지: spaceId → (spaceName, projectsSet)
-        Map<Long, WorkspaceTreeResponse.SpaceNode> spaceMap = new LinkedHashMap<>();
-        // spaceId 별로 이미 추가된 projectId를 추적
-        Map<Long, Set<Long>> seenProjectIdsBySpace = new HashMap<>();
+        // 3) 워크스페이스별로 그룹핑하며 트리 구성
+        //    workspaceId -> (spaceId -> SpaceNode), workspaceId -> (spaceId -> seenProjectIds)
+        Map<Long, LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode>> spaceMapByWorkspace = new LinkedHashMap<>();
+        Map<Long, Map<Long, Set<Long>>> seenProjectIdsByWorkspaceAndSpace = new HashMap<>();
 
         for (TreeRow row : rows) {
-            // Space 생성
-            spaceMap.computeIfAbsent(row.spaceId(), id ->
+            Long wid = row.getWorkspaceId();
+            Long sid = row.getSpaceId();
+
+            // 워크스페이스별 Space 맵 꺼내기
+            LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode> spaceMap =
+                    spaceMapByWorkspace.computeIfAbsent(wid, k -> new LinkedHashMap<>());
+
+            // Space 노드 생성/중복 방지
+            spaceMap.computeIfAbsent(sid, id ->
                     new WorkspaceTreeResponse.SpaceNode(
                             id,
-                            row.spaceName(),
+                            row.getSpaceName(),
                             MenuType.SPACE,
                             new ArrayList<>()
                     )
             );
 
-            // Project 중복 방지 + null 방어
-            if (row.projectId() != null) {
-                Set<Long> seen = seenProjectIdsBySpace.computeIfAbsent(row.spaceId(), k -> new HashSet<>());
-                if (seen.add(row.projectId())) {
-                    spaceMap.get(row.spaceId())
+            // 프로젝트 중복 방지 + null 방어
+            if (row.getProjectId() != null) {
+                Map<Long, Set<Long>> seenBySpace =
+                        seenProjectIdsByWorkspaceAndSpace.computeIfAbsent(wid, k -> new HashMap<>());
+                Set<Long> seenProjects =
+                        seenBySpace.computeIfAbsent(sid, k -> new HashSet<>());
+
+                if (seenProjects.add(row.getProjectId())) {
+                    spaceMap.get(sid)
                             .projectNodes()
                             .add(new WorkspaceTreeResponse.ProjectNode(
-                                    row.projectId(),
-                                    row.projectName(),
+                                    row.getProjectId(),
+                                    row.getProjectName(),
                                     MenuType.PROJECT
                             ));
                 }
             }
         }
 
-        // 5) 최종 응답: 필요 시 불변 컬렉션으로 래핑
-        List<WorkspaceTreeResponse.SpaceNode> spaceNodes = new ArrayList<>(spaceMap.values());
-        // spaceNodes.forEach(sn -> sn.setProjectNodes(List.copyOf(sn.getProjectNodes()))); // 가변 → 불변 전환 (게터/세터 유무에 맞게 조정)
+        // 4) 워크스페이스 순서대로 최종 응답 만들기
+        //    workspace 정렬 기준(포지션)이 있다면 쿼리/정렬로 먼저 workspaceIds 자체를 원하는 순서로 받아오면 더 깔끔
+        List<WorkspaceTreeResponse> result = new ArrayList<>();
+        for (Long wid : workspaceIds) {
+            Workspace ws = workspaceById.get(wid);
+            if (ws == null) {
+                // 방어 코드: 혹시 멤버십은 있는데 워크스페이스가 삭제되었거나 조회 실패한 경우 스킵/예외
+                continue;
+            }
+            List<WorkspaceTreeResponse.SpaceNode> spaceNodes = new ArrayList<>();
+            LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode> spaceMap = spaceMapByWorkspace.get(wid);
+            if (spaceMap != null) {
+                spaceNodes.addAll(spaceMap.values());
+                // 필요하면 불변 래핑
+                // spaceNodes = List.copyOf(spaceNodes);
+                // spaceNodes.forEach(sn -> sn.setProjectNodes(List.copyOf(sn.getProjectNodes())));
+            }
 
-        return new WorkspaceTreeResponse(
-                workspace.getId(),
-                workspace.getName(),
-                MenuType.WORKSPACE,
-                spaceNodes
-        );
+            result.add(new WorkspaceTreeResponse(
+                    ws.getId(),
+                    ws.getName(),
+                    MenuType.WORKSPACE,
+                    spaceNodes
+            ));
+        }
+
+        return result;
     }
 
 

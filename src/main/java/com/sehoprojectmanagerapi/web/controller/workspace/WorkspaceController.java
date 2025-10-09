@@ -19,9 +19,9 @@ public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
 
-    @GetMapping("/{workspaceId}/tree")
-    public WorkspaceTreeResponse getWorkspaceTree(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
-        return workspaceService.getWorkspaceTree(customUserDetails.getId(), workspaceId);
+    @GetMapping("/tree")
+    public ResponseEntity<List<WorkspaceTreeResponse>> getWorkspaceTree(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(workspaceService.getWorkspaceTrees(customUserDetails.getId()));
     }
 
     @PostMapping
