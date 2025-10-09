@@ -2,8 +2,10 @@ package com.sehoprojectmanagerapi.web.controller.task;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.task.TaskService;
+import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
+import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,8 +29,24 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasksByUserAndProject(customUserDetails.getId(), projectId));
     }
 
+    @GetMapping("/{taskId}/edit")
+    public ResponseEntity<TaskResponse> getTaskById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
+    }
+
+    @PutMapping("/{taskId}/edit")
+    public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestBody TaskUpdateRequest request) {
+        return ResponseEntity.ok(taskService.updateTask(customUserDetails.getId(), taskId, request));
+    }
+
+    @DeleteMapping("/{taskId}/projects/{projectId}")
+    public ResponseEntity<Void> deleteTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId, @PathVariable Long taskId) {
+        taskService.deleteTask(customUserDetails.getId(), projectId, taskId);
+        return ResponseEntity.ok().build();
     }
 }

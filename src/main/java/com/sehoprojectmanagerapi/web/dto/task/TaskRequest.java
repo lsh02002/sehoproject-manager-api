@@ -19,6 +19,7 @@ public record TaskRequest(
         List<Long> dependencyTaskIds,// [] 가능 (선행 작업들)
         String priority,             // "LOW/MEDIUM/HIGH" 등
         String type,                 // "TASK/BUG/STORY" 등
+        String state,
         Integer storyPoints,         // null 가능
         LocalDate dueDate            // null 가능
 ) {

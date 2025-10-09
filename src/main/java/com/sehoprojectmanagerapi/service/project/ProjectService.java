@@ -103,7 +103,6 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponse updateProject(Long userId, Long projectId, ProjectRequest projectRequest) {
-        System.out.println("tx readOnly? {}" + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
