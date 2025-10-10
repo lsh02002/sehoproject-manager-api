@@ -1,13 +1,6 @@
 package com.sehoprojectmanagerapi.service.task;
 
 import com.sehoprojectmanagerapi.config.keygenerator.TaskKeyGenerator;
-import com.sehoprojectmanagerapi.repository.task.*;
-import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependencyRepository;
-import com.sehoprojectmanagerapi.service.exceptions.*;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
-import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;
-import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
-import com.sehoprojectmanagerapi.web.mapper.TaskMapper;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -18,15 +11,24 @@ import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.sprint.SprintRepository;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.tag.TagRepository;
+import com.sehoprojectmanagerapi.repository.task.*;
 import com.sehoprojectmanagerapi.repository.task.taskassignee.*;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
+import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependencyRepository;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
+import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
+import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
+import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;
+import com.sehoprojectmanagerapi.web.mapper.TaskMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +57,6 @@ public class TaskService {
     private final TagRepository tagRepository;
     private final TaskKeyGenerator taskKeyGenerator; // 예: "PROJ-123" 생성
     private final TaskMapper taskMapper;             // Entity -> Response
-    private final ProjectMapper projectMapper;
 
     @Transactional
     public List<TaskResponse> getAllTasksByUser(Long userId) {
@@ -75,7 +76,7 @@ public class TaskService {
     @Transactional
     public List<TaskResponse> getAllTasksByUserAndProject(Long userId, Long projectId) {
         projectRepository.findById(projectId)
-                        .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
         // 멤버십 확인: 권한 예외 사용(403)
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
@@ -91,7 +92,7 @@ public class TaskService {
     @Transactional
     public TaskResponse getTaskById(Long userId, Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(()->new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, task.getProject().getId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", null));
@@ -186,57 +187,60 @@ public class TaskService {
         task = taskRepository.save(task);
 
         // 다형 담당자 처리 (없으면 스킵)
-        TaskAssignee assigneeSource = null;
-        if (request.assigneeId() != null && request.assigneeType() != null) {
-            AssigneeType type;
-            try {
-                type = AssigneeType.valueOf(request.assigneeType());
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("유효하지 않은 assigneeType입니다.", request.assigneeType());
-            }
+        if (request.assignees() != null) {
+            TaskAssignee assigneeSource = null;
 
-            switch (type) {
-                case USER -> {
-                    User assignee = userRepository.findById(request.assigneeId())
-                            .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", request.assigneeId()));
-
-                    // 정책: 담당자는 프로젝트 멤버여야 함
-                    if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
-                        throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
-                    }
-
-                    assigneeSource = taskAssigneeRepository.save(
-                            TaskAssignee.forUser(task, assignee, creator, OffsetDateTime.now())
-                    );
-
-                    // (선택) 확장 테이블 쓰는 경우
-                    if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
-                        taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
-                    }
+            for (AssigneeRequest assigneeRequest : request.assignees()) {
+                AssigneeType type;
+                try {
+                    type = AssigneeType.valueOf(assigneeRequest.getType());
+                } catch (IllegalArgumentException e) {
+                    throw new BadRequestException("유효하지 않은 assigneeType입니다.", assigneeRequest.getType());
                 }
-                case TEAM -> {
-                    Team team = teamRepository.findById(request.assigneeId())
-                            .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", request.assigneeId()));
 
-                    boolean dynamic = Boolean.TRUE.equals(request.dynamicAssign()); // 팀 변동 자동 반영 여부
-                    // 정책: 팀 구성원 모두가 해당 프로젝트 멤버여야 함(엄격)
-                    boolean allMembersInProject =
-                            teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
-                    if (!allMembersInProject) {
-                        // 완화 정책을 원하면 여기서 교집합만 확장하도록 분기 가능
-                        throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                switch (type) {
+                    case USER -> {
+                        User assignee = userRepository.findById(assigneeRequest.getAssigneeId())
+                                .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
+
+                        // 정책: 담당자는 프로젝트 멤버여야 함
+                        if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
+                            throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
+                        }
+
+                        assigneeSource = taskAssigneeRepository.save(
+                                TaskAssignee.forUser(task, assignee, creator, OffsetDateTime.now())
+                        );
+
+                        // (선택) 확장 테이블 쓰는 경우
+                        if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
+                            taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
+                        }
                     }
+                    case TEAM -> {
+                        Team team = teamRepository.findById(assigneeRequest.getAssigneeId())
+                                .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", assigneeRequest.getDynamicAssign()));
 
-                    assigneeSource = taskAssigneeRepository.save(
-                            TaskAssignee.forTeam(task, team, creator, dynamic, OffsetDateTime.now())
-                    );
+                        boolean dynamic = Boolean.TRUE.equals(assigneeRequest.getDynamicAssign()); // 팀 변동 자동 반영 여부
+                        // 정책: 팀 구성원 모두가 해당 프로젝트 멤버여야 함(엄격)
+                        boolean allMembersInProject =
+                                teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
+                        if (!allMembersInProject) {
+                            // 완화 정책을 원하면 여기서 교집합만 확장하도록 분기 가능
+                            throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                        }
 
-                    // (선택) 확장: 팀 멤버 전원 사용자 단위로 upsert
-                    List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
-                    for (User u : members) {
-                        if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
-                                !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
-                            taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                        assigneeSource = taskAssigneeRepository.save(
+                                TaskAssignee.forTeam(task, team, creator, dynamic, OffsetDateTime.now())
+                        );
+
+                        // (선택) 확장: 팀 멤버 전원 사용자 단위로 upsert
+                        List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
+                        for (User u : members) {
+                            if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
+                                    !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
+                                taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                            }
                         }
                     }
                 }
@@ -386,27 +390,23 @@ public class TaskService {
         //  - assigneeType, assigneeId 둘 다 null이면 변경 없음
         //  - assigneeType != null && assigneeId == null 이면 '할당 해제'
         //  - 둘 다 있으면 타입 검증 + 동일 프로젝트 정책 검증 후 재할당
-        if (request.assigneeType() != null) {
-            // 먼저 기존 담당자/확장 매핑 정리
-            // (아래 메서드는 레포지토리에 구현되어 있어야 합니다)
-            taskAssigneeUserRepository.deleteByTaskId(task.getId());
-            taskAssigneeRepository.deleteByTaskId(task.getId());
+        taskAssigneeUserRepository.deleteByTaskId(task.getId());
+        taskAssigneeRepository.deleteByTaskId(task.getId());
 
-            if (request.assigneeId() == null) {
-                // 전부 해제하고 종료
-            } else {
+        for (AssigneeRequest assigneeRequest : request.assignees()) {
+            if (assigneeRequest.getType() != null) {
                 AssigneeType type;
                 try {
-                    type = AssigneeType.valueOf(request.assigneeType());
+                    type = AssigneeType.valueOf(assigneeRequest.getType());
                 } catch (IllegalArgumentException e) {
-                    throw new BadRequestException("유효하지 않은 assigneeType입니다.", request.assigneeType());
+                    throw new BadRequestException("유효하지 않은 assigneeType입니다.", assigneeRequest.getType());
                 }
 
                 TaskAssignee assigneeSource;
                 switch (type) {
                     case USER -> {
-                        User assignee = userRepository.findById(request.assigneeId())
-                                .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", request.assigneeId()));
+                        User assignee = userRepository.findById(assigneeRequest.getAssigneeId())
+                                .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
                         if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
                             throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                         }
@@ -418,10 +418,10 @@ public class TaskService {
                         }
                     }
                     case TEAM -> {
-                        Team team = teamRepository.findById(request.assigneeId())
-                                .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", request.assigneeId()));
+                        Team team = teamRepository.findById(assigneeRequest.getAssigneeId())
+                                .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
 
-                        boolean dynamic = Boolean.TRUE.equals(request.dynamicAssign());
+                        boolean dynamic = Boolean.TRUE.equals(assigneeRequest.getDynamicAssign());
                         boolean allMembersInProject =
                                 teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
                         if (!allMembersInProject) {
@@ -441,14 +441,13 @@ public class TaskService {
                         }
                     }
                 }
+            } else if (Boolean.TRUE.equals(assigneeRequest.getDynamicAssign())) {
+                // 타입 변경은 없고, 팀 담당 상태에서 dynamic 플래그만 토글하고 싶은 경우 지원
+                taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), true);
+            } else if (Boolean.FALSE.equals(assigneeRequest.getDynamicAssign())) {
+                taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), false);
             }
-        } else if (Boolean.TRUE.equals(request.dynamicAssign())) {
-            // 타입 변경은 없고, 팀 담당 상태에서 dynamic 플래그만 토글하고 싶은 경우 지원
-            taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), true);
-        } else if (Boolean.FALSE.equals(request.dynamicAssign())) {
-            taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), false);
         }
-
         // 6) (선택) 키 재계산은 일반적으로 불필요. 필요 시 주석 해제
         // String key = taskKeyGenerator.generate(project, task.getId());
         // task.setKey(key);
@@ -462,14 +461,13 @@ public class TaskService {
         return taskMapper.toTaskResponse(task);
     }
 
-
     @Transactional
     public void deleteTask(Long userId, Long projectId, Long taskId) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)
-                .orElseThrow(()->new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
 
         try {
             taskRepository.delete(task);

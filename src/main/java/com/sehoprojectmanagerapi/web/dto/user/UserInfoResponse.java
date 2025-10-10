@@ -5,9 +5,8 @@ import lombok.Builder;
 @Builder
 public record UserInfoResponse(
         Long userId,
-        String nickname,
+        String name,
         String email,
-        String userStatus,
         String createdAt,
         String deletedAt
 ) {

@@ -9,6 +9,7 @@ import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,17 +40,19 @@ public class TaskMapper {
                                     if (a.getAssigneeType() == AssigneeType.USER) {
                                         User user = userRepository.findById(a.getAssigneeId())
                                                 .orElse(null);
-                                        return AssigneeResponse.builder()
-                                                .userId(user != null ? user.getId() : null)
-                                                .username(user != null ? user.getName() : null)
+                                        return AssigneeRequest.builder()
+                                                .assigneeId(user != null ? user.getId() : null)
+                                                .email(user != null ? user.getEmail() : null)
+                                                .dynamicAssign(true)
                                                 .type("USER")
                                                 .build();
                                     } else if (a.getAssigneeType() == AssigneeType.TEAM) {
                                         Team team = teamRepository.findById(a.getAssigneeId())
                                                 .orElse(null);
-                                        return AssigneeResponse.builder()
-                                                .userId(null)
-                                                .username(team != null ? team.getName() : null)
+                                        return AssigneeRequest.builder()
+                                                .assigneeId(team != null ? team.getId() : null)
+                                                .email(Objects.requireNonNull(team).getName()+" 팀")
+                                                .dynamicAssign(true)
                                                 .type("TEAM")
                                                 .build();
                                     } else {

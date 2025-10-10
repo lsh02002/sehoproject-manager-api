@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface ProjectInviteRepository extends JpaRepository<ProjectInvite, Long> {
@@ -46,4 +47,30 @@ public interface ProjectInviteRepository extends JpaRepository<ProjectInvite, Lo
                               @Param("now") OffsetDateTime now,
                               @Param("pending") ProjectInvite.Status pending,
                               @Param("expired") ProjectInvite.Status expired);
+
+    List<ProjectInvite> findAllByInvitedUserId(Long invitedUserId);
+
+    @Query("""
+                select i from ProjectInvite i
+                join fetch i.project p
+                join fetch i.invitedUser iu
+                left join fetch i.inviter su
+                where i.id = :inviteId
+                  and p.id = :projectId
+            """)
+    Optional<ProjectInvite> findByIdWithProject(@Param("inviteId") Long inviteId,
+                                                @Param("projectId") Long projectId);
+
+    @Query("""
+        select i
+        from ProjectInvite i
+        join fetch i.project p
+        left join fetch p.space s
+        join fetch i.invitedUser iu
+        left join fetch i.inviter su
+        where i.id = :inviteId
+          and p.id = :projectId
+    """)
+    Optional<ProjectInvite> findByIdWithProjectAndSpace(@Param("inviteId") Long inviteId,
+                                                 @Param("projectId") Long projectId);
 }

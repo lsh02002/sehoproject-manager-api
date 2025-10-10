@@ -4,8 +4,10 @@ import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.user.UserService;
+import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
 import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
+import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +42,11 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<UserResponse> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(userService.logout(Objects.requireNonNull(customUserDetails).getEmail(), request, response));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AssigneeRequest>> getAllUsers(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(userService.getUserInfos(customUserDetails.getId()));
     }
 
     @GetMapping(value = "/entrypoint")

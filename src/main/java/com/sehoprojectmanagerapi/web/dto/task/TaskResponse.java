@@ -18,7 +18,7 @@ public record TaskResponse(
         String priority,
         String type,
         Integer storyPoints,
-        List<AssigneeResponse> assignees,
+        List<AssigneeRequest> assignees,
         Long sprintId,
         Long milestoneId,
         List<Long> tagIds,             // 여러 태그

@@ -51,34 +51,39 @@ public class ProjectController {
     }
 
     /* ==== 멤버 초대 (기존 PathVar 방식 개선: Body로 받기) ==== */
+    @GetMapping("/invitations")
+    public ResponseEntity<List<ProjectInviteResponse>> getMyInvites(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(projectService.getMyProjectInvites(customUserDetails.getId()));
+    }
+
     @PostMapping("/{projectId}/invites")
     public ResponseEntity<ProjectInviteResponse> inviteToProject(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long projectId,
             @RequestBody ProjectInviteRequest request
     ) {
-        ProjectInviteResponse invite = projectService.inviteToProject(user.getId(), projectId, request);
+        ProjectInviteResponse invite = projectService.inviteToProject(customUserDetails.getId(), projectId, request);
         return ResponseEntity.ok(invite);
     }
 
     /* ==== 초대 수락 ==== */
     @PostMapping("/{projectId}/invites/{inviteId}/accept")
     public ResponseEntity<ProjectResponse> acceptInvite(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long projectId,
             @PathVariable Long inviteId
     ) {
-        return ResponseEntity.ok(projectService.acceptInvite(user.getId(), projectId, inviteId));
+        return ResponseEntity.ok(projectService.acceptInvite(customUserDetails.getId(), projectId, inviteId));
     }
 
     /* ==== 초대 거절 ==== */
     @PostMapping("/{projectId}/invites/{inviteId}/decline")
     public ResponseEntity<Void> declineInvite(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long projectId,
             @PathVariable Long inviteId
     ) {
-        projectService.declineInvite(user.getId(), projectId, inviteId);
+        projectService.declineInvite(customUserDetails.getId(), projectId, inviteId);
         return ResponseEntity.noContent().build();
     }
 }

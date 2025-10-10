@@ -25,7 +25,5 @@ public record TaskUpdateRequest(
         List<Long> tagIds,             // null: 변경 없음, empty: 모두 제거
         List<Long> dependencyTaskIds,  // null: 변경 없음, empty: 모두 제거
 
-        String assigneeType,    // "USER" | "TEAM" | null (변경 없음)
-        Long assigneeId,        // null: 해제
-        Boolean dynamicAssign   // null: 변경 없음
+        List<AssigneeRequest> assignees // null: 변경 없음
 ) {}

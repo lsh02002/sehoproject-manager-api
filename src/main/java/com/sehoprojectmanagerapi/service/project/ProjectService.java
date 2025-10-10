@@ -25,11 +25,11 @@ import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
@@ -53,6 +53,9 @@ public class ProjectService {
 
     @Transactional
     public List<ProjectResponse> getAllProjectsByUserAndSpace(Long userId, Long spaceId) {
+        spaceRepository.findById(spaceId)
+                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+
         return projectMemberRepository.findByUserId(userId)
                 .stream().filter(projectMember -> Objects.equals(projectMember.getProject().getSpace().getId(), spaceId))
                 .map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject())).toList();
@@ -60,6 +63,9 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponse getProjectById(Long userId, Long projectId) {
+        projectRepository.findById(projectId)
+                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+
         return projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject()))
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", null));
@@ -158,6 +164,17 @@ public class ProjectService {
     }
 
     @Transactional
+    public List<ProjectInviteResponse> getMyProjectInvites(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
+
+        List<ProjectInvite> invites = projectInviteRepository.findAllByInvitedUserId(userId);
+
+        return invites.stream()
+                .map(projectMapper::toInviteResponse)
+                .collect(Collectors.toList());
+    }
+    @Transactional
     public ProjectInviteResponse inviteToProject(Long inviterId, Long projectId, ProjectInviteRequest request) {
         // 1) 필수 로드
         Project project = projectRepository.findById(projectId)
@@ -217,7 +234,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse acceptInvite(Long userId, Long projectId, Long inviteId) {
         // 1) 초대/프로젝트/유저 로드
-        ProjectInvite invite = projectInviteRepository.findByIdAndProjectId(inviteId, projectId)
+        ProjectInvite invite = projectInviteRepository.findByIdWithProjectAndSpace(inviteId, projectId)
                 .orElseThrow(() -> new NotFoundException("해당 초대 내역이 없습니다.", inviteId));
         Project project = invite.getProject();
 
@@ -254,6 +271,8 @@ public class ProjectService {
         newMember.setProject(project);
         newMember.setUser(invite.getInvitedUser());
         newMember.setRole(role);
+        newMember.setJoinedAt(OffsetDateTime.now());
+
         projectMemberRepository.save(newMember);
 
         // 6) 초대 상태 갱신 + 동일 사용자 다른 초대 무효화
