@@ -13,6 +13,8 @@ import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
@@ -44,6 +46,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final RoleFunc roleFunc;
     private final SpaceRepository spaceRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -287,7 +290,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public void declineInvite(Long userId, Long projectId, Long inviteId) {
+    public ProjectResponse declineInvite(Long userId, Long projectId, Long inviteId) {
         ProjectInvite invite = projectInviteRepository.findByIdAndProjectId(inviteId, projectId)
                 .orElseThrow(() -> new NotFoundException("초대 내역이 없습니다.", inviteId));
 
@@ -297,7 +300,7 @@ public class ProjectService {
 
         if (invite.getStatus() != ProjectInvite.Status.PENDING) {
             // 이미 처리된 초대는 멱등적으로 무시
-            return;
+            return null;
         }
 
         // 만료 상태로 바꾸고 싶다면 아래 2줄 중 택1 (DECLINED 권장)
@@ -307,5 +310,7 @@ public class ProjectService {
         projectInviteRepository.save(invite);
         // (옵션) 대체 초대를 위해 알림/이벤트 발행 가능
         // notificationService.notifyUser(invite.getInviter().getId(), ...);
+
+        return projectMapper.toProjectResponse(invite.getProject());
     }
 }

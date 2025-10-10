@@ -78,12 +78,11 @@ public class ProjectController {
 
     /* ==== 초대 거절 ==== */
     @PostMapping("/{projectId}/invites/{inviteId}/decline")
-    public ResponseEntity<Void> declineInvite(
+    public ResponseEntity<ProjectResponse> declineInvite(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long projectId,
             @PathVariable Long inviteId
     ) {
-        projectService.declineInvite(customUserDetails.getId(), projectId, inviteId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(projectService.declineInvite(customUserDetails.getId(), projectId, inviteId));
     }
 }
