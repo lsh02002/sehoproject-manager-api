@@ -19,9 +19,9 @@ public class WorkspaceMapper {
     public WorkspaceInviteResponse toInviteResponse(WorkspaceInvite invite) {
         return WorkspaceInviteResponse.builder()
                 .id(invite.getId())
-                .workspaceId(invite.getWorkspace().getId())
-                .inviterId(invite.getInviter().getId())
-                .invitedUserId(invite.getInvitedUser().getId())
+                .workspaceName(invite.getWorkspace().getName())
+                .inviterName(invite.getInviter().getName())
+                .invitedUserName(invite.getInvitedUser().getName())
                 .message(invite.getMessage())
                 .requestedRole(invite.getRequestedRole())
                 .status(invite.getStatus().name())

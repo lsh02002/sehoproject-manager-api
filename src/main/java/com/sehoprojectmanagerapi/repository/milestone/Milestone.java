@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -42,6 +43,20 @@ public class Milestone extends BaseEntity {
     @Column(nullable = false, length = 16)
     private MilestoneStatus status = MilestoneStatus.PLANNED;
 
-    @OneToMany(mappedBy = "milestone")
+    @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Task> tasks = new ArrayList<>();
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks.clear();
+        if (tasks != null) {
+            for (Task task : tasks) {
+                addTask(task);
+            }
+        }
+    }
+
+    public void addTask(Task task) {
+        tasks.add(task);
+        task.setMilestone(this); // 양방향 연결
+    }
 }

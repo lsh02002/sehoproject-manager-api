@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.repository.space;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
-import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMember;

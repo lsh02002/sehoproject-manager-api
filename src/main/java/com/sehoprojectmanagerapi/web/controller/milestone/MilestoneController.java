@@ -27,7 +27,7 @@ public class MilestoneController {
         return ResponseEntity.ok(milestoneService.getMilestoneById(customUserDetails.getId(), milestoneId));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody MilestoneRequest request) {
         return ResponseEntity.ok(milestoneService.createMilestone(customUserDetails.getId(), request));
     }

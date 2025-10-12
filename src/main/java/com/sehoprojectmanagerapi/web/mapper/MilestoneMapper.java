@@ -7,6 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class MilestoneMapper {
 
+    private final TaskMapper taskMapper;
+
+    public MilestoneMapper(TaskMapper taskMapper) {
+        this.taskMapper = taskMapper;
+    }
+
     /**
      * Entity → Response
      */
@@ -19,6 +25,7 @@ public class MilestoneMapper {
                 .startDate(milestone.getStartDate())
                 .dueDate(milestone.getDueDate())
                 .status(milestone.getStatus().name())
+                .taskIds(milestone.getTasks().stream().map(taskMapper::toTaskResponse).toList())
                 .createdAt(milestone.getCreatedAt())
                 .updatedAt(milestone.getUpdatedAt())
                 .build();

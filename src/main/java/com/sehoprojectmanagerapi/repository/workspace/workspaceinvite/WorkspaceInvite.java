@@ -1,8 +1,6 @@
 package com.sehoprojectmanagerapi.repository.workspace.workspaceinvite;
 
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
-import com.sehoprojectmanagerapi.repository.project.Project;
-import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;

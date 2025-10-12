@@ -1,9 +1,11 @@
 package com.sehoprojectmanagerapi.web.dto.milestone;
 
+import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 public record MilestoneResponse(
@@ -15,6 +17,7 @@ public record MilestoneResponse(
         LocalDate dueDate,
         String status,              // OPEN, IN_PROGRESS, DONE 등
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<TaskResponse> taskIds
 ) {
 }
