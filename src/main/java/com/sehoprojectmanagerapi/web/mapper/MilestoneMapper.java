@@ -14,7 +14,7 @@ public class MilestoneMapper {
         return MilestoneResponse.builder()
                 .id(milestone.getId())
                 .projectId(milestone.getProject().getId())
-                .title(milestone.getTitle())
+                .name(milestone.getName())
                 .description(milestone.getDescription())
                 .startDate(milestone.getStartDate())
                 .dueDate(milestone.getDueDate())

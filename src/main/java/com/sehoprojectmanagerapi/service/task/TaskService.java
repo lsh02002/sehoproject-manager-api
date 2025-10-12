@@ -134,9 +134,9 @@ public class TaskService {
 
         // 4) 태그 로드 (same project 정책이라면 검증)
         List<Tag> tags = List.of();
-        if (request.tagIds() != null && !request.tagIds().isEmpty()) {
-            tags = tagRepository.findAllById(request.tagIds());
-            if (tags.size() != request.tagIds().size()) {
+        if (request.tags() != null && !request.tags().isEmpty()) {
+            tags = tagRepository.findAllById(request.tags());
+            if (tags.size() != request.tags().size()) {
                 throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
             }
             // 프로젝트 범위 태그 정책이면 아래 검증 추가
@@ -172,7 +172,7 @@ public class TaskService {
         Task task = new Task();
         task.setCreatedBy(creator);
         task.setProject(project);
-        task.setTitle(request.title());
+        task.setName(request.name());
         task.setDescription(request.description());
         task.setPriority(TaskPriority.from(request.priority())); // 문자열 -> Enum 변환 유틸
         task.setType(TaskType.from(request.type()));             // 문자열 -> Enum 변환 유틸
@@ -318,34 +318,34 @@ public class TaskService {
         }
 
         // 2) 기본 필드들 (null => 변경 없음)
-        if (request.title() != null) task.setTitle(request.title());
+        if (request.name() != null) task.setName(request.name());
         if (request.description() != null) task.setDescription(request.description());
         if (request.priority() != null) task.setPriority(TaskPriority.from(request.priority()));
         if (request.type() != null) task.setType(TaskType.from(request.type()));
         if (request.state() != null) task.setState(TaskState.from(request.state()));
         if (request.storyPoints() != null) task.setStoryPoints(request.storyPoints());
         if (request.dueDate() != null) task.setDueDate(request.dueDate());
+        task.setProject(project);
 
         // 3) 태그 교체 로직
         // - null : 변경 없음
         // - 빈 리스트 : 모두 제거
         // - 그 외 : 동일 프로젝트 소속 검증 후 교체
-        if (request.tagIds() != null) {
-            if (request.tagIds().isEmpty()) {
-                task.getTags().clear();
-            } else {
-                List<Tag> tags = tagRepository.findAllById(request.tagIds());
-                if (tags.size() != request.tagIds().size()) {
-                    throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
-                }
-                for (Tag t : tags) {
-                    if (!Objects.equals(t.getProject().getId(), project.getId())) {
-                        throw new ConflictException("다른 프로젝트의 태그가 포함되어 있습니다.", t.getId());
-                    }
-                }
-                task.getTags().clear();
-                task.getTags().addAll(tags);
+
+        if (request.tags().isEmpty()) {
+            task.getTags().clear();
+        } else {
+            List<Tag> tags = tagRepository.findAllById(request.tags());
+            if (tags.size() != request.tags().size()) {
+                throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
             }
+            for (Tag t : tags) {
+                if (!Objects.equals(t.getProject().getId(), project.getId())) {
+                    throw new ConflictException("다른 프로젝트의 태그가 포함되어 있습니다.", t.getId());
+                }
+            }
+            task.getTags().clear();
+            task.getTags().addAll(tags);
         }
 
         // 4) 의존성 교체 로직 (TaskDependency: dependent -> prerequisite)

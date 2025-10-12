@@ -1,9 +1,11 @@
-package com.sehoprojectmanagerapi.repository.project.projectinvite;
+package com.sehoprojectmanagerapi.repository.workspace.workspaceinvite;
 
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.user.User;
+import com.sehoprojectmanagerapi.repository.workspace.Workspace;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,14 +17,14 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectInvite extends BaseEntity {
+public class WorkspaceInvite extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @JoinColumn(name = "workspace_id", nullable = false)
+    private Workspace workspace;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inviter_id", nullable = false)
@@ -37,7 +39,7 @@ public class ProjectInvite extends BaseEntity {
 
     private String message; // 선택
     @Enumerated(EnumType.STRING)
-    private RoleProject requestedRole; // 선택
+    private WorkspaceRole requestedRole; // 선택
 
     private OffsetDateTime expiresAt;
 

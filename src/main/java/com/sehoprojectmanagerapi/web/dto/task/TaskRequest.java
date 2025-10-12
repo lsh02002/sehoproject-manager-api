@@ -8,12 +8,12 @@ import java.util.List;
 @Builder
 public record TaskRequest(
         Long projectId,
-        String title,
+        String name,
         String description,
         List<AssigneeRequest> assignees,
         Long sprintId,               // null 가능
         Long milestoneId,            // null 가능
-        List<Long> tagIds,           // [] 가능
+        List<Long> tags,           // [] 가능
         List<Long> dependencyTaskIds,// [] 가능 (선행 작업들)
         String priority,             // "LOW/MEDIUM/HIGH" 등
         String type,                 // "TASK/BUG/STORY" 등

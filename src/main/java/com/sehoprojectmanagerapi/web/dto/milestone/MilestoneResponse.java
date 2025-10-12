@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public record MilestoneResponse(
         Long id,
         Long projectId,
-        String title,
+        String name,
         String description,
         LocalDate startDate,
         LocalDate dueDate,

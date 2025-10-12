@@ -1,10 +1,13 @@
 package com.sehoprojectmanagerapi.service.workspace;
 
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.security.SecurityUtil;
 import com.sehoprojectmanagerapi.repository.common.MenuType;
-import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
-import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInviteRepository;
-import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
+import com.sehoprojectmanagerapi.repository.common.Role;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
+import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
+import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
+import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.project.ProjectService;
 import com.sehoprojectmanagerapi.service.space.SpaceService;
 import com.sehoprojectmanagerapi.service.task.TaskService;
@@ -12,9 +15,7 @@ import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
-import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
-import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
 import com.sehoprojectmanagerapi.web.mapper.WorkspaceMapper;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
@@ -41,9 +42,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
-
+    private static final int DEFAULT_INVITE_TTL_DAYS = 14;
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final WorkspaceInviteRepository workspaceInviteRepository;
+    private final SecurityUtil securityUtil;
     private final UserRepository userRepository;
     private final SpaceRepository spaceRepository;
     private final WorkspaceMapper workspaceMapper;
@@ -51,97 +54,21 @@ public class WorkspaceService {
     private final SpaceService spaceService;
     private final ProjectService projectService;
     private final TaskService taskService;
+    private final RoleFunc roleFunc;
 
-    @Transactional
-    public List<WorkspaceTreeResponse> getWorkspaceTrees(Long userId) {
-        // 0) 유저가 속한 워크스페이스 목록을 먼저 전부 조회 (권한 노출 방지)
-        //    존재 안 하면 403/404 중 정책에 맞게 처리
+    public List<TreeRow> getTreeRowsForCurrentUser() {
+        Long userId = securityUtil.getCurrentUserId();
+
+        // 1️⃣ 사용자가 속한 workspace id 목록 조회
         List<Long> workspaceIds = workspaceMemberRepository.findWorkspaceIdsByUserId(userId);
-        if (workspaceIds.isEmpty()) {
-            // 멤버십이 하나도 없으면 접근 금지 혹은 빈 리스트 반환 중 정책 선택
-            throw new NotAcceptableException("소속된 워크스페이스가 없습니다.", null);
-            // return List.of();
-        }
 
-        // 1) 워크스페이스 엔티티 일괄 조회 (멤버만 이름을 알 수 있음)
-        //    Map으로 빠른 참조
-        List<Workspace> workspaces = workspaceRepository.findAllById(workspaceIds);
-        Map<Long, Workspace> workspaceById = workspaces.stream()
-                .collect(Collectors.toMap(Workspace::getId, Function.identity()));
-
-        // 2) 모든 워크스페이스에 대한 트리 로우를 한 번에 조회 (정렬 보장)
-        //    ORDER BY 는 쿼리에서 workspace_position, space_position, project_position 등으로 보장
-        List<TreeRow> rows = spaceRepository.findTreeRowsByWorkspaceIds(workspaceIds);
-
-        // 3) 워크스페이스별로 그룹핑하며 트리 구성
-        //    workspaceId -> (spaceId -> SpaceNode), workspaceId -> (spaceId -> seenProjectIds)
-        Map<Long, LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode>> spaceMapByWorkspace = new LinkedHashMap<>();
-        Map<Long, Map<Long, Set<Long>>> seenProjectIdsByWorkspaceAndSpace = new HashMap<>();
-
-        for (TreeRow row : rows) {
-            Long wid = row.getWorkspaceId();
-            Long sid = row.getSpaceId();
-
-            // 워크스페이스별 Space 맵 꺼내기
-            LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode> spaceMap =
-                    spaceMapByWorkspace.computeIfAbsent(wid, k -> new LinkedHashMap<>());
-
-            // Space 노드 생성/중복 방지
-            spaceMap.computeIfAbsent(sid, id ->
-                    new WorkspaceTreeResponse.SpaceNode(
-                            id,
-                            row.getSpaceName(),
-                            MenuType.SPACE,
-                            new ArrayList<>()
-                    )
-            );
-
-            // 프로젝트 중복 방지 + null 방어
-            if (row.getProjectId() != null) {
-                Map<Long, Set<Long>> seenBySpace =
-                        seenProjectIdsByWorkspaceAndSpace.computeIfAbsent(wid, k -> new HashMap<>());
-                Set<Long> seenProjects =
-                        seenBySpace.computeIfAbsent(sid, k -> new HashSet<>());
-
-                if (seenProjects.add(row.getProjectId())) {
-                    spaceMap.get(sid)
-                            .projectNodes()
-                            .add(new WorkspaceTreeResponse.ProjectNode(
-                                    row.getProjectId(),
-                                    row.getProjectName(),
-                                    MenuType.PROJECT
-                            ));
-                }
-            }
-        }
-
-        // 4) 워크스페이스 순서대로 최종 응답 만들기
-        //    workspace 정렬 기준(포지션)이 있다면 쿼리/정렬로 먼저 workspaceIds 자체를 원하는 순서로 받아오면 더 깔끔
-        List<WorkspaceTreeResponse> result = new ArrayList<>();
-        for (Long wid : workspaceIds) {
-            Workspace ws = workspaceById.get(wid);
-            if (ws == null) {
-                // 방어 코드: 혹시 멤버십은 있는데 워크스페이스가 삭제되었거나 조회 실패한 경우 스킵/예외
-                continue;
-            }
-            List<WorkspaceTreeResponse.SpaceNode> spaceNodes = new ArrayList<>();
-            LinkedHashMap<Long, WorkspaceTreeResponse.SpaceNode> spaceMap = spaceMapByWorkspace.get(wid);
-            if (spaceMap != null) {
-                spaceNodes.addAll(spaceMap.values());
-                // 필요하면 불변 래핑
-                // spaceNodes = List.copyOf(spaceNodes);
-                // spaceNodes.forEach(sn -> sn.setProjectNodes(List.copyOf(sn.getProjectNodes())));
-            }
-
-            result.add(new WorkspaceTreeResponse(
-                    ws.getId(),
-                    ws.getName(),
-                    MenuType.WORKSPACE,
-                    spaceNodes
-            ));
-        }
-
-        return result;
+        // 2️⃣ 접근 가능한 항목만 반환
+        return spaceRepository.findTreeRowsVisibleToUser(
+                workspaceIds,
+                userId,
+                Role.rolesGrantingSpaceVisibility(),
+                Role.rolesGrantingProjectVisibility()
+        );
     }
 
     @Transactional
@@ -234,6 +161,157 @@ public class WorkspaceService {
     }
 
     @Transactional
+    public List<WorkspaceInviteResponse> getMyWorkspaceInvites(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
+        List<WorkspaceInvite> invites = workspaceInviteRepository.findAllByInvitedUserId(userId);
+
+        return invites.stream()
+                .map(workspaceMapper::toInviteResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public WorkspaceInviteResponse inviteToWorkspace(Long inviterId, Long workspaceId, WorkspaceInviteRequest request) {
+        // 1) 필수 로드
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", workspaceId));
+        User inviter = userRepository.findById(inviterId)
+                .orElseThrow(() -> new NotFoundException("초대한 사용자를 찾을 수 없습니다.", inviterId));
+        User invited = userRepository.findById(request.invitedUserId())
+                .orElseThrow(() -> new NotFoundException("초대된 사용자를 찾을 수 없습니다.", request.invitedUserId()));
+
+        // 2) 권한 체크: 초대자가 해당 워크스페이스 멤버인가?
+        if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(inviterId, workspaceId)) {
+            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
+        }
+        // (필요 시 역할 레벨 체크도 추가: OWNER/MANAGER만 허용 등)
+        if (!roleFunc.hasAtLeast(workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspace.getId()).get(), WorkspaceRole.ADMIN)) {
+            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", null);
+        }
+
+        // 3) 자기 자신 초대 방지
+        if (inviter.getId().equals(invited.getId())) {
+            throw new BadRequestException("자기 자신을 초대할 수 없습니다.", workspaceId);
+        }
+
+        // 4) 이미 워크스페이스 멤버인지 검사
+        boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(invited.getId(), workspaceId);
+        if (alreadyMember) {
+            throw new ConflictException("이미 워크스페이스 멤버입니다.", workspaceId);
+        }
+
+        // 5) 중복/유효 초대 존재 여부 (PENDING && 미만료)
+        boolean hasPending = workspaceInviteRepository
+                .existsByWorkspaceIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
+                        workspaceId,
+                        invited.getId(),
+                        List.of(WorkspaceInvite.Status.PENDING),
+                        OffsetDateTime.now()
+                );
+        if (hasPending) {
+            throw new ConflictException("진행 중인 초대가 이미 있습니다.", workspaceId);
+        }
+
+        // 6) 초대 엔티티 생성
+        WorkspaceInvite invite = new WorkspaceInvite();
+        invite.setWorkspace(workspace);
+        invite.setInviter(inviter);
+        invite.setInvitedUser(invited);
+        invite.setStatus(WorkspaceInvite.Status.PENDING);
+        invite.setMessage(request.message());
+        invite.setRequestedRole(request.requestedRole()); // 예: RoleWorkspace.MEMBER 등 (null이면 기본)
+        invite.setExpiresAt(OffsetDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
+
+        // 7) 저장
+        WorkspaceInvite saved = workspaceInviteRepository.save(invite);
+
+        // 8) (옵션) 이벤트/알림 발행
+        // domainEvents.publish(new WorkspaceInviteCreatedEvent(saved.getId()));
+
+        // 9) 응답
+        return workspaceMapper.toInviteResponse(saved);
+    }
+
+    @Transactional
+    public WorkspaceResponse acceptWorkspaceInvite(Long userId, Long workspaceId, Long inviteId) {
+        // 1) 초대/워크스페이스/유저 로드
+        WorkspaceInvite invite = workspaceInviteRepository.findByIdWithWorkspace(inviteId, workspaceId)
+                .orElseThrow(() -> new NotFoundException("해당 초대 내역이 없습니다.", inviteId));
+        Workspace workspace = invite.getWorkspace();
+
+        // 2) 수락자 본인 여부
+        if (!invite.getInvitedUser().getId().equals(userId)) {
+            throw new NotAcceptableException("당신은 초대되지 않았습니다.", workspaceId);
+        }
+
+        // 3) 상태/만료 검사
+        if (invite.getStatus() != WorkspaceInvite.Status.PENDING) {
+            throw new ConflictException("이미 처리되었거나 만료된 초대입니다.", workspaceId);
+        }
+        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(OffsetDateTime.now())) {
+            invite.setStatus(WorkspaceInvite.Status.EXPIRED);
+            workspaceInviteRepository.save(invite);
+            throw new ConflictException("초대 기간이 만료되었습니다.", workspaceId);
+        }
+
+        // 4) 이미 워크스페이스 멤버인지 검사 (외부에서 선점 추가 가능)
+        boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(userId, workspaceId);
+        if (alreadyMember) {
+            invite.setStatus(WorkspaceInvite.Status.ACCEPTED);
+            workspaceInviteRepository.save(invite);
+            // 같은 사용자에 대한 다른 PENDING 초대 무효화(선택)
+            workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), OffsetDateTime.now());
+            return workspaceMapper.toResponse(workspace);
+        }
+
+        // 5) 멤버 추가 (요청된 역할 없으면 기본값)
+        WorkspaceRole role = invite.getRequestedRole() != null
+                ? invite.getRequestedRole()
+                : WorkspaceRole.MEMBER; // 필요시 기본 롤 상수 변경
+
+        WorkspaceMember newMember = new WorkspaceMember();
+        newMember.setWorkspace(workspace);
+        newMember.setUser(invite.getInvitedUser());
+        newMember.setRole(role);
+        newMember.setJoinedAt(OffsetDateTime.now());
+
+        workspaceMemberRepository.save(newMember);
+
+        // 6) 초대 상태 갱신 + 동일 사용자 다른 초대 무효화
+        invite.setStatus(WorkspaceInvite.Status.ACCEPTED);
+        workspaceInviteRepository.save(invite);
+        workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), OffsetDateTime.now());
+
+        // 7) (옵션) 이벤트/알림 발행
+        // domainEvents.publish(new WorkspaceMemberJoinedEvent(workspace.getId(), userId, role));
+
+        return workspaceMapper.toResponse(workspace);
+    }
+
+    @Transactional
+    public WorkspaceResponse declineWorkspaceInvite(Long userId, Long workspaceId, Long inviteId) {
+        WorkspaceInvite invite = workspaceInviteRepository.findByIdAndWorkspaceId(inviteId, workspaceId)
+                .orElseThrow(() -> new NotFoundException("초대 내역이 없습니다.", inviteId));
+
+        if (!invite.getInvitedUser().getId().equals(userId)) {
+            throw new NotAcceptableException("당신은 초대되지 않았습니다.", userId);
+        }
+
+        if (invite.getStatus() != WorkspaceInvite.Status.PENDING) {
+            // 이미 처리된 초대는 멱등적으로 무시 (null 반환 or 현재 워크스페이스 응답)
+            return workspaceMapper.toResponse(invite.getWorkspace());
+        }
+
+        // 상태 전환: DECLINED 권장
+        invite.setStatus(WorkspaceInvite.Status.DECLINED);
+        workspaceInviteRepository.save(invite);
+
+        return workspaceMapper.toResponse(invite.getWorkspace());
+    }
+
+    @Transactional
     public void createSample(Long userId, WorkspaceRequest workspaceRequest, WorkspaceResponse workspaceResponse) {
         //WorkspaceResponse workspaceResponse = workspaceService.createWorkspace(userId, workspaceRequest);
 
@@ -258,12 +336,12 @@ public class WorkspaceService {
 
         TaskRequest taskRequest = TaskRequest.builder()
                 .projectId(projectResponse.getId())
-                .title("Task1")
+                .name("Task1")
                 .description("This is a test task1")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")
@@ -276,12 +354,12 @@ public class WorkspaceService {
 
         taskRequest = TaskRequest.builder()
                 .projectId(projectResponse.getId())
-                .title("Task2")
+                .name("Task2")
                 .description("This is a test task2")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")
@@ -294,12 +372,12 @@ public class WorkspaceService {
 
         taskRequest = TaskRequest.builder()
                 .projectId(projectResponse.getId())
-                .title("Task3")
+                .name("Task3")
                 .description("This is a test task3")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")
@@ -324,12 +402,12 @@ public class WorkspaceService {
 
         TaskRequest taskRequest2 = TaskRequest.builder()
                 .projectId(projectResponse2.getId())
-                .title("Task1")
+                .name("Task1")
                 .description("This is a test task1")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")
@@ -342,12 +420,12 @@ public class WorkspaceService {
 
         taskRequest2 = TaskRequest.builder()
                 .projectId(projectResponse2.getId())
-                .title("Task2")
+                .name("Task2")
                 .description("This is a test task2")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")
@@ -360,12 +438,12 @@ public class WorkspaceService {
 
         taskRequest2 = TaskRequest.builder()
                 .projectId(projectResponse2.getId())
-                .title("Task3")
+                .name("Task3")
                 .description("This is a test task3")
                 .assignees(new ArrayList<>())
                 .sprintId(null)
                 .milestoneId(null)
-                .tagIds(null)
+                .tags(null)
                 .dependencyTaskIds(null)
                 .priority("MEDIUM")
                 .type("TASK")

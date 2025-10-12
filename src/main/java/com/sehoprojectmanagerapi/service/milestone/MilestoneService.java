@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.service.milestone;
 
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.web.mapper.MilestoneMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
@@ -33,12 +34,31 @@ public class MilestoneService {
     private final RoleFunc roleFunc;
 
     @Transactional
-    public List<MilestoneResponse> getAllMilestonesByUserId(Long userId) {
+    public List<MilestoneResponse> getAllMilestonesByUserIdAndProjectId(Long userId, Long projectId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
-        return milestoneRepository.findAllVisibleForUser(userId)
+        projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(()->new NotAcceptableException("해당 마일스톤 접근 권한이 없습니다.", null));
+
+        return milestoneRepository.findAllVisibleForUserAndProject(userId, projectId)
                 .stream().map(milestoneMapper::toResponse).toList();
+    }
+
+    @Transactional
+    public MilestoneResponse getMilestoneById(Long userId, Long milestoneId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
+
+        // 2. 권한 확인
+        // (a) 프로젝트 생성자이거나
+        // (b) 팀 Owner 이어야 함
+        Project project = milestone.getProject();
+
+        projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
+                .orElseThrow(()->new NotAcceptableException("해당 마일스톤 접근 권한이 없습니다.", milestoneId));
+
+        return milestoneMapper.toResponse(milestone);
     }
 
     @Transactional
@@ -46,8 +66,8 @@ public class MilestoneService {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        if (request.title().isEmpty()) {
-            throw new BadRequestException("해당 제목란이 비어있습니다.", request.title());
+        if (request.name().isEmpty()) {
+            throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());
         }
 
         if (request.status().isEmpty()) {
@@ -56,7 +76,7 @@ public class MilestoneService {
 
         Milestone milestone = new Milestone();
         milestone.setProject(projectMember.getProject());
-        milestone.setTitle(request.title());
+        milestone.setName(request.name());
         milestone.setDescription(request.description());
         milestone.setStartDate(request.startDate());
         milestone.setDueDate(request.dueDate());
@@ -72,8 +92,8 @@ public class MilestoneService {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        if (request.title().isEmpty()) {
-            throw new BadRequestException("해당 제목란이 비어있습니다.", request.title());
+        if (request.name().isEmpty()) {
+            throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());
         }
 
         if (request.description().isEmpty()) {
@@ -88,7 +108,7 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
 
         milestone.setProject(projectMember.getProject());
-        milestone.setTitle(request.title());
+        milestone.setName(request.name());
         milestone.setDescription(request.description());
         milestone.setStartDate(request.startDate());
         milestone.setDueDate(request.dueDate());

@@ -9,7 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tag")
+@Table(
+        name = "tag",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "ux_tags_project_name", columnNames = {"project_id", "name"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +26,7 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50, unique = true)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Column(length = 200)

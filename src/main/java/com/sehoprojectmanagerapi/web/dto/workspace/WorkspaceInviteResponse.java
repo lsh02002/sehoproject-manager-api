@@ -1,18 +1,19 @@
-package com.sehoprojectmanagerapi.web.dto.project;
+package com.sehoprojectmanagerapi.web.dto.workspace;
 
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import lombok.Builder;
 
 import java.time.OffsetDateTime;
 
 @Builder
-public record ProjectInviteResponse(
+public record WorkspaceInviteResponse(
         Long id,
-        Long projectId,
+        Long workspaceId,
         Long inviterId,
         Long invitedUserId,
         String message,
-        RoleProject requestedRole,
+        WorkspaceRole requestedRole,
         String status,
         OffsetDateTime expiresAt,
         java.time.LocalDateTime createdAt

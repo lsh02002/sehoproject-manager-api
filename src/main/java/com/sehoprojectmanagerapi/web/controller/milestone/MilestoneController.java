@@ -13,13 +13,18 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/milestones")
+@RequestMapping("/milestones")
 public class MilestoneController {
     private final MilestoneService milestoneService;
 
-    @GetMapping
-    public ResponseEntity<List<MilestoneResponse>> getAllMilestonesByUserId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(milestoneService.getAllMilestonesByUserId(customUserDetails.getId()));
+    @GetMapping("/projects/{projectId}")
+    public ResponseEntity<List<MilestoneResponse>> getAllMilestonesByUserIdProjectId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(milestoneService.getAllMilestonesByUserIdAndProjectId(customUserDetails.getId(), projectId));
+    }
+
+    @GetMapping("/{milestoneId}")
+    public ResponseEntity<MilestoneResponse> getMilestoneById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId) {
+        return ResponseEntity.ok(milestoneService.getMilestoneById(customUserDetails.getId(), milestoneId));
     }
 
     @PostMapping

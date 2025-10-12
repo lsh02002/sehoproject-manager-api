@@ -9,6 +9,7 @@ import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
@@ -22,13 +23,14 @@ import java.util.Objects;
 public class TaskMapper {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
+    private final TagMapper tagMapper;
 
     public TaskResponse toTaskResponse(Task t) {
         return TaskResponse.builder()
                 .id(t.getId())
                 .projectKey(t.getProject().getKey())
                 .projectId(t.getProject().getId())
-                .title(t.getTitle())
+                .name(t.getName())
                 .description(t.getDescription())
                 .state(t.getState().name())
                 .priority(t.getPriority().name())
@@ -62,9 +64,9 @@ public class TaskMapper {
                                 .toList() : null)
                 .sprintId(t.getSprint() == null ? null : t.getSprint().getId())
                 .milestoneId(t.getMilestone() == null ? null : t.getMilestone().getId())
-                .tagIds(
+                .tags(
                         t.getTags().stream()
-                                .map(Tag::getId)
+                                .map(tagMapper::toResponse)
                                 .toList()
                 )
                 .dependencyIds(t.getDependencies().stream().map(d -> d.getDependsOn().getId()).toList())

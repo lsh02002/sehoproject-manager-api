@@ -1,8 +1,10 @@
 package com.sehoprojectmanagerapi.web.dto.project;
 
+import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,4 +24,5 @@ public class ProjectResponse {
     private LocalDate dueDate;
     private Long creatorId;
     private String creatorName;
+    private List<TagResponse> tagResponses;
 }

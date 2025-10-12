@@ -3,13 +3,19 @@ package com.sehoprojectmanagerapi.web.mapper;
 // ProjectMapper.java
 
 import com.sehoprojectmanagerapi.repository.project.Project;
-import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInvite;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectInviteResponse;
+import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProjectMapper {
+    private final TagMapper tagMapper;
+
+    public ProjectMapper(TagMapper tagMapper) {
+        this.tagMapper = tagMapper;
+    }
+
     public ProjectResponse toProjectResponse(Project project) {
         return ProjectResponse.builder()
                 .id(project.getId())   // projectId
@@ -23,21 +29,7 @@ public class ProjectMapper {
                 .dueDate(project.getDueDate())
                 .creatorId(project.getCreatedBy() != null ? project.getCreatedBy().getId() : null)
                 .creatorName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
+                .tagResponses(project.getTags().stream().map(tagMapper::toResponse).toList())
                 .build();
-    }
-
-    public ProjectInviteResponse toInviteResponse(ProjectInvite invite) {
-        return ProjectInviteResponse.builder()
-                .id(invite.getId())
-                .projectId(invite.getProject().getId())
-                .inviterId(invite.getInviter().getId())
-                .invitedUserId(invite.getInvitedUser().getId())
-                .message(invite.getMessage())
-                .requestedRole(invite.getRequestedRole())
-                .status(invite.getStatus().name())
-                .expiresAt(invite.getExpiresAt())
-                .createdAt(invite.getCreatedAt())
-                .build();
-
     }
 }

@@ -45,13 +45,16 @@ public class Task extends BaseEntity {
     private Task parent;
 
     @Column(nullable = false, length = 500)
-    private String title;
+    private String name;
 
     @Column(columnDefinition = "text")
     private String description;
 
     @Enumerated(EnumType.STRING)
     private TaskType type;
+
+    @Column(nullable = false)
+    private int position = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
@@ -90,7 +93,11 @@ public class Task extends BaseEntity {
     @ManyToMany
     @JoinTable(name = "task_tag",
             joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+            inverseJoinColumns = @JoinColumn(name = "tag_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(name = "ux_task_tag_task_tag", columnNames = {"task_id", "tag_id"})
+            }
+    )
     private List<Tag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)

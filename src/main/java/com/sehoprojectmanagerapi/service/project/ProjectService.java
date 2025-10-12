@@ -4,8 +4,7 @@ import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
-import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInvite;
-import com.sehoprojectmanagerapi.repository.project.projectinvite.ProjectInviteRepository;
+import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
@@ -13,14 +12,11 @@ import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectInviteRequest;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
@@ -31,22 +27,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-    private static final int DEFAULT_INVITE_TTL_DAYS = 14;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
-    private final ProjectInviteRepository projectInviteRepository;
     private final ProjectMapper projectMapper;
     private final RoleFunc roleFunc;
     private final SpaceRepository spaceRepository;
-    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -164,153 +156,5 @@ public class ProjectService {
         } catch (RuntimeException e) {
             throw new ConflictException("해당 프로젝트 삭제에 실패했습니다.", projectId);
         }
-    }
-
-    @Transactional
-    public List<ProjectInviteResponse> getMyProjectInvites(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
-
-        List<ProjectInvite> invites = projectInviteRepository.findAllByInvitedUserId(userId);
-
-        return invites.stream()
-                .map(projectMapper::toInviteResponse)
-                .collect(Collectors.toList());
-    }
-    @Transactional
-    public ProjectInviteResponse inviteToProject(Long inviterId, Long projectId, ProjectInviteRequest request) {
-        // 1) 필수 로드
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
-        User inviter = userRepository.findById(inviterId)
-                .orElseThrow(() -> new NotFoundException("초대한 주인을 찾을 수 없습니다.", inviterId));
-        User invited = userRepository.findById(request.invitedUserId())
-                .orElseThrow(() -> new NotFoundException("초대된 손님을 찾을 수 없습니다.", request.invitedUserId()));
-
-        // 2) 권한 체크 (프로젝트에 초대할 권한이 있는지)
-        if (!projectMemberRepository.existsByUserIdAndProjectId(inviterId, project.getId())) {
-            throw new NotAcceptableException("프로젝트에 초대할 권한이 없습니다.", projectId);
-        }
-
-        // 3) 자기 자신 초대 방지
-        if (inviter.getId().equals(invited.getId())) {
-            throw new BadRequestException("자기 자신을 초대할 수 없습니다.", projectId);
-        }
-
-        // 4) 이미 멤버인지 검사
-        boolean alreadyMember = projectMemberRepository.existsByUserIdAndProjectId(invited.getId(), projectId);
-        if (alreadyMember) {
-            throw new ConflictException("이미 초대된 사용자입니다.", projectId);
-        }
-
-        // 5) 중복/유효 초대 존재 여부 검사 (PENDING && 미만료)
-        boolean hasPending = projectInviteRepository.existsByProjectIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
-                projectId, invited.getId(),
-                List.of(ProjectInvite.Status.PENDING),
-                OffsetDateTime.now()
-        );
-        if (hasPending) {
-            throw new ConflictException("초대된 내용이 이미 있습니다.", projectId);
-        }
-
-        // 6) 초대 엔티티 생성
-        ProjectInvite invite = new ProjectInvite();
-        invite.setProject(project);
-        invite.setInviter(inviter);
-        invite.setInvitedUser(invited);
-        invite.setStatus(ProjectInvite.Status.PENDING);
-        invite.setMessage(request.message()); // 선택
-        invite.setRequestedRole(request.requestedRole()); // 선택(OWNER/MANAGER/MEMBER 등)
-        invite.setExpiresAt(OffsetDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
-
-        // 7) 저장
-        ProjectInvite saved = projectInviteRepository.save(invite);
-
-        // 8) (옵션) 알림/이벤트 발행
-        // domainEvents.publish(new ProjectInviteCreatedEvent(saved.getId()));
-        // notificationService.notifyUser(invited.getId(), ...);
-
-        // 9) 응답 매핑
-        return projectMapper.toInviteResponse(saved);
-    }
-
-    @Transactional
-    public ProjectResponse acceptInvite(Long userId, Long projectId, Long inviteId) {
-        // 1) 초대/프로젝트/유저 로드
-        ProjectInvite invite = projectInviteRepository.findByIdWithProjectAndSpace(inviteId, projectId)
-                .orElseThrow(() -> new NotFoundException("해당 초대 내역이 없습니다.", inviteId));
-        Project project = invite.getProject();
-
-        // 2) 수락자 본인 여부
-        if (!invite.getInvitedUser().getId().equals(userId)) {
-            throw new NotAcceptableException("당신은 초대되지 않았습니다.", projectId);
-        }
-
-        // 3) 상태/만료 검사
-        if (invite.getStatus() != ProjectInvite.Status.PENDING) {
-            throw new ConflictException("초대 기간이 만료되었습니다.", projectId);
-        }
-        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(OffsetDateTime.now())) {
-            invite.setStatus(ProjectInvite.Status.EXPIRED);
-            projectInviteRepository.save(invite);
-            throw new ConflictException("초대 기간이 만료되었습니다.", projectId);
-        }
-
-        // 4) 이미 멤버인지 검사 (외부에서 누군가 선점 추가했을 수 있음)
-        boolean alreadyMember = projectMemberRepository
-                .existsByUserIdAndProjectId(userId, projectId);
-        if (alreadyMember) {
-            // 멤버면 초대를 수락 완료 처리만 하고 반환
-            invite.setStatus(ProjectInvite.Status.ACCEPTED);
-            projectInviteRepository.save(invite);
-            // 같은 사용자에 대한 다른 PENDING 초대 무효화(선택)
-            projectInviteRepository.expireOtherPendings(projectId, userId, invite.getId(), OffsetDateTime.now());
-            return projectMapper.toProjectResponse(project);
-        }
-
-        // 5) 멤버 추가 (요청된 역할이 없으면 MEMBER 기본)
-        RoleProject role = invite.getRequestedRole() != null ? invite.getRequestedRole() : RoleProject.CONTRIBUTOR;
-        ProjectMember newMember = new ProjectMember();
-        newMember.setProject(project);
-        newMember.setUser(invite.getInvitedUser());
-        newMember.setRole(role);
-        newMember.setJoinedAt(OffsetDateTime.now());
-
-        projectMemberRepository.save(newMember);
-
-        // 6) 초대 상태 갱신 + 동일 사용자 다른 초대 무효화
-        invite.setStatus(ProjectInvite.Status.ACCEPTED);
-        projectInviteRepository.save(invite);
-        projectInviteRepository.expireOtherPendings(projectId, userId, invite.getId(), OffsetDateTime.now());
-
-        // 7) (옵션) 이벤트/알림 발행
-        // domainEvents.publish(new ProjectMemberJoinedEvent(project.getId(), userId, role));
-
-        return projectMapper.toProjectResponse(project);
-    }
-
-    @Transactional
-    public ProjectResponse declineInvite(Long userId, Long projectId, Long inviteId) {
-        ProjectInvite invite = projectInviteRepository.findByIdAndProjectId(inviteId, projectId)
-                .orElseThrow(() -> new NotFoundException("초대 내역이 없습니다.", inviteId));
-
-        if (!invite.getInvitedUser().getId().equals(userId)) {
-            throw new NotAcceptableException("당신은 초대되지 않았습니다.", userId);
-        }
-
-        if (invite.getStatus() != ProjectInvite.Status.PENDING) {
-            // 이미 처리된 초대는 멱등적으로 무시
-            return null;
-        }
-
-        // 만료 상태로 바꾸고 싶다면 아래 2줄 중 택1 (DECLINED 권장)
-        invite.setStatus(ProjectInvite.Status.DECLINED);
-        // invite.setStatus(ProjectInvite.Status.EXPIRED);
-
-        projectInviteRepository.save(invite);
-        // (옵션) 대체 초대를 위해 알림/이벤트 발행 가능
-        // notificationService.notifyUser(invite.getInviter().getId(), ...);
-
-        return projectMapper.toProjectResponse(invite.getProject());
     }
 }

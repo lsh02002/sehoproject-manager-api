@@ -27,7 +27,10 @@ public class Milestone extends BaseEntity {
     private Project project;
 
     @Column(nullable = false, length = 255)
-    private String title;
+    private String name;
+
+    @Column(nullable = false)
+    private int position = 0;
 
     @Column(columnDefinition = "text")
     private String description;

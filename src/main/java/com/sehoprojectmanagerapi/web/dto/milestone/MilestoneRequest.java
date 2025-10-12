@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Builder
 public record MilestoneRequest(
         Long projectId,
-        String title,
+        String name,
         String description,
         LocalDate startDate,
         LocalDate dueDate,

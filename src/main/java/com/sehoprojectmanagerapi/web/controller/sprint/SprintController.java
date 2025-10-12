@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sprints")
+@RequestMapping("/sprints")
 @RequiredArgsConstructor
 @Validated
 public class SprintController {

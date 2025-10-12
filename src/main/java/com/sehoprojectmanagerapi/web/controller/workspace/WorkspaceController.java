@@ -2,9 +2,8 @@ package com.sehoprojectmanagerapi.web.controller.workspace;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.workspace.WorkspaceService;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceTreeResponse;
+import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
+import com.sehoprojectmanagerapi.web.dto.workspace.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,8 +19,8 @@ public class WorkspaceController {
     private final WorkspaceService workspaceService;
 
     @GetMapping("/tree")
-    public ResponseEntity<List<WorkspaceTreeResponse>> getWorkspaceTree(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(workspaceService.getWorkspaceTrees(customUserDetails.getId()));
+    public ResponseEntity<List<TreeRow>> getWorkspaceTree() {
+        return ResponseEntity.ok(workspaceService.getTreeRowsForCurrentUser());
     }
 
     @PostMapping
@@ -53,5 +52,41 @@ public class WorkspaceController {
                        @PathVariable Long id) {
         workspaceService.deleteWorkspace(customUserDetails.getId(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    /* ==== 멤버 초대 (기존 PathVar 방식 개선: Body로 받기) ==== */
+    @GetMapping("/invitations")
+    public ResponseEntity<List<WorkspaceInviteResponse>> getMyInvites(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(workspaceService.getMyWorkspaceInvites(customUserDetails.getId()));
+    }
+
+    @PostMapping("/{workspaceId}/invites")
+    public ResponseEntity<WorkspaceInviteResponse> inviteToWorkspace(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long workspaceId,
+            @RequestBody WorkspaceInviteRequest request
+    ) {
+        WorkspaceInviteResponse invite = workspaceService.inviteToWorkspace(customUserDetails.getId(), workspaceId, request);
+        return ResponseEntity.ok(invite);
+    }
+
+    /* ==== 초대 수락 ==== */
+    @PostMapping("/{workspaceId}/invites/{inviteId}/accept")
+    public ResponseEntity<WorkspaceResponse> acceptInvite(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long workspaceId,
+            @PathVariable Long inviteId
+    ) {
+        return ResponseEntity.ok(workspaceService.acceptWorkspaceInvite(customUserDetails.getId(), workspaceId, inviteId));
+    }
+
+    /* ==== 초대 거절 ==== */
+    @PostMapping("/{workspaceId}/invites/{inviteId}/decline")
+    public ResponseEntity<WorkspaceResponse> declineInvite(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long workspaceId,
+            @PathVariable Long inviteId
+    ) {
+        return ResponseEntity.ok(workspaceService.declineWorkspaceInvite(customUserDetails.getId(), workspaceId, inviteId));
     }
 }
