@@ -29,6 +29,9 @@ public class Sprint extends BaseEntity {
     @Column(length = 255)
     private String name;
 
+    @Column(nullable = false)
+    private int position = 0;
+
     private LocalDate startDate;
     private LocalDate endDate;
 

@@ -23,6 +23,9 @@ select distinct new com.sehoprojectmanagerapi.web.dto.workspace.TreeRow(
     /* Milestone 필드 */
     m.id, m.name, m.position,
 
+    /* Sprint 필드 */
+    sp.id, sp.name, sp.position,
+
     /* Task 필드 */
     t.id, t.name, t.position,
 
@@ -86,6 +89,26 @@ select distinct new com.sehoprojectmanagerapi.web.dto.workspace.TreeRow(
           and wm4.role in :rolesGrantingProject
      )),
 
+    /* 스프린트 접근 가능 여부 (sp가 null이면 true) */
+    (sp is null
+     or exists (
+        select 1 from ProjectMember pm6
+        where pm6.project = p
+          and pm6.user.id = :userId
+     )
+     or exists (
+        select 1 from SpaceMember sm6
+        where sm6.space = s
+          and sm6.user.id = :userId
+          and sm6.role in :rolesGrantingProject
+     )
+     or exists (
+        select 1 from WorkspaceMember wm6
+        where wm6.workspace = w
+          and wm6.user.id = :userId
+          and wm6.role in :rolesGrantingProject
+     )),
+
     /* 태스크 접근 가능 여부 (t가 null이면 true) */
     (t is null
      or exists (
@@ -110,6 +133,7 @@ from Space s
 join s.workspace w
 left join Project p on p.space = s
 left join Milestone m on m.project = p
+left join Sprint sp on sp.project = p
 left join Task t on t.project = p
 where w.id in :workspaceIds
 order by
@@ -117,6 +141,7 @@ order by
     s.position asc, s.id asc,
     p.position asc, p.id asc,
     m.position asc, m.id asc,
+    sp.position asc, sp.id asc,
     t.position asc, t.id asc
 """)
     List<TreeRow> findTreeRowsVisibleToUser(
@@ -125,5 +150,6 @@ order by
             @Param("rolesGrantingSpace") Collection<Role> rolesGrantingSpace,
             @Param("rolesGrantingProject") Collection<Role> rolesGrantingProject
     );
+
 
 }

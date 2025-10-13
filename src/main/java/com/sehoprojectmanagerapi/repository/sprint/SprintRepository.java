@@ -19,4 +19,6 @@ public interface SprintRepository extends JpaRepository<Sprint, Long> {
                     )
             """)
     List<Sprint> findAllVisibleForUser(Long userId);
+
+    List<Sprint> findByProjectId(Long projectId);
 }

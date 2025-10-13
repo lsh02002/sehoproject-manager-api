@@ -26,6 +26,10 @@ public class TreeRow {
     private String milestoneName;
     private Integer milestonePosition;
 
+    private Long sprintId;
+    private String sprintName;
+    private Integer sprintPosition;
+
     private Long taskId;             // ⬅️ 신규
     private String taskName;         // ⬅️ 신규
     private Integer taskPosition;    // ⬅️ 신규
@@ -35,4 +39,5 @@ public class TreeRow {
     private boolean canEnterProject;
     private boolean canEnterMilestone;
     private boolean canEnterTask;    // ⬅️ 신규
+    private boolean canEnterSprint;
 }

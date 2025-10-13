@@ -3,6 +3,7 @@ package com.sehoprojectmanagerapi.web.dto.sprint;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * 스프린트 생성/수정을 위한 요청 DTO
@@ -14,6 +15,7 @@ public record SprintRequest(
         String name,
         LocalDate startDate,
         LocalDate endDate,
-        String status         // 예: PLANNED, ACTIVE, CLOSED ...
+        String state,         // 예: PLANNED, ACTIVE, CLOSED ...
+        List<Long> taskIds
 ) {
 }

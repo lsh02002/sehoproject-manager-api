@@ -19,12 +19,17 @@ import java.util.List;
 public class SprintController {
     private final SprintService sprintService;
 
-    @GetMapping
-    public ResponseEntity<List<SprintResponse>> getAllVisibleByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(sprintService.getAllSprintsByUserId(customUserDetails.getId()));
+    @GetMapping("/projects/{projectId}")
+    public ResponseEntity<List<SprintResponse>> getAllVisibleByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(sprintService.getAllSprintsByUserIdAndProjectId(customUserDetails.getId(), projectId));
     }
 
-    @PostMapping
+    @GetMapping("/{sprintId}")
+    public ResponseEntity<SprintResponse> getSprintById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long sprintId) {
+        return ResponseEntity.ok(sprintService.getSprintById(customUserDetails.getId(), sprintId));
+    }
+
+    @PostMapping("/create")
     public ResponseEntity<SprintResponse> createSprint(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody SprintRequest request) {
         return ResponseEntity.ok(sprintService.createSprint(customUserDetails.getId(), request));
     }
