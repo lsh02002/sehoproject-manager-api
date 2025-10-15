@@ -2,16 +2,13 @@ package com.sehoprojectmanagerapi.web.mapper;
 
 // TaskMapper.java
 
-import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.taskassignee.AssigneeType;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
-import com.sehoprojectmanagerapi.web.dto.task.AssigneeResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -73,7 +70,6 @@ public class TaskMapper {
                 .dueDate(t.getDueDate())
                 .createdAt(t.getCreatedAt())
                 .build();
-
     }
 }
 

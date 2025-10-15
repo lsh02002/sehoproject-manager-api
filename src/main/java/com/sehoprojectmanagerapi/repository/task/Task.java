@@ -12,6 +12,8 @@ import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

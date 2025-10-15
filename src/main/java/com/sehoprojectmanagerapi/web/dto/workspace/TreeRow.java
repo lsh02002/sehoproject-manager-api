@@ -38,6 +38,6 @@ public class TreeRow {
     private boolean canEnterSpace;
     private boolean canEnterProject;
     private boolean canEnterMilestone;
-    private boolean canEnterTask;    // ⬅️ 신규
     private boolean canEnterSprint;
+    private boolean canEnterTask;    // ⬅️ 신규
 }

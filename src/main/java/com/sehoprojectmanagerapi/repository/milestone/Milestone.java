@@ -43,7 +43,7 @@ public class Milestone extends BaseEntity {
     @Column(nullable = false, length = 16)
     private MilestoneStatus status = MilestoneStatus.PLANNED;
 
-    @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToMany(mappedBy = "milestone")
     private List<Task> tasks = new ArrayList<>();
 
     public void setTasks(List<Task> tasks) {

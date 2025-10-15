@@ -210,6 +210,7 @@ public class MilestoneService {
         }
 
         // 3. 삭제 수행
+        taskRepository.detachTasksFromMilestone(milestone.getId());
         milestoneRepository.delete(milestone);
     }
 }
