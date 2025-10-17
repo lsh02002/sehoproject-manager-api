@@ -29,22 +29,31 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(lettuceConnectionFactory());
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setConnectionFactory(cf);
 
+        StringRedisSerializer string = new StringRedisSerializer();
+        template.setKeySerializer(string);        // << prefix 붙이지 않음
+        template.setHashKeySerializer(string);
+        template.setValueSerializer(string);
+        template.setHashValueSerializer(string);
+
+        template.afterPropertiesSet();
         return template;
     }
 
     @Bean
-    public CacheManager contentCacheManager(RedisConnectionFactory cf) {
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+    public CacheManager contentCacheManager(RedisConnectionFactory cf,
+                                            @Value("project") String prefix) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                // 캐시 키 직렬화기: prefix 없는 일반 직렬화기
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())) // Value Serializer 변경
-                .entryTtl(Duration.ofHours(3L)); // 캐시 수명 3시간
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                .entryTtl(Duration.ofHours(3))
+                // 여기서만 통일해서 붙임: account:<cacheName>:
+                .computePrefixWith(cacheName -> prefix + ":" + cacheName + ":");
 
-        return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(cf).cacheDefaults(redisCacheConfiguration).build();
+        return RedisCacheManager.builder(cf).cacheDefaults(config).build();
     }
 }
