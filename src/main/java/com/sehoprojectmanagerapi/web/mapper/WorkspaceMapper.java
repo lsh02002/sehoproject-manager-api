@@ -2,7 +2,7 @@ package com.sehoprojectmanagerapi.web.mapper;
 
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceInviteResponse;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
 import org.springframework.stereotype.Component;
 
@@ -21,13 +21,13 @@ public class WorkspaceMapper {
                 .id(invite.getId())
                 .workspaceId(invite.getWorkspace().getId())
                 .workspaceName(invite.getWorkspace().getName())
-                .inviterName(invite.getInviter().getName())
-                .invitedUserName(invite.getInvitedUser().getName())
+                .inviterEmail(invite.getInviter().getEmail())
+                .invitedUserEmail(invite.getInvitedUser().getEmail())
                 .message(invite.getMessage())
                 .requestedRole(invite.getRequestedRole())
                 .status(invite.getStatus().name())
                 .expiresAt(invite.getExpiresAt())
-                .createdAt(invite.getCreatedAt())
+                .createdAt(invite.getCreatedAt().toString())
                 .build();
 
     }

@@ -2,8 +2,6 @@ package com.sehoprojectmanagerapi.web.controller.project;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.project.ProjectService;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceInviteRequest;
-import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import lombok.RequiredArgsConstructor;

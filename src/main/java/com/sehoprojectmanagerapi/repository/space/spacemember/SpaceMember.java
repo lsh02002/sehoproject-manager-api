@@ -5,9 +5,7 @@ import com.sehoprojectmanagerapi.repository.space.SpaceRole;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
@@ -15,6 +13,8 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "space_members",
         uniqueConstraints = @UniqueConstraint(columnNames = {"space_id", "user_id"}))
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpaceMember {

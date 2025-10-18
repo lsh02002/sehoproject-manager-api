@@ -51,5 +51,7 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
                             @Param("userId") Long userId,
                             @Param("currentInviteId") Long currentInviteId,
                             @Param("now") OffsetDateTime now);
+
+    List<WorkspaceInvite> findByInviterId(Long userId);
 }
 

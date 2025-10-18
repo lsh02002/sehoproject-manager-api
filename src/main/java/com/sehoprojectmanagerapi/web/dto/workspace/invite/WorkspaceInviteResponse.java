@@ -1,6 +1,5 @@
-package com.sehoprojectmanagerapi.web.dto.workspace;
+package com.sehoprojectmanagerapi.web.dto.workspace.invite;
 
-import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import lombok.Builder;
 
@@ -11,12 +10,12 @@ public record WorkspaceInviteResponse(
         Long id,
         Long workspaceId,
         String workspaceName,
-        String inviterName,
-        String invitedUserName,
+        String inviterEmail,
+        String invitedUserEmail,
         String message,
         WorkspaceRole requestedRole,
         String status,
         OffsetDateTime expiresAt,
-        java.time.LocalDateTime createdAt
+        String createdAt
 ) {
 }

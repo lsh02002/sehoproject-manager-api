@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.service.workspace;
 
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.config.security.SecurityUtil;
-import com.sehoprojectmanagerapi.repository.common.MenuType;
 import com.sehoprojectmanagerapi.repository.common.Role;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
@@ -16,6 +15,8 @@ import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.mapper.WorkspaceMapper;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
@@ -36,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -309,6 +309,13 @@ public class WorkspaceService {
         workspaceInviteRepository.save(invite);
 
         return workspaceMapper.toResponse(invite.getWorkspace());
+    }
+
+    @Transactional
+    public List<WorkspaceInviteResponse> getGivePrivileges(Long userId) {
+        return workspaceInviteRepository.findByInviterId(userId)
+                .stream().filter(invited->invited.getStatus() == WorkspaceInvite.Status.ACCEPTED)
+                .map(workspaceMapper::toInviteResponse).toList();
     }
 
     @Transactional

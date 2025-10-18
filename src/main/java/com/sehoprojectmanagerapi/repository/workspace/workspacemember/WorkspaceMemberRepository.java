@@ -45,12 +45,14 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
             """)
     List<Long> findWorkspaceIdsByUserId(@Param("userId") Long userId);
 
-//    @Query("""
-//            SELECT p.project.space.workspace.id AS workspaceId,
-//                   p.project.space.id           AS spaceId,
-//                   p.project.id                 AS projectId
-//            FROM ProjectMember p
-//            WHERE p.user.id = :userId
-//            """)
-//    List<WorkIdsView> findByUserIdAndProjectId(@Param("userId") Long userId, @Param("projectId") Long projectId);
+    boolean existsByWorkspaceIdAndUserId(Long workspaceId, Long userId);
+
+    @Query("""
+        select wm.role
+        from WorkspaceMember wm
+        where wm.workspace.id = :workspaceId
+          and wm.user.id = :userId
+    """)
+    Optional<WorkspaceRole> findRole(@Param("workspaceId") Long workspaceId,
+                                     @Param("userId") Long userId);
 }

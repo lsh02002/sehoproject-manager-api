@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.dto.workspace;
+package com.sehoprojectmanagerapi.web.dto.workspace.tree;
 
 import com.sehoprojectmanagerapi.repository.common.MenuType;
 import lombok.Builder;

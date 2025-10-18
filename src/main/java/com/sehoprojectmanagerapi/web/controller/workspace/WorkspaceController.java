@@ -2,8 +2,9 @@ package com.sehoprojectmanagerapi.web.controller.workspace;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.workspace.WorkspaceService;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.*;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -87,5 +88,10 @@ public class WorkspaceController {
             @PathVariable Long inviteId
     ) {
         return ResponseEntity.ok(workspaceService.declineWorkspaceInvite(customUserDetails.getId(), workspaceId, inviteId));
+    }
+
+    @GetMapping("/giveprivileges")
+    public ResponseEntity<List<WorkspaceInviteResponse>> getGivePrivileges(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(workspaceService.getGivePrivileges(customUserDetails.getId()));
     }
 }

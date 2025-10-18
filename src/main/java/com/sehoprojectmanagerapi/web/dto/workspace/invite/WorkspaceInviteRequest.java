@@ -1,6 +1,5 @@
-package com.sehoprojectmanagerapi.web.dto.workspace;
+package com.sehoprojectmanagerapi.web.dto.workspace.invite;
 
-import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import lombok.Builder;
 

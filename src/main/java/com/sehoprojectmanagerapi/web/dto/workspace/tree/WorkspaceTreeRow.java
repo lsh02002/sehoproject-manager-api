@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.dto.workspace;
+package com.sehoprojectmanagerapi.web.dto.workspace.tree;
 
 public record WorkspaceTreeRow(
         Long wsId, String wsName,

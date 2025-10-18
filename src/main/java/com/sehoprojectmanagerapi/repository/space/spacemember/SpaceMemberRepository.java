@@ -32,4 +32,14 @@ public interface SpaceMemberRepository extends JpaRepository<SpaceMember, Long> 
     List<SpaceMember> findActiveMembers(@Param("spaceId") Long spaceId);
 
     void deleteAllBySpaceId(Long spaceId);
+
+    @Query("""
+        select count(sm) > 0
+        from SpaceMember sm
+        where sm.space.id = :spaceId
+          and sm.user.id = :userId
+    """)
+    boolean isMember(@Param("spaceId") Long spaceId, @Param("userId") Long userId);
+
+    boolean existsBySpaceIdAndUserId(Long spaceId, Long userId);
 }
