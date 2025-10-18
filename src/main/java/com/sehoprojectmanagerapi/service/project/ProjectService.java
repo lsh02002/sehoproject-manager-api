@@ -4,6 +4,9 @@ import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
+import com.sehoprojectmanagerapi.repository.space.SpaceRole;
+import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMemberRepository;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
@@ -39,6 +42,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final RoleFunc roleFunc;
     private final SpaceRepository spaceRepository;
+    private final SpaceMemberRepository spaceMemberRepository;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -77,6 +81,12 @@ public class ProjectService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
+        var role = spaceMemberRepository.findRoleBySpaceIdAndUserId(space.getId(), user.getId())
+                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트를 생성할 권한이 없습니다.", null));
+        if (role != SpaceRole.ADMIN) {
+            throw new NotAcceptableException("스페이스 ADMIN만 프로젝트를 생성할 수 있습니다.", null);
+        }
 
         Project project = Project.builder()
                 .space(space)
@@ -151,6 +161,13 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long userId, Long projectId) {
         try {
+            ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                            .orElseThrow(()->new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId));
+
+            if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+                throw new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId);
+            }
+
             projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
             projectRepository.deleteById(projectId);
         } catch (RuntimeException e) {

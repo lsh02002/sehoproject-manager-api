@@ -72,6 +72,10 @@ public class MilestoneService {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("마일스톤 생성 권한이 없습니다.", userId);
+        }
+
         if (request.name().isEmpty()) {
             throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());
         }
@@ -104,7 +108,11 @@ public class MilestoneService {
     @Transactional
     public MilestoneResponse updateMilestone(Long userId, Long milestoneId, MilestoneRequest request) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+                .orElseThrow(() -> new NotFoundException("해당 마일스톤 수정 권한이 없습니다.", request.projectId()));
+
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("해당 마일스톤 수정 권한이 없습니다.", userId);
+        }
 
         if (request.name() == null || request.name().isEmpty()) {
             throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());

@@ -1,12 +1,14 @@
 package com.sehoprojectmanagerapi.service.task;
 
 import com.sehoprojectmanagerapi.config.keygenerator.TaskKeyGenerator;
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
+import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.sprint.SprintRepository;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
@@ -57,6 +59,7 @@ public class TaskService {
     private final TagRepository tagRepository;
     private final TaskKeyGenerator taskKeyGenerator; // 예: "PROJ-123" 생성
     private final TaskMapper taskMapper;             // Entity -> Response
+    private final RoleFunc roleFunc;
 
     @Transactional
     public List<TaskResponse> getAllTasksByUser(Long userId) {
@@ -108,9 +111,11 @@ public class TaskService {
         Project project = projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", request.projectId()));
 
-        boolean isMember = projectMemberRepository.existsByUserIdAndProjectId(userId, project.getId());
-        if (!isMember) {
-            throw new NotAcceptableException("해당 프로젝트에 대한 권한이 없습니다.", userId);
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
+                .orElseThrow(()->new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
+            throw new NotAcceptableException("해당 태스크 생성 권한이 없습니다.", userId);
         }
 
         // 3) Sprint/Milestone 검증 (same project)
@@ -285,9 +290,12 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("작업(Task)을 찾을 수 없습니다.", taskId));
 
         Project project = task.getProject();
-        boolean isMember = projectMemberRepository.existsByUserIdAndProjectId(userId, project.getId());
-        if (!isMember) {
-            throw new NotAcceptableException("해당 프로젝트에 대한 권한이 없습니다.", userId);
+
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
+                .orElseThrow(()->new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
+            throw new NotAcceptableException("해당 태스크 업데이트할 권한이 없습니다.", userId);
         }
 
         // 1) 스프린트/마일스톤 변경 (null = 변경 없음, Optional.empty 의미의 특별 플래그가 없다면: 빈 값 명시 지우기용 필드 권장)
@@ -465,6 +473,10 @@ public class TaskService {
     public void deleteTask(Long userId, Long projectId, Long taskId) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
+
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
+            throw new NotAcceptableException("해당 태스크 삭제할 권한이 없습니다.", userId);
+        }
 
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)
                 .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));

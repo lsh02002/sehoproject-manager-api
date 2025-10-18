@@ -139,8 +139,8 @@ public class SpaceService {
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, workspaceId)
                 .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
-        if (role != WorkspaceRole.OWNER) {
-            throw new NotAcceptableException("OWNER만 스페이스를 삭제할 수 있습니다.", null);
+        if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
+            throw new NotAcceptableException("OWNER 또는 ADMIN만 스페이스를 삭제할 수 있습니다.", null);
         }
 
         spaceMemberRepository.deleteAllBySpaceId(spaceId);
