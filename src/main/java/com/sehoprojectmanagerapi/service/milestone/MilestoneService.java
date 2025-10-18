@@ -200,21 +200,11 @@ public class MilestoneService {
         Milestone milestone = milestoneRepository.findById(milestoneId)
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
 
-        // 2. 권한 확인
-        // (a) 프로젝트 생성자이거나
-        // (b) 팀 Owner 이어야 함
-        Project project = milestone.getProject();
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, milestone.getProject().getId())
+                .orElseThrow(()->new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId));
 
-        // 프로젝트 생성자 체크
-        boolean isProjectCreator = project.getCreatedBy().getId().equals(userId);
-
-        boolean isProjectManagerUp = projectMemberRepository
-                .findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER))
-                .orElse(false);
-
-        if (!isProjectCreator && !isProjectManagerUp) {
-            throw new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
 
         // 3. 삭제 수행

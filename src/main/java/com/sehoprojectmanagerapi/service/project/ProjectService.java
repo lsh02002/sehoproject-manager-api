@@ -4,20 +4,16 @@ import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
-import com.sehoprojectmanagerapi.repository.space.SpaceRole;
-import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMemberRepository;
-import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
-import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
+import com.sehoprojectmanagerapi.repository.space.SpaceRole;
+import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
@@ -53,7 +49,7 @@ public class ProjectService {
     @Transactional
     public List<ProjectResponse> getAllProjectsByUserAndSpace(Long userId, Long spaceId) {
         spaceRepository.findById(spaceId)
-                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
 
         return projectMemberRepository.findByUserId(userId)
                 .stream().filter(projectMember -> Objects.equals(projectMember.getProject().getSpace().getId(), spaceId))
@@ -63,7 +59,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse getProjectById(Long userId, Long projectId) {
         projectRepository.findById(projectId)
-                .orElseThrow(()->new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
 
         return projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject()))
@@ -160,18 +156,14 @@ public class ProjectService {
 
     @Transactional
     public void deleteProject(Long userId, Long projectId) {
-        try {
-            ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                            .orElseThrow(()->new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId));
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId));
 
-            if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-                throw new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId);
-            }
-
-            projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
-            projectRepository.deleteById(projectId);
-        } catch (RuntimeException e) {
-            throw new ConflictException("해당 프로젝트 삭제에 실패했습니다.", projectId);
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
         }
+
+        projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
+        projectRepository.deleteById(projectId);
     }
 }

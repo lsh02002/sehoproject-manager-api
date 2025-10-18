@@ -1,10 +1,8 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
-import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneResponse;
 import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -116,7 +114,7 @@ public class SprintService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 스프린트 생성 권한이 없습니다.", userId);
+            throw new NotAcceptableException("해당 스프린트 수정 권한이 없습니다.", userId);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -200,22 +198,11 @@ public class SprintService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new NotFoundException("해당 스프린트를 찾을 수 없습니다.", sprintId));
 
-        Project project = sprint.getProject();
-        if (project == null) {
-            throw new NotFoundException("스프린트에 연결된 프로젝트가 없습니다.", null);
-        }
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, sprint.getProject().getId())
+                .orElseThrow(()->new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
 
-        // (a) 프로젝트 생성자, 또는 (b) 프로젝트 MANAGER 이상만 삭제 허용
-        boolean isProjectCreator = project.getCreatedBy() != null
-                && project.getCreatedBy().getId().equals(userId);
-
-        boolean isProjectManagerUp = projectMemberRepository
-                .findByUserIdAndProjectId(userId, project.getId())
-                .map(pm -> roleFunc.hasAtLeast(pm.getRole(), RoleProject.MANAGER))
-                .orElse(false);
-
-        if (!(isProjectCreator || isProjectManagerUp)) {
-            throw new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId);
+        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+            throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);
         }
 
         taskRepository.detachTasksFromSprint(sprint.getId());
