@@ -8,6 +8,7 @@ import lombok.Builder;
 public record WorkspaceInviteRequest(
         Long invitedUserId,
         String message,
-        WorkspaceRole requestedRole // null 허용
+        WorkspaceRole requestedRole, // null 허용
+        Long workspaceId
 ) {
 }

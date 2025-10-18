@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 @Builder
 public record WorkspaceInviteResponse(
         Long id,
+        Long workspaceId,
         String workspaceName,
         String inviterName,
         String invitedUserName,

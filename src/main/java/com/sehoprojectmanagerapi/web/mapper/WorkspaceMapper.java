@@ -19,6 +19,7 @@ public class WorkspaceMapper {
     public WorkspaceInviteResponse toInviteResponse(WorkspaceInvite invite) {
         return WorkspaceInviteResponse.builder()
                 .id(invite.getId())
+                .workspaceId(invite.getWorkspace().getId())
                 .workspaceName(invite.getWorkspace().getName())
                 .inviterName(invite.getInviter().getName())
                 .invitedUserName(invite.getInvitedUser().getName())

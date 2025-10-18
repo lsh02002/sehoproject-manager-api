@@ -60,13 +60,12 @@ public class WorkspaceController {
         return ResponseEntity.ok(workspaceService.getMyWorkspaceInvites(customUserDetails.getId()));
     }
 
-    @PostMapping("/{workspaceId}/invites")
+    @PostMapping("/invites")
     public ResponseEntity<WorkspaceInviteResponse> inviteToWorkspace(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PathVariable Long workspaceId,
             @RequestBody WorkspaceInviteRequest request
     ) {
-        WorkspaceInviteResponse invite = workspaceService.inviteToWorkspace(customUserDetails.getId(), workspaceId, request);
+        WorkspaceInviteResponse invite = workspaceService.inviteToWorkspace(customUserDetails.getId(), request);
         return ResponseEntity.ok(invite);
     }
 

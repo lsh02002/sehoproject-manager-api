@@ -173,18 +173,18 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceInviteResponse inviteToWorkspace(Long inviterId, Long workspaceId, WorkspaceInviteRequest request) {
+    public WorkspaceInviteResponse inviteToWorkspace(Long inviterId, WorkspaceInviteRequest request) {
         // 1) 필수 로드
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", workspaceId));
+        Workspace workspace = workspaceRepository.findById(request.workspaceId())
+                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", request.workspaceId()));
         User inviter = userRepository.findById(inviterId)
                 .orElseThrow(() -> new NotFoundException("초대한 사용자를 찾을 수 없습니다.", inviterId));
         User invited = userRepository.findById(request.invitedUserId())
                 .orElseThrow(() -> new NotFoundException("초대된 사용자를 찾을 수 없습니다.", request.invitedUserId()));
 
         // 2) 권한 체크: 초대자가 해당 워크스페이스 멤버인가?
-        if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(inviterId, workspaceId)) {
-            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
+        if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(inviterId, request.workspaceId())) {
+            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", request.workspaceId());
         }
         // (필요 시 역할 레벨 체크도 추가: OWNER/MANAGER만 허용 등)
         if (!roleFunc.hasAtLeast(workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspace.getId()).get(), WorkspaceRole.ADMIN)) {
@@ -193,25 +193,25 @@ public class WorkspaceService {
 
         // 3) 자기 자신 초대 방지
         if (inviter.getId().equals(invited.getId())) {
-            throw new BadRequestException("자기 자신을 초대할 수 없습니다.", workspaceId);
+            throw new BadRequestException("자기 자신을 초대할 수 없습니다.", invited.getId());
         }
 
         // 4) 이미 워크스페이스 멤버인지 검사
-        boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(invited.getId(), workspaceId);
+        boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(invited.getId(), request.workspaceId());
         if (alreadyMember) {
-            throw new ConflictException("이미 워크스페이스 멤버입니다.", workspaceId);
+            throw new ConflictException("이미 워크스페이스 멤버입니다.", invited.getId());
         }
 
         // 5) 중복/유효 초대 존재 여부 (PENDING && 미만료)
         boolean hasPending = workspaceInviteRepository
                 .existsByWorkspaceIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
-                        workspaceId,
+                        request.workspaceId(),
                         invited.getId(),
                         List.of(WorkspaceInvite.Status.PENDING),
                         OffsetDateTime.now()
                 );
         if (hasPending) {
-            throw new ConflictException("진행 중인 초대가 이미 있습니다.", workspaceId);
+            throw new ConflictException("진행 중인 초대가 이미 있습니다.", request.workspaceId());
         }
 
         // 6) 초대 엔티티 생성
