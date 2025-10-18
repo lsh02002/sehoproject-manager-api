@@ -41,23 +41,6 @@ public class MembershipService {
 
     private static final Set<WorkspaceRole> CAN_GRANT = EnumSet.of(WorkspaceRole.OWNER, WorkspaceRole.ADMIN);
 
-    private void ensureGranterCanGrant(Long granterUserId, Long workspaceId) {
-        WorkspaceRole role = workspaceMemberRepository.findRole(workspaceId, granterUserId)
-                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버가 아님", null));
-        if (!CAN_GRANT.contains(role)) {
-            throw new AccessDeniedException("권한 부여 권한이 없음", null);
-        }
-    }
-
-    private User resolveTargetUserInWorkspace(Long workspaceId, String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("대상 유저를 찾을 수 없음: " + email));
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, user.getId())) {
-            throw new IllegalArgumentException("대상 유저가 해당 워크스페이스 멤버가 아님");
-        }
-        return user;
-    }
-
     @Transactional
     public MemberResponse addSpaceMember(Long granterUserId,
                                          Long workspaceId,
@@ -128,5 +111,22 @@ public class MembershipService {
         projectMemberRepository.save(pm);
 
         return new MemberResponse(pm.getId().getProjectId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
+    }
+
+    private void ensureGranterCanGrant(Long granterUserId, Long workspaceId) {
+        WorkspaceRole role = workspaceMemberRepository.findRole(workspaceId, granterUserId)
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버가 아님", null));
+        if (!CAN_GRANT.contains(role)) {
+            throw new AccessDeniedException("권한 부여 권한이 없음", null);
+        }
+    }
+
+    private User resolveTargetUserInWorkspace(Long workspaceId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("대상 유저를 찾을 수 없음: " + email));
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, user.getId())) {
+            throw new IllegalArgumentException("대상 유저가 해당 워크스페이스 멤버가 아님");
+        }
+        return user;
     }
 }
