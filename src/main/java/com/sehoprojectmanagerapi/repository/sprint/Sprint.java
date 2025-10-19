@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.sprint;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.task.Task;
@@ -17,7 +19,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Sprint extends BaseEntity {
+public class Sprint extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,4 +43,9 @@ public class Sprint extends BaseEntity {
 
     @OneToMany(mappedBy = "sprint")
     private List<Task> tasks = new ArrayList<>();
+
+    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.SPRINT; }
+    @Override public Long logTargetId()   { return id; }
+    @Override public String logMessage()    { return "name=" + name; }
+    @Override public Project logProject() { return this.project; }
 }

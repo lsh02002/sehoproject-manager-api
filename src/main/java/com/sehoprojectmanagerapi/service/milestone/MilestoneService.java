@@ -1,6 +1,8 @@
 package com.sehoprojectmanagerapi.service.milestone;
 
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneStatus;
@@ -12,6 +14,7 @@ import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
@@ -35,7 +38,7 @@ public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final MilestoneMapper milestoneMapper;
     private final UserRepository userRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final ActivityLogService activityLogService;
     private final RoleFunc roleFunc;
     private final TaskRepository taskRepository;
 
@@ -100,7 +103,9 @@ public class MilestoneService {
         milestone.setStatus(MilestoneStatus.valueOf(request.status()));
         milestone.setTasks(tasks);
 
-        milestoneRepository.save(milestone);
+        Milestone savedmilestone = milestoneRepository.save(milestone);
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject());
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -190,7 +195,10 @@ public class MilestoneService {
         milestone.setDueDate(request.dueDate());
         milestone.setStatus(MilestoneStatus.valueOf(request.status()));
 
-        milestoneRepository.save(milestone);
+        Milestone savedmilestone = milestoneRepository.save(milestone);
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject());
+
         return milestoneMapper.toResponse(milestone);
     }
 
@@ -206,6 +214,8 @@ public class MilestoneService {
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject());
 
         // 3. 삭제 수행
         taskRepository.detachTasksFromMilestone(milestone.getId());

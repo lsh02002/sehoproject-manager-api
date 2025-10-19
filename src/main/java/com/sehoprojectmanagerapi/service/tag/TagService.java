@@ -1,5 +1,8 @@
 package com.sehoprojectmanagerapi.service.tag;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.web.mapper.TagMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
@@ -30,6 +33,7 @@ public class TagService {
     private final UserRepository userRepository;
     private final TagMapper tagMapper;
     private final RoleFunc roleFunc;
+    private final ActivityLogService activityLogService;
 
     /* 목록 조회: 프로젝트 멤버면 누구나 열람 가능 */
     @Transactional
@@ -81,7 +85,10 @@ public class TagService {
                 .description(request.description())
                 .build();
 
-        tagRepository.save(tag);
+        Tag savedtag = tagRepository.save(tag);
+
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject());
+
         return tagMapper.toResponse(tag);
     }
 
@@ -107,7 +114,10 @@ public class TagService {
             tag.setDescription(request.description());
         }
 
-        tagRepository.save(tag);
+        Tag savedtag = tagRepository.save(tag);
+
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject());
+
         return tagMapper.toResponse(tag);
     }
 
@@ -121,6 +131,7 @@ public class TagService {
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
 
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject());
         // 연결된 TaskTag가 있으면 FK/제약 위반될 수 있습니다.
         // orphanRemoval/ON DELETE CASCADE 설정에 맞춰 예외 처리
         tagRepository.delete(tag);

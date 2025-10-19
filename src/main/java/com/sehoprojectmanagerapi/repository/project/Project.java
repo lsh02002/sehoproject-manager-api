@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.project;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
@@ -26,7 +28,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Project extends BaseEntity {
+public class Project extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -82,4 +84,9 @@ public class Project extends BaseEntity {
     // 태스크
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
+
+    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.PROJECT; }
+    @Override public Long logTargetId()   { return id; }
+    @Override public String logMessage()    { return "name=" + name; }
+    @Override public Project logProject() { return this; }
 }

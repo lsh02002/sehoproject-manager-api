@@ -36,6 +36,9 @@ public class ActivityLog extends BaseEntity {
     @Column(name = "entity_id", nullable = false)
     private Long entityId;
 
+    @Column
+    private String message;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 16, nullable = false)
     private ActivityAction action;
@@ -45,4 +48,13 @@ public class ActivityLog extends BaseEntity {
 
     @Column(name = "after_json", columnDefinition = "JSON")
     private String afterJson;
+
+    public ActivityLog(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project) {
+        this.entityType = type;
+        this.action = action;
+        this.entityId = targetId;
+        this.message = message;
+        this.actor = actor;
+        this.project = project;
+    }
 }

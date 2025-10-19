@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.milestone;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.task.Task;
@@ -8,7 +10,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Milestone extends BaseEntity {
+public class Milestone extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -59,4 +60,9 @@ public class Milestone extends BaseEntity {
         tasks.add(task);
         task.setMilestone(this); // 양방향 연결
     }
+
+    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.MILESTONE; }
+    @Override public Long logTargetId()   { return id; }
+    @Override public String logMessage()    { return "name=" + name; }
+    @Override public Project logProject() { return this.project; }
 }

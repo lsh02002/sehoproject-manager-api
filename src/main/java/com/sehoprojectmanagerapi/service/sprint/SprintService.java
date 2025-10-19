@@ -1,7 +1,10 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
@@ -36,6 +39,7 @@ public class SprintService {
     private final UserRepository userRepository;
     private final RoleFunc roleFunc;
     private final TaskRepository taskRepository;
+    private final ActivityLogService activityLogService;
 
     /**
      * 사용자 기준 가시한 스프린트 전체 조회
@@ -100,7 +104,10 @@ public class SprintService {
         sprint.setState(SprintState.valueOf(request.state()));
         sprint.setTasks(tasks);
 
-        sprintRepository.save(sprint);
+        Sprint savedsprint = sprintRepository.save(sprint);
+
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.CREATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject());
+
         return sprintMapper.toResponse(sprint);
     }
 
@@ -186,7 +193,10 @@ public class SprintService {
         sprint.setEndDate(request.endDate());
         sprint.setState(SprintState.valueOf(request.state()));
 
-        sprintRepository.save(sprint);
+        Sprint savedsprint = sprintRepository.save(sprint);
+
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject());
+
         return sprintMapper.toResponse(sprint);
     }
 
@@ -204,6 +214,8 @@ public class SprintService {
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);
         }
+
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject());
 
         taskRepository.detachTasksFromSprint(sprint.getId());
         sprintRepository.delete(sprint);

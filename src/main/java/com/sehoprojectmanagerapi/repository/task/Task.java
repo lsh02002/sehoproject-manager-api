@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.task;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -12,8 +14,6 @@ import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,7 +33,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task extends BaseEntity {
+public class Task extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -107,6 +107,11 @@ public class Task extends BaseEntity {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskDependency> dependencies = new ArrayList<>();
+
+    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.TASK; }
+    @Override public Long logTargetId()   { return id; }
+    @Override public String logMessage()    { return "name=" + name; }
+    @Override public Project logProject() { return this.project; }
 
     /* -------------------------
        편의 메서드 (양방향 일관성 보장)

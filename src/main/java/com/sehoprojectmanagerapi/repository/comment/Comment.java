@@ -1,6 +1,9 @@
 package com.sehoprojectmanagerapi.repository.comment;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
+import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -15,7 +18,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment extends BaseEntity {
+public class Comment extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,4 +33,9 @@ public class Comment extends BaseEntity {
 
     @Column(columnDefinition = "text", nullable = false)
     private String body;
+
+    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.COMMENT; }
+    @Override public Long logTargetId()   { return id; }
+    @Override public String logMessage()    { return "name=" + body; }
+    @Override public Project logProject() { return this.task.getProject(); }
 }

@@ -1,5 +1,8 @@
 package com.sehoprojectmanagerapi.service.comment;
 
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.web.mapper.CommentMapper;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.repository.comment.CommentRepository;
@@ -25,6 +28,7 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
 
     @Transactional
     public List<CommentResponse> getCommentByTaskId(Long taskId) {
@@ -65,11 +69,16 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject());
+
         return commentMapper.toResponse(savedComment);
     }
 
     @Transactional
     public CommentResponse updateComment(Long userId, Long commentId, CommentRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
         Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
                 .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
 
@@ -85,12 +94,23 @@ public class CommentService {
         }
 
         Comment savedComment = commentRepository.save(comment);
+
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject());
+
         return commentMapper.toResponse(savedComment);
     }
 
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
         try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
+            Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
+                    .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
+
+            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject());
+
             commentRepository.deleteByAuthorIdAndId(userId, commentId);
         } catch (RuntimeException e) {
             throw new ConflictException("해당 댓그을 삭제할 수 없습니다.", commentId);

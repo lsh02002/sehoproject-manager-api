@@ -1,6 +1,8 @@
 package com.sehoprojectmanagerapi.service.project;
 
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
@@ -13,6 +15,7 @@ import com.sehoprojectmanagerapi.repository.space.SpaceRole;
 import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -39,6 +42,7 @@ public class ProjectService {
     private final RoleFunc roleFunc;
     private final SpaceRepository spaceRepository;
     private final SpaceMemberRepository spaceMemberRepository;
+    private final ActivityLogService activityLogService;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -105,6 +109,8 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
 
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject());
+
         return projectMapper.toProjectResponse(savedProject);
     }
 
@@ -151,6 +157,9 @@ public class ProjectService {
         }
 
         Project savedProject = projectRepository.save(project);
+
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.UPDATE, savedProject.logTargetId(), savedProject.logMessage(), projectMember.getUser(), savedProject.logProject());
+
         return projectMapper.toProjectResponse(savedProject);
     }
 
@@ -162,6 +171,8 @@ public class ProjectService {
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
         }
+
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject());
 
         projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
         projectRepository.deleteById(projectId);

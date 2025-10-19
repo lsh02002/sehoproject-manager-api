@@ -1,3 +1,3 @@
 package com.sehoprojectmanagerapi.repository.activity;
 
-public enum ActivityEntityType {TASK, COMMENT, ATTACHMENT, PROJECT, MILESTONE, SPRINT}
+public enum ActivityEntityType {TAG, TASK, COMMENT, ATTACHMENT, PROJECT, MILESTONE, SPRINT}
