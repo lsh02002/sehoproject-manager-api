@@ -413,6 +413,10 @@ public class TaskService {
         taskAssigneeUserRepository.deleteByTaskId(task.getId());
         taskAssigneeRepository.deleteByTaskId(task.getId());
 
+        if (request.assignees().isEmpty()) {
+            task.getAssignees().clear();
+        }
+
         for (AssigneeRequest assigneeRequest : request.assignees()) {
             if (assigneeRequest.getType() != null) {
                 AssigneeType type;
