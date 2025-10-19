@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -40,6 +41,7 @@ public class SprintService {
     private final RoleFunc roleFunc;
     private final TaskRepository taskRepository;
     private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     /**
      * 사용자 기준 가시한 스프린트 전체 조회
@@ -106,7 +108,9 @@ public class SprintService {
 
         Sprint savedsprint = sprintRepository.save(sprint);
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.CREATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), sprint, savedsprint);
+        Object aftersprint = sprintMapper.toResponse(savedsprint);
+
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.CREATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), null, aftersprint);
 
         return sprintMapper.toResponse(sprint);
     }
@@ -133,6 +137,8 @@ public class SprintService {
 
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new NotFoundException("해당 스프린트를 찾을 수 없습니다.", sprintId));
+
+        Object beforesprint = snapshotFunc.snapshot(sprint);
 
         if (request.taskIds() != null) {
             // ====== 태스크 연결 갱신 ======
@@ -195,7 +201,9 @@ public class SprintService {
 
         Sprint savedsprint = sprintRepository.save(sprint);
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), sprint, savedsprint);
+        Object aftersprint = snapshotFunc.snapshot(savedsprint);
+
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), beforesprint, aftersprint);
 
         return sprintMapper.toResponse(sprint);
     }
@@ -208,6 +216,8 @@ public class SprintService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new NotFoundException("해당 스프린트를 찾을 수 없습니다.", sprintId));
 
+        Object beforesprint = snapshotFunc.snapshot(sprint);
+
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, sprint.getProject().getId())
                 .orElseThrow(() -> new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
 
@@ -215,7 +225,7 @@ public class SprintService {
             throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject(), sprint, null);
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject(), beforesprint, null);
 
         taskRepository.detachTasksFromSprint(sprint.getId());
         sprintRepository.delete(sprint);

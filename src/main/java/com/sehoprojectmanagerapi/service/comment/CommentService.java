@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.service.comment;
 
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
@@ -29,6 +30,7 @@ public class CommentService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public List<CommentResponse> getCommentByTaskId(Long taskId) {
@@ -69,7 +71,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), comment, savedComment);
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), null, savedComment);
 
         return commentMapper.toResponse(savedComment);
     }
@@ -81,6 +83,8 @@ public class CommentService {
 
         Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
                 .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
+
+        Object beforecomment = snapshotFunc.snapshot(comment);
 
         Task task = taskRepository.findById(request.taskId())
                 .orElseThrow(() -> new NotFoundException("해당 테스크를 찾을 수 없습니다.", request.taskId()));
@@ -95,7 +99,9 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject(), comment, savedComment);
+        Object aftercomment = snapshotFunc.snapshot(savedComment);
+
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject(), beforecomment, aftercomment);
 
         return commentMapper.toResponse(savedComment);
     }
@@ -109,7 +115,9 @@ public class CommentService {
             Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
                     .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
 
-            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), comment, null);
+            Object beforecomment = snapshotFunc.snapshot(comment);
+
+            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), beforecomment, null);
 
             commentRepository.deleteByAuthorIdAndId(userId, commentId);
         } catch (RuntimeException e) {

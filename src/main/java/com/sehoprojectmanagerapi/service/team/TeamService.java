@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.team;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teamInvite.TeamInvite;

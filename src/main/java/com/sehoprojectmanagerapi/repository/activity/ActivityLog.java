@@ -1,7 +1,5 @@
 package com.sehoprojectmanagerapi.repository.activity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.user.User;
@@ -9,9 +7,6 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
-
-import java.util.Map;
-import java.util.Objects;
 
 @Entity
 @Table(name = "activity_logs", indexes = {
@@ -52,13 +47,13 @@ public class ActivityLog extends BaseEntity {
 
     @Type(JsonType.class)
     @Column(name = "before_json", columnDefinition = "JSON")
-    private Map<String, Object> beforeJson;
+    private Object beforeJson;
 
     @Type(JsonType.class)
     @Column(name = "after_json", columnDefinition = "JSON")
-    private Map<String, Object> afterJson;
+    private Object afterJson;
 
-    public ActivityLog(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project, Map<String, Object> beforeJson, Map<String, Object> afterJson) {
+    public ActivityLog(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project, Object beforeJson, Object afterJson) {
         this.entityType = type;
         this.action = action;
         this.entityId = targetId;
@@ -66,6 +61,6 @@ public class ActivityLog extends BaseEntity {
         this.actor = actor;
         this.project = project;
         this.beforeJson = beforeJson;
-        this.afterJson =afterJson;
+        this.afterJson = afterJson;
     }
 }

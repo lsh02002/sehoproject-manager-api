@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.config.rolefunction;
+package com.sehoprojectmanagerapi.config.function;
 
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;

@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.tag;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
@@ -34,6 +35,7 @@ public class TagService {
     private final TagMapper tagMapper;
     private final RoleFunc roleFunc;
     private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     /* 목록 조회: 프로젝트 멤버면 누구나 열람 가능 */
     @Transactional
@@ -87,7 +89,9 @@ public class TagService {
 
         Tag savedtag = tagRepository.save(tag);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), tag, savedtag);
+        Object aftertag = tagMapper.toResponse(savedtag);
+
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), null, aftertag);
 
         return tagMapper.toResponse(tag);
     }
@@ -97,6 +101,8 @@ public class TagService {
     public TagResponse updateTag(Long userId, Long tagId, TagRequest request) {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new NotFoundException("해당 태그를 찾을 수 없습니다.", tagId));
+
+        Object beforetag = snapshotFunc.snapshot(tag);
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 수정할 수 있습니다.", userId));
@@ -116,7 +122,9 @@ public class TagService {
 
         Tag savedtag = tagRepository.save(tag);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), tag, savedtag);
+        Object aftertage = snapshotFunc.snapshot(savedtag);
+
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), beforetag, aftertage);
 
         return tagMapper.toResponse(tag);
     }
@@ -127,11 +135,13 @@ public class TagService {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new NotFoundException("해당 태그를 찾을 수 없습니다.", tagId));
 
+        Object beforetag = snapshotFunc.snapshot(tag);
+
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject(), tag, null);
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject(), beforetag, null);
         // 연결된 TaskTag가 있으면 FK/제약 위반될 수 있습니다.
         // orphanRemoval/ON DELETE CASCADE 설정에 맞춰 예외 처리
         tagRepository.delete(tag);

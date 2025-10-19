@@ -1,7 +1,8 @@
 package com.sehoprojectmanagerapi.service.task;
 
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.config.keygenerator.TaskKeyGenerator;
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
@@ -64,6 +65,7 @@ public class TaskService {
     private final TaskMapper taskMapper;             // Entity -> Response
     private final RoleFunc roleFunc;
     private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public List<TaskResponse> getAllTasksByUser(Long userId) {
@@ -280,7 +282,9 @@ public class TaskService {
         // 11) 최종 저장
         Task savedtask = taskRepository.save(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), task, savedtask);
+        Object aftertask = snapshotFunc.snapshot(savedtask);
+
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), null, aftertask);
 
         // 12) 응답
         return taskMapper.toTaskResponse(task);
@@ -294,6 +298,8 @@ public class TaskService {
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundException("작업(Task)을 찾을 수 없습니다.", taskId));
+
+        Object beforetask = snapshotFunc.snapshot(task);
 
         Project project = task.getProject();
 
@@ -473,7 +479,9 @@ public class TaskService {
         // 8) 저장 & 응답
         Task savedtask = taskRepository.save(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), task, savedtask);
+        Object aftertask = snapshotFunc.snapshot(savedtask);
+
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), beforetask, aftertask);
 
         return taskMapper.toTaskResponse(task);
     }
@@ -490,7 +498,9 @@ public class TaskService {
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)
                 .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), task, null);
+        Object beforetask = snapshotFunc.snapshot(task);
+
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), beforetask, null);
 
         try {
             taskRepository.delete(task);

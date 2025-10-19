@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.project;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
@@ -43,6 +44,7 @@ public class ProjectService {
     private final SpaceRepository spaceRepository;
     private final SpaceMemberRepository spaceMemberRepository;
     private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public List<ProjectResponse> getAllTeamsByUser(Long userId) {
@@ -101,6 +103,8 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
+        Object afterproject = snapshotFunc.snapshot(savedProject);
+
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(savedProject);
         projectMember.setUser(user);
@@ -109,7 +113,7 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject(), project, savedProject);
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject(), null, afterproject);
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -125,6 +129,8 @@ public class ProjectService {
         }
 
         Project project = projectMember.getProject();
+
+        Object beforeproject = snapshotFunc.snapshot(project);
 
         // 문자열 필드: null이면 유지, ""이면 null로 지우기
         if (projectRequest.getName() != null) {
@@ -158,7 +164,9 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.UPDATE, savedProject.logTargetId(), savedProject.logMessage(), projectMember.getUser(), savedProject.logProject(), project, savedProject);
+        Object afterproject = snapshotFunc.snapshot(savedProject);
+
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.UPDATE, savedProject.logTargetId(), savedProject.logMessage(), projectMember.getUser(), savedProject.logProject(), beforeproject, afterproject);
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -172,7 +180,9 @@ public class ProjectService {
             throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject(), projectMember.getProject(), null);
+        Object beforeproject = snapshotFunc.snapshot(projectMember.getProject());
+
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject(), beforeproject, null);
 
         projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
         projectRepository.deleteById(projectId);

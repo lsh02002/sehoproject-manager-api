@@ -1,6 +1,6 @@
 package com.sehoprojectmanagerapi.service.workspace;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
 import com.sehoprojectmanagerapi.config.security.SecurityUtil;
 import com.sehoprojectmanagerapi.repository.common.Role;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;

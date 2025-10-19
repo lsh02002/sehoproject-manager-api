@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.service.milestone;
 
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
@@ -40,6 +41,7 @@ public class MilestoneService {
     private final ActivityLogService activityLogService;
     private final RoleFunc roleFunc;
     private final TaskRepository taskRepository;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public List<MilestoneResponse> getAllMilestonesByUserIdAndProjectId(Long userId, Long projectId) {
@@ -104,7 +106,9 @@ public class MilestoneService {
 
         Milestone savedmilestone = milestoneRepository.save(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), milestone, savedmilestone);
+        Object aftermilestone = snapshotFunc.snapshot(savedmilestone);
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), null, aftermilestone);
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -128,6 +132,8 @@ public class MilestoneService {
 
         Milestone milestone = milestoneRepository.findById(milestoneId)
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
+
+        Object beforemilestone = snapshotFunc.snapshot(milestone);
 
         // 날짜 유효성: 요청 값 기준으로 검사
         if (request.startDate() != null && request.dueDate() != null
@@ -196,7 +202,9 @@ public class MilestoneService {
 
         Milestone savedmilestone = milestoneRepository.save(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), milestone, savedmilestone);
+        Object aftermilestone = snapshotFunc.snapshot(savedmilestone);
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), beforemilestone, aftermilestone);
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -214,7 +222,9 @@ public class MilestoneService {
             throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), milestone, null);
+        Object beforemilestone = snapshotFunc.snapshot(milestone);
+
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), beforemilestone, null);
 
         // 3. 삭제 수행
         taskRepository.detachTasksFromMilestone(milestone.getId());
