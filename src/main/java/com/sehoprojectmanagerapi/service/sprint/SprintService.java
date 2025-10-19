@@ -106,7 +106,7 @@ public class SprintService {
 
         Sprint savedsprint = sprintRepository.save(sprint);
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.CREATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject());
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.CREATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), sprint, savedsprint);
 
         return sprintMapper.toResponse(sprint);
     }
@@ -195,7 +195,7 @@ public class SprintService {
 
         Sprint savedsprint = sprintRepository.save(sprint);
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject());
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), sprint, savedsprint);
 
         return sprintMapper.toResponse(sprint);
     }
@@ -215,7 +215,7 @@ public class SprintService {
             throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject());
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject(), sprint, null);
 
         taskRepository.detachTasksFromSprint(sprint.getId());
         sprintRepository.delete(sprint);

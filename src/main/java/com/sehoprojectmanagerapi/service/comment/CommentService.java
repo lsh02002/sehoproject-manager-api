@@ -69,7 +69,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject());
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), comment, savedComment);
 
         return commentMapper.toResponse(savedComment);
     }
@@ -95,7 +95,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject());
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject(), comment, savedComment);
 
         return commentMapper.toResponse(savedComment);
     }
@@ -109,7 +109,7 @@ public class CommentService {
             Comment comment = commentRepository.findByAuthorIdAndId(userId, commentId)
                     .orElseThrow(() -> new NotFoundException("해당 댓글을 찾을 수 없습니다.", commentId));
 
-            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject());
+            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), comment, null);
 
             commentRepository.deleteByAuthorIdAndId(userId, commentId);
         } catch (RuntimeException e) {

@@ -22,6 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class Tag implements Loggable {
 
     @Id

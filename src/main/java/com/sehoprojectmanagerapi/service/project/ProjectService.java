@@ -109,7 +109,7 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject());
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject(), project, savedProject);
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -158,7 +158,7 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.UPDATE, savedProject.logTargetId(), savedProject.logMessage(), projectMember.getUser(), savedProject.logProject());
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.UPDATE, savedProject.logTargetId(), savedProject.logMessage(), projectMember.getUser(), savedProject.logProject(), project, savedProject);
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -172,7 +172,7 @@ public class ProjectService {
             throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject());
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject(), projectMember.getProject(), null);
 
         projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
         projectRepository.deleteById(projectId);

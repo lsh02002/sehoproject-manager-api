@@ -278,9 +278,9 @@ public class TaskService {
         }
 
         // 11) 최종 저장
-        task = taskRepository.save(task);
+        Task savedtask = taskRepository.save(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject());
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), task, savedtask);
 
         // 12) 응답
         return taskMapper.toTaskResponse(task);
@@ -471,9 +471,9 @@ public class TaskService {
         task.setUpdatedAt(OffsetDateTime.now().toLocalDateTime());
 
         // 8) 저장 & 응답
-        task = taskRepository.save(task);
+        Task savedtask = taskRepository.save(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject());
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), task, savedtask);
 
         return taskMapper.toTaskResponse(task);
     }
@@ -490,7 +490,7 @@ public class TaskService {
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)
                 .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject());
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), task, null);
 
         try {
             taskRepository.delete(task);

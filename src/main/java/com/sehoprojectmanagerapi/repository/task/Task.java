@@ -33,6 +33,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
 public class Task extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -104,7 +104,7 @@ public class MilestoneService {
 
         Milestone savedmilestone = milestoneRepository.save(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject());
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), milestone, savedmilestone);
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -196,7 +196,7 @@ public class MilestoneService {
 
         Milestone savedmilestone = milestoneRepository.save(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject());
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), milestone, savedmilestone);
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -214,7 +214,7 @@ public class MilestoneService {
             throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject());
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), milestone, null);
 
         // 3. 삭제 수행
         taskRepository.detachTasksFromMilestone(milestone.getId());
