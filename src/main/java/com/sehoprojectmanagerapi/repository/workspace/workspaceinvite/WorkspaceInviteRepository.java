@@ -23,14 +23,14 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
 
     // 수락/거절용 조회 (Fetch join 포함 버전)
     @Query("""
-        SELECT i
-        FROM WorkspaceInvite i
-        JOIN FETCH i.workspace w
-        JOIN FETCH i.invitedUser iu
-        LEFT JOIN FETCH i.inviter su
-        WHERE i.id = :inviteId
-          AND w.id = :workspaceId
-    """)
+                SELECT i
+                FROM WorkspaceInvite i
+                JOIN FETCH i.workspace w
+                JOIN FETCH i.invitedUser iu
+                LEFT JOIN FETCH i.inviter su
+                WHERE i.id = :inviteId
+                  AND w.id = :workspaceId
+            """)
     Optional<WorkspaceInvite> findByIdWithWorkspace(@Param("inviteId") Long inviteId,
                                                     @Param("workspaceId") Long workspaceId);
 
@@ -39,14 +39,14 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
     // 동일 사용자 다른 초대 무효화 (커스텀 @Modifying 쿼리)
     @Modifying
     @Query("""
-        UPDATE WorkspaceInvite i
-        SET i.status = com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite.Status.EXPIRED,
-            i.expiresAt = :now
-        WHERE i.workspace.id = :workspaceId
-          AND i.invitedUser.id = :userId
-          AND i.id <> :currentInviteId
-          AND i.status = com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite.Status.PENDING
-    """)
+                UPDATE WorkspaceInvite i
+                SET i.status = com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite.Status.EXPIRED,
+                    i.expiresAt = :now
+                WHERE i.workspace.id = :workspaceId
+                  AND i.invitedUser.id = :userId
+                  AND i.id <> :currentInviteId
+                  AND i.status = com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite.Status.PENDING
+            """)
     int expireOtherPendings(@Param("workspaceId") Long workspaceId,
                             @Param("userId") Long userId,
                             @Param("currentInviteId") Long currentInviteId,

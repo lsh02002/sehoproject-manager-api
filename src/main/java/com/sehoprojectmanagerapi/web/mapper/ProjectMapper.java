@@ -27,7 +27,7 @@ public class ProjectMapper {
                 .dueDate(project.getDueDate())
                 .creatorId(project.getCreatedBy() != null ? project.getCreatedBy().getId() : null)
                 .creatorName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
-                .tagResponses(project.getTags() != null ? project.getTags().stream().map(tagMapper::toResponse).toList(): null)
+                .tagResponses(project.getTags() != null ? project.getTags().stream().map(tagMapper::toResponse).toList() : null)
                 .build();
     }
 }

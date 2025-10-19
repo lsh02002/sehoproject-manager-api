@@ -50,7 +50,7 @@ public class TaskMapper {
                                                 .orElse(null);
                                         return AssigneeRequest.builder()
                                                 .assigneeId(team != null ? team.getId() : null)
-                                                .email(Objects.requireNonNull(team).getName()+" 팀")
+                                                .email(Objects.requireNonNull(team).getName() + " 팀")
                                                 .dynamicAssign(true)
                                                 .type("TEAM")
                                                 .build();

@@ -85,8 +85,23 @@ public class Project extends BaseEntity implements Loggable {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
 
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.PROJECT; }
-    @Override public Long logTargetId()   { return id; }
-    @Override public String logMessage()    { return "name=" + name; }
-    @Override public Project logProject() { return this; }
+    @Override
+    public ActivityEntityType logTargetType() {
+        return ActivityEntityType.PROJECT;
+    }
+
+    @Override
+    public Long logTargetId() {
+        return id;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=" + name;
+    }
+
+    @Override
+    public Project logProject() {
+        return this;
+    }
 }

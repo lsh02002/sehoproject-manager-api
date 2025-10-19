@@ -34,8 +34,23 @@ public class Comment extends BaseEntity implements Loggable {
     @Column(columnDefinition = "text", nullable = false)
     private String body;
 
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.COMMENT; }
-    @Override public Long logTargetId()   { return id; }
-    @Override public String logMessage()    { return "name=" + body; }
-    @Override public Project logProject() { return this.task.getProject(); }
+    @Override
+    public ActivityEntityType logTargetType() {
+        return ActivityEntityType.COMMENT;
+    }
+
+    @Override
+    public Long logTargetId() {
+        return id;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=" + body;
+    }
+
+    @Override
+    public Project logProject() {
+        return this.task.getProject();
+    }
 }

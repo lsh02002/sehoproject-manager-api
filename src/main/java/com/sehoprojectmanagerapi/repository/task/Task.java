@@ -108,10 +108,25 @@ public class Task extends BaseEntity implements Loggable {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskDependency> dependencies = new ArrayList<>();
 
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.TASK; }
-    @Override public Long logTargetId()   { return id; }
-    @Override public String logMessage()    { return "name=" + name; }
-    @Override public Project logProject() { return this.project; }
+    @Override
+    public ActivityEntityType logTargetType() {
+        return ActivityEntityType.TASK;
+    }
+
+    @Override
+    public Long logTargetId() {
+        return id;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=" + name;
+    }
+
+    @Override
+    public Project logProject() {
+        return this.project;
+    }
 
     /* -------------------------
        편의 메서드 (양방향 일관성 보장)

@@ -116,7 +116,7 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(()->new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
             throw new NotAcceptableException("해당 태스크 생성 권한이 없습니다.", userId);
@@ -298,7 +298,7 @@ public class TaskService {
         Project project = task.getProject();
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(()->new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
             throw new NotAcceptableException("해당 태스크 업데이트할 권한이 없습니다.", userId);

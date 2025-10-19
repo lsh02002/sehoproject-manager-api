@@ -8,4 +8,5 @@ public record SpaceResponse(
         String name,
         String slug,
         Long workspaceId
-) {}
+) {
+}

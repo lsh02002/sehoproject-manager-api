@@ -11,8 +11,11 @@ import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProject(Project project);
+
     List<Task> findAllByProjectIdOrderByCreatedAtAsc(Long projectId);
+
     Optional<Task> findByProjectIdAndId(Long projectId, Long taskId);
+
     List<Task> findAllByIdInAndProjectId(List<Long> ids, Long projectId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

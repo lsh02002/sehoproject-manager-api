@@ -41,8 +41,23 @@ public class Tag implements Loggable {
     @ManyToMany(mappedBy = "tags")
     private List<Task> tasks = new ArrayList<>();
 
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.TAG; }
-    @Override public Long logTargetId()   { return id; }
-    @Override public String logMessage()    { return "name=" + name; }
-    @Override public Project logProject() { return this.project; }
+    @Override
+    public ActivityEntityType logTargetType() {
+        return ActivityEntityType.TAG;
+    }
+
+    @Override
+    public Long logTargetId() {
+        return id;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=" + name;
+    }
+
+    @Override
+    public Project logProject() {
+        return this.project;
+    }
 }

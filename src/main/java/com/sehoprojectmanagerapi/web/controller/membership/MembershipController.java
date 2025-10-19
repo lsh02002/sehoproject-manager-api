@@ -31,9 +31,9 @@ public class MembershipController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/workspaces/{workspaceId}/spaces/{spaceId}/members")
     public ResponseEntity<MemberResponse> addSpaceMember(@PathVariable Long workspaceId,
-                                                        @PathVariable Long spaceId,
-                                                        @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                        @RequestBody AddMemberRequest req) {
+                                                         @PathVariable Long spaceId,
+                                                         @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                         @RequestBody AddMemberRequest req) {
         // me.getUserId()는 인증 객체에서 현재 사용자(부여자) ID를 가져온다고 가정
         return ResponseEntity.ok(membershipService.addSpaceMember(customUserDetails.getId(), workspaceId, spaceId, req));
     }
@@ -48,8 +48,8 @@ public class MembershipController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/projects/{projectId}/members")
     public ResponseEntity<MemberResponse> addProjectMember(@PathVariable Long projectId,
-                                           @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                           @RequestBody AddMemberRequest req) {
+                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                           @RequestBody AddMemberRequest req) {
         return ResponseEntity.ok(membershipService.addProjectMember(customUserDetails.getId(), projectId, req));
     }
 
@@ -69,8 +69,8 @@ public class MembershipController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/workspaces/{workspaceId}/members:batch")
     public ResponseEntity<List<MemberResponse>> grantBatch(@PathVariable Long workspaceId,
-                                           @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                           @RequestBody BatchAddMembersRequest req) {
+                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                           @RequestBody BatchAddMembersRequest req) {
         final Long granterId = customUserDetails.getId();
 
         final List<MemberResponse> result = new ArrayList<>();

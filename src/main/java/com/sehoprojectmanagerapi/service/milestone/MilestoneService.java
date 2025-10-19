@@ -12,7 +12,6 @@ import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberR
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
-import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
@@ -136,7 +135,7 @@ public class MilestoneService {
             throw new BadRequestException("마감일은 시작일 이후여야 합니다.", null);
         }
 
-        if(request.taskIds() != null) {
+        if (request.taskIds() != null) {
             // ====== 태스크 연결 갱신 ======
             if (request.taskIds().isEmpty()) {
                 // 빈 리스트면 전부 해제: owning side도 함께 끊기
@@ -209,7 +208,7 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, milestone.getProject().getId())
-                .orElseThrow(()->new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId));
+                .orElseThrow(() -> new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);

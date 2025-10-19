@@ -12,6 +12,9 @@ public record WorkspaceTreeResponse(
         MenuType type,
         List<SpaceNode> spaces
 ) {
-    public record SpaceNode(Long id, String name, MenuType type, List<ProjectNode> projectNodes) {}
-    public record ProjectNode(Long id, String name, MenuType type) {}
+    public record SpaceNode(Long id, String name, MenuType type, List<ProjectNode> projectNodes) {
+    }
+
+    public record ProjectNode(Long id, String name, MenuType type) {
+    }
 }

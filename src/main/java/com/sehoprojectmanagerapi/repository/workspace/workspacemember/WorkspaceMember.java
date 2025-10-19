@@ -1,9 +1,9 @@
 package com.sehoprojectmanagerapi.repository.workspace.workspacemember;
 
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
-import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.service.space;
 
-import com.sehoprojectmanagerapi.web.mapper.SpaceMapper;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.space.SpaceRole;
@@ -17,6 +16,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
+import com.sehoprojectmanagerapi.web.mapper.SpaceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ public class SpaceService {
         }
 
         User creator = userRepository.findById(currentUserId)
-                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", currentUserId));
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", currentUserId));
 
         Space space = Space.builder()
                 .workspace(workspace)

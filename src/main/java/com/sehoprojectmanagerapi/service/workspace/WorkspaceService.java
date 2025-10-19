@@ -4,9 +4,19 @@ import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.config.security.SecurityUtil;
 import com.sehoprojectmanagerapi.repository.common.Role;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
+import com.sehoprojectmanagerapi.repository.user.User;
+import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.repository.workspace.Workspace;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
+import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
+import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.service.project.ProjectService;
 import com.sehoprojectmanagerapi.service.space.SpaceService;
 import com.sehoprojectmanagerapi.service.task.TaskService;
@@ -15,20 +25,12 @@ import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.TreeRow;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
+import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.mapper.WorkspaceMapper;
-import com.sehoprojectmanagerapi.repository.workspace.Workspace;
-import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
-import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.repository.user.User;
-import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
-import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
-import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
-import com.sehoprojectmanagerapi.web.dto.workspace.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,7 +111,7 @@ public class WorkspaceService {
         List<WorkspaceMember> workspaceMembers = workspaceMemberRepository.findByUserId(userId);
 
         return workspaceMembers
-                .stream().map(member->workspaceMapper.toResponse(member.getWorkspace())).toList();
+                .stream().map(member -> workspaceMapper.toResponse(member.getWorkspace())).toList();
     }
 
     @Transactional
@@ -314,7 +317,7 @@ public class WorkspaceService {
     @Transactional
     public List<WorkspaceInviteResponse> getGivePrivileges(Long userId) {
         return workspaceInviteRepository.findByInviterId(userId)
-                .stream().filter(invited->invited.getStatus() == WorkspaceInvite.Status.ACCEPTED)
+                .stream().filter(invited -> invited.getStatus() == WorkspaceInvite.Status.ACCEPTED)
                 .map(workspaceMapper::toInviteResponse).toList();
     }
 

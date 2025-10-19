@@ -2,8 +2,8 @@ package com.sehoprojectmanagerapi.web.mapper;
 
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;
-import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
+import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
 import org.springframework.stereotype.Component;
 
 @Component

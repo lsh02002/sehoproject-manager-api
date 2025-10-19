@@ -1,13 +1,8 @@
 package com.sehoprojectmanagerapi.service.sprint;
 
+import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
-import com.sehoprojectmanagerapi.repository.task.Task;
-import com.sehoprojectmanagerapi.repository.task.TaskRepository;
-import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
-import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
@@ -15,12 +10,17 @@ import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.sprint.SprintRepository;
 import com.sehoprojectmanagerapi.repository.sprint.SprintState;
+import com.sehoprojectmanagerapi.repository.task.Task;
+import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintRequest;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintResponse;
+import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,7 +134,7 @@ public class SprintService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new NotFoundException("해당 스프린트를 찾을 수 없습니다.", sprintId));
 
-        if(request.taskIds() != null) {
+        if (request.taskIds() != null) {
             // ====== 태스크 연결 갱신 ======
             if (request.taskIds().isEmpty()) {
                 // 빈 리스트면 전부 해제: owning side도 함께 끊기
@@ -209,7 +209,7 @@ public class SprintService {
                 .orElseThrow(() -> new NotFoundException("해당 스프린트를 찾을 수 없습니다.", sprintId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, sprint.getProject().getId())
-                .orElseThrow(()->new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
+                .orElseThrow(() -> new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);

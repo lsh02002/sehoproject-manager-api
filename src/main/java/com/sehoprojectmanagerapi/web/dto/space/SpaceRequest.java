@@ -6,4 +6,5 @@ import lombok.Builder;
 public record SpaceRequest(
         String name,
         String slug
-) {}
+) {
+}

@@ -10,7 +10,10 @@ import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
-import com.sehoprojectmanagerapi.web.dto.user.*;
+import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
+import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import com.sehoprojectmanagerapi.web.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -136,7 +139,7 @@ public class UserService {
     @Transactional
     public List<AssigneeRequest> getUserInfos(Long userId) {
         userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
 
         return userRepository.findAll()
                 .stream().map(userMapper::toAssigneeRequest).toList();

@@ -7,7 +7,6 @@ import com.sehoprojectmanagerapi.service.user.UserService;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
 import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
-import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

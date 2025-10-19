@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.web.controller.task;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.task.TaskService;
-import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;

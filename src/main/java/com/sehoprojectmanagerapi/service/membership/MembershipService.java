@@ -31,6 +31,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class MembershipService {
+    private static final Set<WorkspaceRole> CAN_GRANT = EnumSet.of(WorkspaceRole.OWNER, WorkspaceRole.ADMIN);
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final SpaceRepository spaceRepository;
     private final SpaceMemberRepository spaceMemberRepository;
@@ -38,8 +39,6 @@ public class MembershipService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
     private final EntityManager em;
-
-    private static final Set<WorkspaceRole> CAN_GRANT = EnumSet.of(WorkspaceRole.OWNER, WorkspaceRole.ADMIN);
 
     @Transactional
     public MemberResponse addSpaceMember(Long granterUserId,
@@ -59,9 +58,9 @@ public class MembershipService {
         if (spaceMemberRepository.existsBySpaceIdAndUserId(space.getId(), target.getId())) {
             // 이미 멤버면 idempotent 처리: 그냥 성공처럼 응답하거나 409 반환(정책 선택)
             SpaceMember existing = em.createQuery("""
-                select sm from SpaceMember sm
-                where sm.space.id = :sid and sm.user.id = :uid
-            """, SpaceMember.class)
+                                select sm from SpaceMember sm
+                                where sm.space.id = :sid and sm.user.id = :uid
+                            """, SpaceMember.class)
                     .setParameter("sid", space.getId()).setParameter("uid", target.getId())
                     .getSingleResult();
             return new MemberResponse(existing.getId(), target.getId(), space.getId(), "SPACE", existing.getRole().name(), null);
@@ -93,9 +92,9 @@ public class MembershipService {
 
         if (projectMemberRepository.existsByUserIdAndProjectId(target.getId(), projectId)) {
             ProjectMember existing = em.createQuery("""
-                select pm from ProjectMember pm
-                where pm.project.id = :pid and pm.user.id = :uid
-            """, ProjectMember.class)
+                                select pm from ProjectMember pm
+                                where pm.project.id = :pid and pm.user.id = :uid
+                            """, ProjectMember.class)
                     .setParameter("pid", projectId).setParameter("uid", target.getId())
                     .getSingleResult();
             return new MemberResponse(existing.getId().getProjectId(), target.getId(), projectId, "PROJECT", null, existing.getRole().name());

@@ -1,7 +1,5 @@
 package com.sehoprojectmanagerapi.service.team;
 
-import com.sehoprojectmanagerapi.service.exceptions.*;
-import com.sehoprojectmanagerapi.web.mapper.TeamMapper;
 import com.sehoprojectmanagerapi.config.rolefunction.RoleFunc;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
@@ -12,10 +10,15 @@ import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
+import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
+import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.team.TeamRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
+import com.sehoprojectmanagerapi.web.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,7 +50,7 @@ public class TeamService {
     public TeamResponse getTeamByUserIdAndTeamId(Long userId, Long teamId) {
         return teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
                 .map(teamMember -> teamMapper.toTeamResponse(teamMember.getTeam()))
-                .orElseThrow(()->new NotAcceptableException("해당 정보에 접근할 수 없습니다.", null));
+                .orElseThrow(() -> new NotAcceptableException("해당 정보에 접근할 수 없습니다.", null));
     }
 
     @Transactional

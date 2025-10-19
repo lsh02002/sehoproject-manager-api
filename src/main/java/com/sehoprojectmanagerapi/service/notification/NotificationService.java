@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.service.notification;
 
-import com.sehoprojectmanagerapi.web.mapper.NotificationMapper;
 import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.repository.notification.NotificationRepository;
 import com.sehoprojectmanagerapi.repository.notification.NotificationType;
@@ -11,6 +10,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationRequest;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationResponse;
+import com.sehoprojectmanagerapi.web.mapper.NotificationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

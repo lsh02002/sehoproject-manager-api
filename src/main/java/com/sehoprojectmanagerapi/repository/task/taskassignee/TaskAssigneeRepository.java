@@ -11,10 +11,10 @@ public interface TaskAssigneeRepository extends JpaRepository<TaskAssignee, Stri
     @Modifying
     @Transactional
     @Query("""
-        update TaskAssignee ta
-           set ta.dynamic = :dynamic
-         where ta.task.id = :taskId
-           and ta.assigneeType = 'TEAM'
-    """)
+                update TaskAssignee ta
+                   set ta.dynamic = :dynamic
+                 where ta.task.id = :taskId
+                   and ta.assigneeType = 'TEAM'
+            """)
     void updateDynamicFlagIfTeam(Long taskId, boolean dynamic);
 }

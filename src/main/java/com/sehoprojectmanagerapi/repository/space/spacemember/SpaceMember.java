@@ -1,8 +1,8 @@
 package com.sehoprojectmanagerapi.repository.space.spacemember;
 
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
-import com.sehoprojectmanagerapi.repository.space.SpaceRole;
 import com.sehoprojectmanagerapi.repository.space.Space;
+import com.sehoprojectmanagerapi.repository.space.SpaceRole;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;

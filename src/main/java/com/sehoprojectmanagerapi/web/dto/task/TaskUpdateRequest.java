@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Task 수정 요청 DTO
- *
+ * <p>
  * - null 필드: 변경 없음
  * - 빈 리스트: 해당 매핑 제거 (태그, 의존성 등)
  * - 0 이하 ID: 해제 (스프린트/마일스톤)
@@ -27,4 +27,5 @@ public record TaskUpdateRequest(
         List<Long> dependencyTaskIds,  // null: 변경 없음, empty: 모두 제거
 
         List<AssigneeRequest> assignees // null: 변경 없음
-) {}
+) {
+}

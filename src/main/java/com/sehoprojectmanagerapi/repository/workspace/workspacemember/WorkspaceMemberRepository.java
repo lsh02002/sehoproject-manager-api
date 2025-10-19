@@ -48,11 +48,11 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
     boolean existsByWorkspaceIdAndUserId(Long workspaceId, Long userId);
 
     @Query("""
-        select wm.role
-        from WorkspaceMember wm
-        where wm.workspace.id = :workspaceId
-          and wm.user.id = :userId
-    """)
+                select wm.role
+                from WorkspaceMember wm
+                where wm.workspace.id = :workspaceId
+                  and wm.user.id = :userId
+            """)
     Optional<WorkspaceRole> findRole(@Param("workspaceId") Long workspaceId,
                                      @Param("userId") Long userId);
 }

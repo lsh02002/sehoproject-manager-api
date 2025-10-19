@@ -5,4 +5,5 @@ public record AddMemberRequest(
         String requestRole, // "ADMIN" | "MEMBER" | "VIEWER"
         String roleProject,
         String note
-) {}
+) {
+}

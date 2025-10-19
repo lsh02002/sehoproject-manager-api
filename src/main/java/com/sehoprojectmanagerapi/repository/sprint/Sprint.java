@@ -44,8 +44,23 @@ public class Sprint extends BaseEntity implements Loggable {
     @OneToMany(mappedBy = "sprint")
     private List<Task> tasks = new ArrayList<>();
 
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.SPRINT; }
-    @Override public Long logTargetId()   { return id; }
-    @Override public String logMessage()    { return "name=" + name; }
-    @Override public Project logProject() { return this.project; }
+    @Override
+    public ActivityEntityType logTargetType() {
+        return ActivityEntityType.SPRINT;
+    }
+
+    @Override
+    public Long logTargetId() {
+        return id;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=" + name;
+    }
+
+    @Override
+    public Project logProject() {
+        return this.project;
+    }
 }

@@ -9,4 +9,5 @@ public record BatchAddMembersRequest(
         String note,
         List<Long> spaceIds,
         List<Long> projectIds
-) {}
+) {
+}
