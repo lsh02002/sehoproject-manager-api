@@ -3,6 +3,7 @@ package com.sehoprojectmanagerapi.web.dto.project;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,4 +19,5 @@ public class ProjectRequest {
     private LocalDate startDate;
     private LocalDate dueDate;
     private Long creatorId;
+    private List<String> tags;
 }

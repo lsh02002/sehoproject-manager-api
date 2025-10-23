@@ -28,7 +28,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasksByUserAndProject(customUserDetails.getId(), projectId));
     }
 
-    @GetMapping("/{taskId}/edit")
+    @GetMapping("/{taskId}")
     public ResponseEntity<TaskResponse> getTaskById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId) {
         return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
     }

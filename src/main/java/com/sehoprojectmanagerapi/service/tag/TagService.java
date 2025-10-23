@@ -89,7 +89,7 @@ public class TagService {
 
         Tag savedtag = tagRepository.save(tag);
 
-        Object aftertag = tagMapper.toResponse(savedtag);
+        Object aftertag = snapshotFunc.snapshot(savedtag);
 
         activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), null, aftertag);
 

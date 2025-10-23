@@ -18,7 +18,7 @@ public class TaskDependency {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("taskId")
-    @JoinColumn(name = "task_id", nullable = false)
+    @JoinColumn(name = "task_id")
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)

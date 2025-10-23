@@ -59,8 +59,7 @@ public class WorkspaceService {
     private final TaskService taskService;
     private final RoleFunc roleFunc;
 
-    public List<TreeRow> getTreeRowsForCurrentUser() {
-        Long userId = securityUtil.getCurrentUserId();
+    public List<TreeRow> getTreeRowsForCurrentUser(Long userId) {
 
         // 1️⃣ 사용자가 속한 workspace id 목록 조회
         List<Long> workspaceIds = workspaceMemberRepository.findWorkspaceIdsByUserId(userId);

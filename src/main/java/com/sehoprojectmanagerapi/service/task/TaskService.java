@@ -356,54 +356,54 @@ public class TaskService {
             task.getTags().clear();
         } else {
             List<Tag> tags = tagRepository.findAllById(request.tags());
-            if (tags.size() != request.tags().size()) {
-                throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
-            }
+//            if (tags.size() != request.tags().size()) {
+//                throw new NotFoundException("하나 이상의 태그를 찾을 수 없습니다.", null);
+//            }
             for (Tag t : tags) {
                 if (!Objects.equals(t.getProject().getId(), project.getId())) {
                     throw new ConflictException("다른 프로젝트의 태그가 포함되어 있습니다.", t.getId());
                 }
             }
+
             task.getTags().clear();
             task.getTags().addAll(tags);
         }
 
         // 4) 의존성 교체 로직 (TaskDependency: dependent -> prerequisite)
-        if (request.dependencyTaskIds() != null) {
-            if (request.dependencyTaskIds().isEmpty()) {
-                // 모두 제거
-                taskDependencyRepository.deleteByTaskId(task.getId());
-                task.setDependencies(List.of());
-            } else {
-                List<Task> deps = taskRepository.findAllById(request.dependencyTaskIds());
-                if (deps.size() != request.dependencyTaskIds().size()) {
-                    throw new NotFoundException("하나 이상의 선행 작업을 찾을 수 없습니다.", null);
-                }
-                for (Task dep : deps) {
-                    if (!Objects.equals(dep.getProject().getId(), project.getId())) {
-                        throw new ConflictException("다른 프로젝트의 작업이 의존성에 포함되어 있습니다.", dep.getId());
-                    }
-                    if (Objects.equals(dep.getId(), task.getId())) {
-                        throw new BadRequestException("자기 자신을 의존성으로 설정할 수 없습니다.", task.getId());
-                    }
-                }
-                // 간단한 상호(즉시) 순환 방지: A->B 요청인데 B가 이미 A를 선행으로 갖는 케이스 차단
-                if (taskDependencyRepository.existsMutualDependency(task.getId(), request.dependencyTaskIds())) {
-                    throw new ConflictException("상호 의존 순환이 감지되었습니다.", task.getId());
-                }
-
-                // 기존 제거 후 새로 세팅 (간단/명확)
-                taskDependencyRepository.deleteByTaskId(task.getId());
-                Task finalTask = task;
-                List<TaskDependency> newDeps = deps.stream().map(prereq -> {
-                    TaskDependency d = new TaskDependency();
-                    d.setTask(finalTask);
-                    d.setDependsOn(prereq);
-                    return d;
-                }).collect(Collectors.toList());
-                task.setDependencies(newDeps);
+        if (request.dependencyTaskIds().isEmpty()) {
+            // 모두 제거
+            taskDependencyRepository.deleteByTaskId(task.getId());
+            task.setDependencies(List.of());
+        } else {
+            List<Task> deps = taskRepository.findAllById(request.dependencyTaskIds());
+            if (deps.size() != request.dependencyTaskIds().size()) {
+                throw new NotFoundException("하나 이상의 선행 작업을 찾을 수 없습니다.", null);
             }
+            for (Task dep : deps) {
+                if (!Objects.equals(dep.getProject().getId(), project.getId())) {
+                    throw new ConflictException("다른 프로젝트의 작업이 의존성에 포함되어 있습니다.", dep.getId());
+                }
+                if (Objects.equals(dep.getId(), task.getId())) {
+                    throw new BadRequestException("자기 자신을 의존성으로 설정할 수 없습니다.", task.getId());
+                }
+            }
+            // 간단한 상호(즉시) 순환 방지: A->B 요청인데 B가 이미 A를 선행으로 갖는 케이스 차단
+            if (taskDependencyRepository.existsMutualDependency(task.getId(), request.dependencyTaskIds())) {
+                throw new ConflictException("상호 의존 순환이 감지되었습니다.", task.getId());
+            }
+
+            // 기존 제거 후 새로 세팅 (간단/명확)
+            taskDependencyRepository.deleteByTaskId(task.getId());
+            Task finalTask = task;
+            List<TaskDependency> newDeps = deps.stream().map(prereq -> {
+                TaskDependency d = new TaskDependency();
+                d.setTask(finalTask);
+                d.setDependsOn(prereq);
+                return d;
+            }).collect(Collectors.toList());
+            task.setDependencies(newDeps);
         }
+
 
         // 5) 담당자(다형) 업데이트
         // 규칙:

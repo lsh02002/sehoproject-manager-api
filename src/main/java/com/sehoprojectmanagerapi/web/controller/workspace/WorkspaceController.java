@@ -22,8 +22,8 @@ public class WorkspaceController {
     private final WorkspaceService workspaceService;
 
     @GetMapping("/tree")
-    public ResponseEntity<List<TreeRow>> getWorkspaceTree() {
-        return ResponseEntity.ok(workspaceService.getTreeRowsForCurrentUser());
+    public ResponseEntity<List<TreeRow>> getWorkspaceTree(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(workspaceService.getTreeRowsForCurrentUser(customUserDetails.getId()));
     }
 
     @PostMapping

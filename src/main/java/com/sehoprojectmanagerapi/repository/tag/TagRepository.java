@@ -32,4 +32,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByUserIdAndProjectIdAndId(@Param("userId") Long userId,
                                                 @Param("projectId") Long projectId,
                                                 @Param("tagId") Long tagId);
+
+    Optional<Tag> findByNameAndProjectId(String name, Long projectId);
+    void deleteByNameAndProjectId(String name, Long projectId);
 }

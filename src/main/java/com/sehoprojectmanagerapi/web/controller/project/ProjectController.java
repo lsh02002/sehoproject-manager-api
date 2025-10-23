@@ -27,7 +27,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getAllProjectsByUserAndSpace(customUserDetails.getId(), spaceId));
     }
 
-    @GetMapping("/{projectId}/edit")
+    @GetMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> getProjectById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getProjectById(customUserDetails.getId(), projectId));
     }

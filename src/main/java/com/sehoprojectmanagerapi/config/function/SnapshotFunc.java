@@ -47,7 +47,7 @@ public class SnapshotFunc {
             m.put("sprints", project.getSprints() != null ? project.getSprints().stream().map(Sprint::getId).toList() : null);
             m.put("tasks", project.getTasks() != null ? project.getTasks().stream().map(Task::getId).toList() : null);
             m.put("tags", project.getTags() != null ? project.getTags().stream().map(Tag::getId).toList() : null);
-            m.put("createdBy", project.getCreatedBy());
+            m.put("createdBy", project.getCreatedBy().getId());
             m.put("spaceId", project.getSpace().getId());
             m.put("createdAt", project.getCreatedAt());
             m.put("updatedAt", project.getUpdatedAt());

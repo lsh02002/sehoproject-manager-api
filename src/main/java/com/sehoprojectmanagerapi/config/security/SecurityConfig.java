@@ -4,6 +4,7 @@ import com.sehoprojectmanagerapi.config.filters.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -49,8 +50,14 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests(a ->
                         a
+                                .requestMatchers(HttpMethod.POST, "/user/sign-up/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/login/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/logout/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/entrypoint/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/access-denied/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/test2/**").permitAll()
                                 // 지정하지 않은 나머지는 Jwt 토큰이 상관없는 엔트리포인트입니다.
-                                .requestMatchers("/**").permitAll())
+                                .requestMatchers("/**").authenticated())
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

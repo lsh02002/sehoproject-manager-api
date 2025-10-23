@@ -106,7 +106,7 @@ public class Task extends BaseEntity implements Loggable {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskAssignee> assignees = new ArrayList<>();
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<TaskDependency> dependencies = new ArrayList<>();
 
     @Override
