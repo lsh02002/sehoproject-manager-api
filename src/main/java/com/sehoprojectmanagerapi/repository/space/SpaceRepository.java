@@ -16,7 +16,7 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
 
     @Query("""
             select distinct new com.sehoprojectmanagerapi.web.dto.workspace.TreeRow(
-                w.id, w.position,
+                w.id, w.name, w.position,
                 s.id, s.name, s.position,
                 p.id, p.name, p.position,
             

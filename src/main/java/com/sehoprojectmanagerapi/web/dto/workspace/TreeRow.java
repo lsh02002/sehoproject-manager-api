@@ -12,6 +12,7 @@ import lombok.Setter;
 public class TreeRow {
 
     private Long workspaceId;
+    private String workspaceName;
     private Integer workspacePosition;  // 추가
 
     private Long spaceId;
