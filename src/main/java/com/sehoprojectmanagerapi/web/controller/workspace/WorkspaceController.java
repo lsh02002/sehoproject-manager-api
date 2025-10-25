@@ -26,7 +26,7 @@ public class WorkspaceController {
         return ResponseEntity.ok(workspaceService.getTreeRowsForCurrentUser(customUserDetails.getId()));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<WorkspaceResponse> createWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                              @RequestBody WorkspaceRequest request) {
         return ResponseEntity.ok(workspaceService.createWorkspace(customUserDetails.getId(), request));
