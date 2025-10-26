@@ -5,6 +5,7 @@ import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
@@ -42,6 +43,7 @@ public class SprintService {
     private final TaskRepository taskRepository;
     private final ActivityLogService activityLogService;
     private final SnapshotFunc snapshotFunc;
+    private final ProjectRepository projectRepository;
 
     /**
      * 사용자 기준 가시한 스프린트 전체 조회
@@ -50,6 +52,9 @@ public class SprintService {
     public List<SprintResponse> getAllSprintsByUserIdAndProjectId(Long userId, Long projectId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
+        projectRepository.findById(projectId)
+                        .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 스프린트에 접근 권한이 없습니다.", null));
@@ -120,9 +125,12 @@ public class SprintService {
      */
     @Transactional
     public SprintResponse updateSprint(Long userId, Long sprintId, SprintRequest request) {
+        projectRepository.findById(request.projectId())
+                .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("해당 스프린트 수정 권한이 없습니다.", userId);
