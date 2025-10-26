@@ -8,6 +8,7 @@ import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneRepository;
 import com.sehoprojectmanagerapi.repository.milestone.MilestoneStatus;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
@@ -42,11 +43,15 @@ public class MilestoneService {
     private final RoleFunc roleFunc;
     private final TaskRepository taskRepository;
     private final SnapshotFunc snapshotFunc;
+    private final ProjectRepository projectRepository;
 
     @Transactional
     public List<MilestoneResponse> getAllMilestonesByUserIdAndProjectId(Long userId, Long projectId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 마일스톤 접근 권한이 없습니다.", null));
@@ -73,8 +78,11 @@ public class MilestoneService {
 
     @Transactional
     public MilestoneResponse createMilestone(Long userId, MilestoneRequest request) {
-        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
+        projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+
+        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("마일스톤 생성 권한이 없습니다.", userId);
@@ -115,6 +123,9 @@ public class MilestoneService {
 
     @Transactional
     public MilestoneResponse updateMilestone(Long userId, Long milestoneId, MilestoneRequest request) {
+        projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤 수정 권한이 없습니다.", request.projectId()));
 
