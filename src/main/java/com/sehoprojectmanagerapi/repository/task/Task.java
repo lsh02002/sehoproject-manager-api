@@ -54,6 +54,7 @@ public class Task extends BaseEntity implements Loggable {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TaskType type;
 
     @Column(nullable = false)

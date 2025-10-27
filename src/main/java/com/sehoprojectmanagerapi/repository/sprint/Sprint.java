@@ -29,13 +29,16 @@ public class Sprint extends BaseEntity implements Loggable {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @Column(length = 255)
+    @Column(length = 255, nullable = false)
     private String name;
 
     @Column(nullable = false)
     private int position = 0;
 
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
