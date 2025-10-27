@@ -110,6 +110,15 @@ public class TaskService {
     }
 
     @Transactional
+    public List<TaskResponse> getTasksByAssigneeId(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(()-> new NotFoundException("해당 사용자가 없습니다.", userId));
+
+        return taskRepository.findTasksVisibleToUser(userId)
+                .stream().map(taskMapper::toTaskResponse).toList();
+    }
+
+    @Transactional
     public TaskResponse createTask(Long userId, TaskRequest request) {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));

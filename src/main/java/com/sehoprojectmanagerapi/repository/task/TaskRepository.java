@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.repository.task;
 
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.task.taskassignee.AssigneeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Task t set t.sprint = null where t.sprint.id = :sprintId")
     void detachTasksFromSprint(@Param("sprintId") Long sprintId);
+
+    @Query("""
+    select distinct t
+    from Task t
+    join t.assignees ta
+    left join ta.expandedUsers eu
+    where (ta.assigneeType = 'USER' and ta.assigneeId = :userId)
+       or (ta.assigneeType = 'TEAM' and eu.user.id = :userId)
+""")
+    List<Task> findTasksVisibleToUser(@Param("userId") Long userId);
 }

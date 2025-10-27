@@ -33,6 +33,11 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
     }
 
+    @GetMapping("/assignee")
+    public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId()));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
