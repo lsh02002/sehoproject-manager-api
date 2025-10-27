@@ -75,6 +75,10 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse createWorkspace(Long userId, WorkspaceRequest request) {
+        if(request.name() == null || request.name().isEmpty()) {
+            throw new ConflictException("이름란이 비어있습니다.", null);
+        }
+
         if (workspaceRepository.existsBySlug(request.slug())) {
             throw new ConflictException("중복된 워크스페이스 슬러그입니다.", request.slug());
         }
@@ -134,6 +138,10 @@ public class WorkspaceService {
                 .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 수정할 수 있습니다.", null));
         if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
             throw new NotAcceptableException("OWNER 또는 ADMIN만 수정할 수 있습니다.", null);
+        }
+
+        if(request.name() == null || request.name().isEmpty()) {
+            throw new ConflictException("이름란이 비어있습니다.", null);
         }
 
         if (!workspace.getSlug().equals(request.slug()) && workspaceRepository.existsBySlug(request.slug())) {

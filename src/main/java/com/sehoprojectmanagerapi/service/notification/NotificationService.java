@@ -32,6 +32,9 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse createNotification(Long userId, NotificationRequest notificationRequest) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
+
         User receiver = userRepository.findById(notificationRequest.receiverId())
                 .orElseThrow(() -> new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
 
@@ -59,6 +62,9 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse updateNotification(Long userId, Long notificationId, NotificationRequest notificationRequest) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
+
         User receiver = userRepository.findById(notificationRequest.receiverId())
                 .orElseThrow(() -> new NotFoundException("수신자를 찾을 수 없습니다.", notificationRequest.receiverId()));
 
@@ -92,6 +98,9 @@ public class NotificationService {
     @Transactional
     public void deleteNotification(Long userId, Long notificationId) {
         try {
+            userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
+
             notificationRepository.deleteById(notificationId);
         } catch (RuntimeException e) {
             throw new NotAcceptableException("해당 알림 삭제가 잘 되지 않았습니다.", null);
