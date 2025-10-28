@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
@@ -126,7 +125,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse updateProject(Long userId, Long projectId, ProjectRequest projectRequest) {
         projectRepository.findById(projectId)
-                .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
@@ -317,7 +316,7 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long userId, Long projectId) {
         projectRepository.findById(projectId)
-                .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId));

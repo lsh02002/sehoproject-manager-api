@@ -6,7 +6,6 @@ import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
-import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
 import org.springframework.stereotype.Component;
 

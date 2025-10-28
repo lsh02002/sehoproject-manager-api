@@ -54,7 +54,7 @@ public class SprintService {
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         projectRepository.findById(projectId)
-                        .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("해당 스프린트에 접근 권한이 없습니다.", null));
@@ -126,7 +126,7 @@ public class SprintService {
     @Transactional
     public SprintResponse updateSprint(Long userId, Long sprintId, SprintRequest request) {
         projectRepository.findById(request.projectId())
-                .orElseThrow(()-> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())

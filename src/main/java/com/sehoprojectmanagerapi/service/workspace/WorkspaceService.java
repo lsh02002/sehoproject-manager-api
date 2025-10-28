@@ -75,16 +75,17 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse createWorkspace(Long userId, WorkspaceRequest request) {
-        if(request.name() == null || request.name().isEmpty()) {
+
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
+
+        if (request.name() == null || request.name().isEmpty()) {
             throw new ConflictException("이름란이 비어있습니다.", null);
         }
 
         if (workspaceRepository.existsBySlug(request.slug())) {
             throw new ConflictException("중복된 워크스페이스 슬러그입니다.", request.slug());
         }
-
-        User creator = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
 
         Workspace workspace = Workspace.builder()
                 .name(request.name())
@@ -140,7 +141,7 @@ public class WorkspaceService {
             throw new NotAcceptableException("OWNER 또는 ADMIN만 수정할 수 있습니다.", null);
         }
 
-        if(request.name() == null || request.name().isEmpty()) {
+        if (request.name() == null || request.name().isEmpty()) {
             throw new ConflictException("이름란이 비어있습니다.", null);
         }
 
