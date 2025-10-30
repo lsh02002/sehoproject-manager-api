@@ -419,10 +419,10 @@ public class TaskService {
         //  - assigneeType, assigneeId 둘 다 null이면 변경 없음
         //  - assigneeType != null && assigneeId == null 이면 '할당 해제'
         //  - 둘 다 있으면 타입 검증 + 동일 프로젝트 정책 검증 후 재할당
+        taskAssigneeUserRepository.deleteByTaskId(task.getId());
+        taskAssigneeRepository.deleteByTaskId(task.getId());
 
         if (request.assignees().isEmpty()) {
-            taskAssigneeUserRepository.deleteByTaskId(task.getId());
-            taskAssigneeRepository.deleteByTaskId(task.getId());
             task.getAssignees().clear();
         }
 
