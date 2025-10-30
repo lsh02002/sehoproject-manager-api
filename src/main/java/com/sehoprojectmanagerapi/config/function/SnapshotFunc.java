@@ -6,6 +6,7 @@ import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
+import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
 import org.springframework.stereotype.Component;
 
@@ -126,7 +127,7 @@ public class SnapshotFunc {
             m.put("sprintId", task.getSprint() != null ? task.getSprint().getId() : null);
             m.put("milestoneId", task.getMilestone() != null ? task.getMilestone().getId() : null);
             m.put("tags", task.getTags() != null ? task.getTags().stream().map(Tag::getId).toList() : null);
-//            m.put("assignees", task.getAssignees() != null ? task.getAssignees().stream().map(TaskAssignee::getId).toList() : null);
+            m.put("assignees", task.getAssignees() != null ? task.getAssignees().stream().map(TaskAssignee::getId).toList() : null);
             m.put("dependencies", task.getDependencies() != null ? task.getDependencies().stream().map(TaskDependency::getId).toList() : null);
             m.put("logTargetType", task.logTargetType());
             m.put("logTargetId", task.logTargetId());

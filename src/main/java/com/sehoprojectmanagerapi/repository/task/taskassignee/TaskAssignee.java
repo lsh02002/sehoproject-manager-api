@@ -18,6 +18,7 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
 public class TaskAssignee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
