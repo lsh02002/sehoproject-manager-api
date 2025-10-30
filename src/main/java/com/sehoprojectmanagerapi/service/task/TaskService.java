@@ -421,10 +421,7 @@ public class TaskService {
         //  - 둘 다 있으면 타입 검증 + 동일 프로젝트 정책 검증 후 재할당
         taskAssigneeUserRepository.deleteByTaskId(task.getId());
         taskAssigneeRepository.deleteByTaskId(task.getId());
-
-        if (request.assignees().isEmpty()) {
-            task.getAssignees().clear();
-        }
+        task.getAssignees().clear();
 
         for (AssigneeRequest assigneeRequest : request.assignees()) {
             if (assigneeRequest.getType() != null) {
