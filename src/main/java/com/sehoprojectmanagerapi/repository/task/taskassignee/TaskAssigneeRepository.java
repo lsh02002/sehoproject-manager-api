@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface TaskAssigneeRepository extends JpaRepository<TaskAssignee, String> {
     void deleteByTaskId(Long taskId);
 
@@ -19,4 +21,8 @@ public interface TaskAssigneeRepository extends JpaRepository<TaskAssignee, Stri
     void updateDynamicFlagIfTeam(Long taskId, boolean dynamic);
 
     boolean existsByTaskIdAndAssigneeTypeAndAssigneeId(Long taskId, AssigneeType assigneeType, Long assigneeId);
+
+    List<TaskAssignee> findByTaskId(Long taskId);
+
+    void deleteByTaskIdAndAssigneeTypeAndAssigneeId(Long taskId, AssigneeType assigneeType, Long assigneeId);
 }

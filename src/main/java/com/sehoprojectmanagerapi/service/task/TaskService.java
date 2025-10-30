@@ -43,6 +43,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -419,68 +420,94 @@ public class TaskService {
         //  - assigneeType, assigneeId 둘 다 null이면 변경 없음
         //  - assigneeType != null && assigneeId == null 이면 '할당 해제'
         //  - 둘 다 있으면 타입 검증 + 동일 프로젝트 정책 검증 후 재할당
-        taskAssigneeUserRepository.deleteByTaskId(task.getId());
-        taskAssigneeRepository.deleteByTaskId(task.getId());
-        task.getAssignees().clear();
+        if (request.assignees().isEmpty()) {
+            taskAssigneeUserRepository.deleteByTaskId(task.getId());
+            task.getAssignees().clear();
+        } else {
+            List<TaskAssignee> taskAssignees = taskAssigneeRepository.findByTaskId(task.getId());
 
-        for (AssigneeRequest assigneeRequest : request.assignees()) {
-            if (assigneeRequest.getType() != null) {
-                AssigneeType type;
-                try {
-                    type = AssigneeType.valueOf(assigneeRequest.getType());
-                } catch (IllegalArgumentException e) {
-                    throw new BadRequestException("유효하지 않은 assigneeType입니다.", assigneeRequest.getType());
-                }
+            // Build a set of valid (type, id) pairs from the request
+            Set<String> validPairs = request.assignees().stream()
+                    .map(a -> a.getType() + "-" + a.getAssigneeId())
+                    .collect(Collectors.toSet());
 
-                TaskAssignee assigneeSource;
-                switch (type) {
-                    case USER -> {
-                        User assignee = userRepository.findById(assigneeRequest.getAssigneeId())
-                                .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
-                        if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
-                            throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
-                        }
-
-                        if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.USER, assignee.getId())) {
-                            assigneeSource = taskAssigneeRepository.save(
-                                    TaskAssignee.forUser(task, assignee, updater, OffsetDateTime.now())
-                            );
-                            if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
-                                taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
-                            }
+            // Remove old assignees not in the request
+            for (TaskAssignee ta : taskAssignees) {
+                String pair = ta.getAssigneeType() + "-" + ta.getAssigneeId();
+                if (!validPairs.contains(pair)) {
+                    if (ta.getAssigneeType().equals(AssigneeType.USER)) {
+                        taskAssigneeUserRepository.deleteByTaskIdAndUserId(task.getId(), ta.getAssigneeId());
+                    } else if (ta.getAssigneeType().equals(AssigneeType.TEAM)) {
+                        List<User> members = teamMemberRepository.findActiveUsersByTeamId(ta.getId());
+                        for (User u : members) {
+                            taskAssigneeUserRepository.deleteByTaskIdAndUserId(task.getId(), u.getId());
                         }
                     }
-                    case TEAM -> {
-                        Team team = teamRepository.findById(assigneeRequest.getAssigneeId())
-                                .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
+                }
 
-                        boolean dynamic = Boolean.TRUE.equals(assigneeRequest.getDynamicAssign());
-                        boolean allMembersInProject =
-                                teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
-                        if (!allMembersInProject) {
-                            throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                task.getAssignees().remove(ta);
+            }
+
+            for (AssigneeRequest assigneeRequest : request.assignees()) {
+
+                if (assigneeRequest.getType() != null) {
+                    AssigneeType type;
+                    try {
+                        type = AssigneeType.valueOf(assigneeRequest.getType());
+                    } catch (IllegalArgumentException e) {
+                        throw new BadRequestException("유효하지 않은 assigneeType입니다.", assigneeRequest.getType());
+                    }
+
+                    TaskAssignee assigneeSource;
+                    switch (type) {
+                        case USER -> {
+                            User assignee = userRepository.findById(assigneeRequest.getAssigneeId())
+                                    .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
+                            if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
+                                throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
+                            }
+
+                            if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.USER, assignee.getId())) {
+                                assigneeSource = taskAssigneeRepository.save(
+                                        TaskAssignee.forUser(task, assignee, updater, OffsetDateTime.now())
+                                );
+                                if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
+                                    taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
+                                }
+                            }
                         }
+                        case TEAM -> {
+                            Team team = teamRepository.findById(assigneeRequest.getAssigneeId())
+                                    .orElseThrow(() -> new NotFoundException("담당자 팀을 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
 
-                        if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.TEAM, team.getId())) {
-                            assigneeSource = taskAssigneeRepository.save(
-                                    TaskAssignee.forTeam(task, team, updater, dynamic, OffsetDateTime.now())
-                            );
+                            boolean dynamic = Boolean.TRUE.equals(assigneeRequest.getDynamicAssign());
+                            boolean allMembersInProject =
+                                    teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
+                            if (!allMembersInProject) {
+                                throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                            }
 
-                            List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
-                            for (User u : members) {
-                                if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
-                                        !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
-                                    taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                            if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.TEAM, team.getId())) {
+                                assigneeSource = taskAssigneeRepository.save(
+                                        TaskAssignee.forTeam(task, team, updater, dynamic, OffsetDateTime.now())
+                                );
+
+                                List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
+                                for (User u : members) {
+                                    if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
+                                            !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
+                                        taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                                    }
                                 }
                             }
                         }
                     }
+                } else if (Boolean.TRUE.equals(assigneeRequest.getDynamicAssign())) {
+                    // 타입 변경은 없고, 팀 담당 상태에서 dynamic 플래그만 토글하고 싶은 경우 지원
+                    taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), true);
+                } else if (Boolean.FALSE.equals(assigneeRequest.getDynamicAssign())) {
+                    taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), false);
                 }
-            } else if (Boolean.TRUE.equals(assigneeRequest.getDynamicAssign())) {
-                // 타입 변경은 없고, 팀 담당 상태에서 dynamic 플래그만 토글하고 싶은 경우 지원
-                taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), true);
-            } else if (Boolean.FALSE.equals(assigneeRequest.getDynamicAssign())) {
-                taskAssigneeRepository.updateDynamicFlagIfTeam(task.getId(), false);
             }
         }
         // 6) (선택) 키 재계산은 일반적으로 불필요. 필요 시 주석 해제
