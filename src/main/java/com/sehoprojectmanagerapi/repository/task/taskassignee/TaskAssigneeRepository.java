@@ -17,4 +17,6 @@ public interface TaskAssigneeRepository extends JpaRepository<TaskAssignee, Stri
                    and ta.assigneeType = 'TEAM'
             """)
     void updateDynamicFlagIfTeam(Long taskId, boolean dynamic);
+
+    boolean existsByTaskIdAndAssigneeTypeAndAssigneeId(Long taskId, AssigneeType assigneeType, Long assigneeId);
 }

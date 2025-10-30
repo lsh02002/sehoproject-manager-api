@@ -419,10 +419,10 @@ public class TaskService {
         //  - assigneeType, assigneeId 둘 다 null이면 변경 없음
         //  - assigneeType != null && assigneeId == null 이면 '할당 해제'
         //  - 둘 다 있으면 타입 검증 + 동일 프로젝트 정책 검증 후 재할당
-        taskAssigneeUserRepository.deleteByTaskId(task.getId());
-        taskAssigneeRepository.deleteByTaskId(task.getId());
 
         if (request.assignees().isEmpty()) {
+            taskAssigneeUserRepository.deleteByTaskId(task.getId());
+            taskAssigneeRepository.deleteByTaskId(task.getId());
             task.getAssignees().clear();
         }
 
@@ -443,11 +443,14 @@ public class TaskService {
                         if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
                             throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                         }
-                        assigneeSource = taskAssigneeRepository.save(
-                                TaskAssignee.forUser(task, assignee, updater, OffsetDateTime.now())
-                        );
-                        if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
-                            taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
+
+                        if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.USER, assignee.getId())) {
+                            assigneeSource = taskAssigneeRepository.save(
+                                    TaskAssignee.forUser(task, assignee, updater, OffsetDateTime.now())
+                            );
+                            if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
+                                taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
+                            }
                         }
                     }
                     case TEAM -> {
@@ -461,15 +464,17 @@ public class TaskService {
                             throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
                         }
 
-                        assigneeSource = taskAssigneeRepository.save(
-                                TaskAssignee.forTeam(task, team, updater, dynamic, OffsetDateTime.now())
-                        );
+                        if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), AssigneeType.TEAM, team.getId())) {
+                            assigneeSource = taskAssigneeRepository.save(
+                                    TaskAssignee.forTeam(task, team, updater, dynamic, OffsetDateTime.now())
+                            );
 
-                        List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
-                        for (User u : members) {
-                            if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
-                                    !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
-                                taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                            List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
+                            for (User u : members) {
+                                if (projectMemberRepository.existsByUserIdAndProjectId(u.getId(), project.getId()) &&
+                                        !taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), u.getId())) {
+                                    taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
+                                }
                             }
                         }
                     }
