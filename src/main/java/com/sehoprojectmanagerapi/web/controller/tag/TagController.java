@@ -42,7 +42,7 @@ public class TagController {
      */
     @GetMapping("/{tagId}")
     public ResponseEntity<TagResponse> getTag(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long tagId) {
-        return ResponseEntity.ok(tagService.getTagByUserIdAndProjectIdAndId(tagId, customUserDetails.getId(), tagId));
+        return ResponseEntity.ok(tagService.getTagByUserIdAndId(customUserDetails.getId(), tagId));
     }
 
     /**

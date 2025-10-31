@@ -21,17 +21,16 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByProjectIdAndId(@Param("projectId") Long projectId, @Param("tagId") Long tagId);
 
     @Query("""
-                select t
-                  from Tag t
-                  join t.project p
-                  join ProjectMember pm on pm.project.id = p.id
-                 where pm.user.id = :userId
-                   and p.id = :projectId
-                   and t.id = :tagId
-            """)
-    Optional<Tag> findByUserIdAndProjectIdAndId(@Param("userId") Long userId,
-                                                @Param("projectId") Long projectId,
-                                                @Param("tagId") Long tagId);
+    select t
+      from Tag t
+      join t.project p
+      join ProjectMember pm on pm.project.id = p.id
+     where pm.user.id = :userId
+       and t.id = :tagId
+""")
+    Optional<Tag> findByUserIdAndId(@Param("userId") Long userId,
+                                    @Param("tagId") Long tagId);
+
 
     Optional<Tag> findByNameAndProjectId(String name, Long projectId);
 

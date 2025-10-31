@@ -55,8 +55,8 @@ public class TagService {
     }
 
     @Transactional
-    public TagResponse getTagByUserIdAndProjectIdAndId(Long userId, Long projectId, Long tagId) {
-        return tagRepository.findByUserIdAndProjectIdAndId(userId, projectId, tagId)
+    public TagResponse getTagByUserIdAndId(Long userId, Long tagId) {
+        return tagRepository.findByUserIdAndId(userId, tagId)
                 .map(tagMapper::toResponse)
                 .orElseThrow(() -> new NotFoundException("해당 태그를 찾지 못했습니다.", tagId));
     }
