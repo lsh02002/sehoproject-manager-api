@@ -438,7 +438,7 @@ public class TaskService {
                     if (ta.getAssigneeType().equals(AssigneeType.USER)) {
                         taskAssigneeUserRepository.deleteByTaskIdAndUserId(task.getId(), ta.getAssigneeId());
                     } else if (ta.getAssigneeType().equals(AssigneeType.TEAM)) {
-                        List<User> members = teamMemberRepository.findActiveUsersByTeamId(ta.getId());
+                        List<User> members = teamMemberRepository.findActiveUsersByTeamId(ta.getAssigneeId());
                         for (User u : members) {
                             taskAssigneeUserRepository.deleteByTaskIdAndUserId(task.getId(), u.getId());
                         }
