@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.repository.task.taskassignee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
@@ -12,14 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "task_assignees")
+@Table(name = "task_assignees", uniqueConstraints = @UniqueConstraint(columnNames = {"task_id", "assignee_type", "assignee_id"}))
 @Getter
 @Setter
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
-public class TaskAssignee {
+public class TaskAssignee extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,7 +39,7 @@ public class TaskAssignee {
     private User createdBy;
 
     @Column(name = "is_dynamic", nullable = false)
-    private boolean dynamic; // 팀 할당 시 멤버 변동 자동 동기화 여부
+    private boolean dynamic = false; // 팀 할당 시 멤버 변동 자동 동기화 여부
 
     @OneToMany(mappedBy = "sourceAssignee", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
