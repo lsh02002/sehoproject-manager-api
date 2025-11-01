@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.controller.membership;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.membership.MembershipService;
+import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddMemberRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.BatchAddMembersRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
@@ -97,5 +98,10 @@ public class MembershipController {
             }
         }
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/workspaces/{workspaceId}/members")
+    public ResponseEntity<List<UserInfoResponse>> getWorkspaceMembers(@PathVariable Long workspaceId) {
+        return ResponseEntity.ok(membershipService.getWorkspaceMembers(workspaceId));
     }
 }

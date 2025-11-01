@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.controller.workspace;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.workspace.WorkspaceService;
+import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.TreeRow;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;

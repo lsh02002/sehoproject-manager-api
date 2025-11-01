@@ -25,11 +25,13 @@ import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
+import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.TreeRow;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.WorkspaceResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.invite.WorkspaceInviteResponse;
+import com.sehoprojectmanagerapi.web.mapper.UserMapper;
 import com.sehoprojectmanagerapi.web.mapper.WorkspaceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -58,6 +60,7 @@ public class WorkspaceService {
     private final ProjectService projectService;
     private final TaskService taskService;
     private final RoleFunc roleFunc;
+    private final UserMapper userMapper;
 
     public List<TreeRow> getTreeRowsForCurrentUser(Long userId) {
 
