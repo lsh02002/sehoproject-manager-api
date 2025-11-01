@@ -45,6 +45,7 @@ public class MembershipService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final EntityManager em;
 
     @Transactional
     public MemberResponse addSpaceMember(Long granterUserId,
@@ -62,7 +63,14 @@ public class MembershipService {
         User target = resolveTargetUserInWorkspace(workspaceId, req.email());
 
         if (spaceMemberRepository.existsBySpaceIdAndUserId(space.getId(), target.getId())) {
-            throw new NotAcceptableException("이미 멤버인 스페이스 사용자입니다.", target.getId());
+            // 이미 멤버면 idempotent 처리: 그냥 성공처럼 응답하거나 409 반환(정책 선택)
+            SpaceMember existing = em.createQuery("""
+                                select sm from SpaceMember sm
+                                where sm.space.id = :sid and sm.user.id = :uid
+                            """, SpaceMember.class)
+                    .setParameter("sid", space.getId()).setParameter("uid", target.getId())
+                    .getSingleResult();
+            return new MemberResponse(existing.getId(), target.getId(), space.getId(), "SPACE", existing.getRole().name(), null);
         }
 
         SpaceMember sm = new SpaceMember();
@@ -90,13 +98,19 @@ public class MembershipService {
         User target = resolveTargetUserInWorkspace(workspaceId, req.email());
 
         if (projectMemberRepository.existsByUserIdAndProjectId(target.getId(), projectId)) {
-            throw new NotAcceptableException("이미 멤버인 프로젝트 사용자입니다.", target.getId());
+            ProjectMember existing = em.createQuery("""
+                                select pm from ProjectMember pm
+                                where pm.project.id = :pid and pm.user.id = :uid
+                            """, ProjectMember.class)
+                    .setParameter("pid", projectId).setParameter("uid", target.getId())
+                    .getSingleResult();
+            return new MemberResponse(existing.getId().getProjectId(), target.getId(), projectId, "PROJECT", null, existing.getRole().name());
         }
 
         ProjectMember pm = new ProjectMember();
         pm.setProject(project);
         pm.setUser(target);
-        pm.setRole(RoleProject.valueOf(req.requestRole())); // 프로젝트 역할 Enum 별도라면 바꾸세요
+        pm.setRole(RoleProject.valueOf(req.roleProject())); // 프로젝트 역할 Enum 별도라면 바꾸세요
         pm.setJoinedAt(OffsetDateTime.now());
 //        pm.setGrantedBy(em.getReference(User.class, granterUserId));
 //        pm.setNote(req.note());
