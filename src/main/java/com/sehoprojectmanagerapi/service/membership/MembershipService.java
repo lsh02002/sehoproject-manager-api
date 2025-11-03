@@ -126,6 +126,13 @@ public class MembershipService {
                 .map(userMapper::toResponse).toList();
     }
 
+    @Transactional
+    public List<UserInfoResponse> getProjectMembers(Long projectId) {
+        return projectMemberRepository.findByProjectId(projectId)
+                .stream().map(ProjectMember::getUser)
+                .map(userMapper::toResponse).toList();
+    }
+
     private void ensureGranterCanGrant(Long granterUserId, Long workspaceId) {
         WorkspaceRole role = workspaceMemberRepository.findRole(workspaceId, granterUserId)
                 .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버가 아님", null));

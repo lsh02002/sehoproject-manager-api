@@ -104,4 +104,9 @@ public class MembershipController {
     public ResponseEntity<List<UserInfoResponse>> getWorkspaceMembers(@PathVariable Long workspaceId) {
         return ResponseEntity.ok(membershipService.getWorkspaceMembers(workspaceId));
     }
+
+    @GetMapping("/projects/{projectId}/members")
+    public ResponseEntity<List<UserInfoResponse>> getProjectMembers(@PathVariable Long projectId) {
+        return ResponseEntity.ok(membershipService.getProjectMembers(projectId));
+    }
 }
