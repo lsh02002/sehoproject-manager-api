@@ -3,6 +3,7 @@ package com.sehoprojectmanagerapi.config.function;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
@@ -10,8 +11,11 @@ import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
 @Component
 public class SnapshotFunc {
@@ -54,6 +58,15 @@ public class SnapshotFunc {
             m.put("logTargetType", project.logTargetType());
             m.put("logTargetId", project.logTargetId());
             m.put("logMessage", project.logMessage());
+            return m;
+        }
+
+        if(obj instanceof ProjectMember projectMember) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", projectMember.getId());
+            m.put("projectId", projectMember.getProject().getId());
+            m.put("role", projectMember.getRole());
+            m.put("userId", projectMember.getUser().getId());
             return m;
         }
 

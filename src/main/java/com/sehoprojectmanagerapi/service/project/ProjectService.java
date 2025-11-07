@@ -117,6 +117,10 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
 
+        Object aftermember = snapshotFunc.snapshot(savedProject);
+
+        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, projectMember.logTargetId(), projectMember.logMessage(), user, project.logProject(), null, aftermember);
+
         activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject(), null, afterproject);
 
         return projectMapper.toProjectResponse(savedProject);

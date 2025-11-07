@@ -1,5 +1,8 @@
 package com.sehoprojectmanagerapi.service.membership;
 
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
@@ -15,8 +18,8 @@ import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
@@ -46,6 +49,8 @@ public class MembershipService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final EntityManager em;
+    private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public MemberResponse addSpaceMember(Long granterUserId,
@@ -104,7 +109,7 @@ public class MembershipService {
                             """, ProjectMember.class)
                     .setParameter("pid", projectId).setParameter("uid", target.getId())
                     .getSingleResult();
-            return new MemberResponse(existing.getId().getProjectId(), target.getId(), projectId, "PROJECT", null, existing.getRole().name());
+            return new MemberResponse(existing.getId(), target.getId(), projectId, "PROJECT", null, existing.getRole().name());
         }
 
         ProjectMember pm = new ProjectMember();
@@ -114,9 +119,13 @@ public class MembershipService {
         pm.setJoinedAt(OffsetDateTime.now());
 //        pm.setGrantedBy(em.getReference(User.class, granterUserId));
 //        pm.setNote(req.note());
+
+        Object aftermember = snapshotFunc.snapshot(pm);
+        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.logTargetId(), pm.logMessage(), target, project, null, aftermember);
+
         projectMemberRepository.save(pm);
 
-        return new MemberResponse(pm.getId().getProjectId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
+        return new MemberResponse(pm.getId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
     }
 
     @Transactional
