@@ -474,6 +474,7 @@ public class TaskService {
                                 if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
                                     taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
                                 }
+                                task.getAssignees().add(assigneeSource);
                             }
                         }
                         case TEAM -> {
@@ -499,6 +500,7 @@ public class TaskService {
                                         taskAssigneeUserRepository.save(new TaskAssigneeUser(task, u, assigneeSource));
                                     }
                                 }
+                                task.getAssignees().add(assigneeSource);
                             }
                         }
                     }
