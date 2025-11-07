@@ -11,31 +11,35 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "team_members")
+@Table(
+        name = "team_member",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"team_id", "user_id"})
+)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamMember {
-    @EmbeddedId
-    private TeamMemberId id = new TeamMemberId();
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  // 단일 기본키
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("teamId")
     @JoinColumn(name = "team_id", nullable = false)
-    private Team team;
+    private Team team;  // 팀
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user;  // 사용자
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private RoleTeam role = RoleTeam.MEMBER;
+    private RoleTeam role = RoleTeam.MEMBER;  // 팀 내 역할
 
-    @Column(name = "active", nullable = false)
-    private boolean active = true;
+    @Column(nullable = false)
+    private boolean active = true;  // 활동 여부
 
-    private OffsetDateTime joinedAt;
+    @Column(name = "joined_at")
+    private OffsetDateTime joinedAt;  // 가입 시각
 }
