@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(
-        name = "team_member",
+        name = "team_members",
         uniqueConstraints = @UniqueConstraint(columnNames = {"team_id", "user_id"})
 )
 @Getter
@@ -20,7 +20,6 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamMember {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;  // 단일 기본키
