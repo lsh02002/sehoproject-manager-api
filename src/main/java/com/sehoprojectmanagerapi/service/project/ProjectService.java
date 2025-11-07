@@ -285,8 +285,6 @@ public class ProjectService {
         }
         // ===================== 태그 동기화 끝 =====================
 
-        // 생성된 태그의 ID 보장을 위해 즉시 flush
-        Project savedProject = projectRepository.save(project);
         // 또는: projectRepository.save(project); entityManager.flush();
 
         // 이제 생성(CREATE) 로그 기록 (ID가 존재)
@@ -300,16 +298,19 @@ public class ProjectService {
             );
         }
 
-        Object afterproject = snapshotFunc.snapshot(savedProject);
+        Object afterproject = snapshotFunc.snapshot(project);
 
         activityLogService.log(
                 ActivityEntityType.PROJECT, ActivityAction.UPDATE,
-                savedProject.logTargetId(), savedProject.logMessage(),
-                projectMember.getUser(), savedProject.logProject(),
+                project.logTargetId(), project.logMessage(),
+                projectMember.getUser(), project.logProject(),
                 beforeproject, afterproject
         );
 
-        return projectMapper.toProjectResponse(savedProject);
+        // 생성된 태그의 ID 보장을 위해 즉시 flush
+        projectRepository.save(project);
+
+        return projectMapper.toProjectResponse(project);
     }
 
 

@@ -207,11 +207,11 @@ public class SprintService {
         sprint.setEndDate(request.endDate());
         sprint.setState(SprintState.valueOf(request.state()));
 
-        Sprint savedsprint = sprintRepository.save(sprint);
+        Object aftersprint = snapshotFunc.snapshot(sprint);
 
-        Object aftersprint = snapshotFunc.snapshot(savedsprint);
+        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, sprint.logTargetId(), sprint.logMessage(), projectMember.getUser(), sprint.logProject(), beforesprint, aftersprint);
 
-        activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.UPDATE, savedsprint.logTargetId(), savedsprint.logMessage(), projectMember.getUser(), savedsprint.logProject(), beforesprint, aftersprint);
+        sprintRepository.save(sprint);
 
         return sprintMapper.toResponse(sprint);
     }

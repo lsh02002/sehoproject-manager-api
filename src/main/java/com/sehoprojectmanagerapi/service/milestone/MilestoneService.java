@@ -211,11 +211,11 @@ public class MilestoneService {
         milestone.setDueDate(request.dueDate());
         milestone.setStatus(MilestoneStatus.valueOf(request.status()));
 
-        Milestone savedmilestone = milestoneRepository.save(milestone);
+        Object aftermilestone = snapshotFunc.snapshot(milestone);
 
-        Object aftermilestone = snapshotFunc.snapshot(savedmilestone);
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), beforemilestone, aftermilestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), beforemilestone, aftermilestone);
+        milestoneRepository.save(milestone);
 
         return milestoneMapper.toResponse(milestone);
     }

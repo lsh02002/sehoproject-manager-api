@@ -518,12 +518,11 @@ public class TaskService {
 //        task.setUpdatedBy(updater);
         task.setUpdatedAt(OffsetDateTime.now().toLocalDateTime());
 
+        Object aftertask = snapshotFunc.snapshot(task);
+
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), beforetask, aftertask);
         // 8) 저장 & 응답
-        Task savedtask = taskRepository.save(task);
-
-        Object aftertask = snapshotFunc.snapshot(savedtask);
-
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), beforetask, aftertask);
+        taskRepository.save(task);
 
         return taskMapper.toTaskResponse(task);
     }

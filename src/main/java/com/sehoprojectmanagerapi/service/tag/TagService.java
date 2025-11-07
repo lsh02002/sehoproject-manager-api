@@ -120,11 +120,11 @@ public class TagService {
             tag.setDescription(request.description());
         }
 
-        Tag savedtag = tagRepository.save(tag);
+        Object aftertage = snapshotFunc.snapshot(tag);
 
-        Object aftertage = snapshotFunc.snapshot(savedtag);
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject(), beforetag, aftertage);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), beforetag, aftertage);
+        tagRepository.save(tag);
 
         return tagMapper.toResponse(tag);
     }

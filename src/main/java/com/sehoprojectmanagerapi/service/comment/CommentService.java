@@ -97,13 +97,13 @@ public class CommentService {
             comment.setBody(request.content());
         }
 
-        Comment savedComment = commentRepository.save(comment);
+        Object aftercomment = snapshotFunc.snapshot(comment);
 
-        Object aftercomment = snapshotFunc.snapshot(savedComment);
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), beforecomment, aftercomment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, savedComment.logTargetId(), savedComment.logMessage(), user, savedComment.logProject(), beforecomment, aftercomment);
+        commentRepository.save(comment);
 
-        return commentMapper.toResponse(savedComment);
+        return commentMapper.toResponse(comment);
     }
 
     @Transactional
