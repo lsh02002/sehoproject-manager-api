@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class ActivityLogService {
@@ -20,7 +22,7 @@ public class ActivityLogService {
     public void log(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project, Object beforeJson, Object afterJson) {
         ActivityLog log = new ActivityLog(type, action, targetId, message, actor, project, beforeJson, afterJson);
 
-        if(beforeJson == afterJson) {
+        if(Objects.equals(beforeJson, afterJson)) {
             throw new NotAcceptableException("변경된 사항이 없습니다.", null);
         }
 
