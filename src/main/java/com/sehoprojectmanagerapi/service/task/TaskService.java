@@ -461,8 +461,8 @@ public class TaskService {
                     TaskAssignee assigneeSource;
                     switch (type) {
                         case USER -> {
-                            User assignee = userRepository.findById(assigneeRequest.getAssigneeId())
-                                    .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getAssigneeId()));
+                            User assignee = userRepository.findByEmail(assigneeRequest.getEmail())
+                                    .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getEmail()));
                             if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
                                 throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                             }
