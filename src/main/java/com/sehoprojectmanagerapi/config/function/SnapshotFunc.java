@@ -30,7 +30,6 @@ public class SnapshotFunc {
             m.put("projectId", comment.getTask().getProject().getId());
             m.put("authorId", comment.getAuthor() != null ? comment.getAuthor().getId() : null);
             m.put("createdAt", comment.getCreatedAt());
-            m.put("updatedAt", comment.getUpdatedAt());
             m.put("body", comment.getBody() != null ? comment.getBody() : null);
             m.put("logTargetType", comment.logTargetType());
             m.put("logTargetId", comment.logTargetId());
@@ -54,7 +53,6 @@ public class SnapshotFunc {
             m.put("createdBy", project.getCreatedBy().getId());
             m.put("spaceId", project.getSpace().getId());
             m.put("createdAt", project.getCreatedAt());
-            m.put("updatedAt", project.getUpdatedAt());
             m.put("logTargetType", project.logTargetType());
             m.put("logTargetId", project.logTargetId());
             m.put("logMessage", project.logMessage());
@@ -82,7 +80,6 @@ public class SnapshotFunc {
             m.put("dueDate", milestone.getDueDate());
             m.put("tasks", milestone.getTasks() != null ? milestone.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", milestone.getCreatedAt());
-            m.put("updatedAt", milestone.getUpdatedAt());
             m.put("logTargetType", milestone.logTargetType());
             m.put("logTargetId", milestone.logTargetId());
             m.put("logMessage", milestone.logMessage());
@@ -100,7 +97,6 @@ public class SnapshotFunc {
             m.put("state", sprint.getState());
             m.put("tasks", sprint.getTasks() != null ? sprint.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", sprint.getCreatedAt());
-            m.put("updatedAt", sprint.getUpdatedAt());
             m.put("logTargetType", sprint.logTargetType());
             m.put("logTargetId", sprint.logTargetId());
             m.put("logMessage", sprint.logMessage());
@@ -138,7 +134,6 @@ public class SnapshotFunc {
             m.put("closedById", task.getClosedBy() != null ? task.getClosedBy().getId() : null);
             m.put("closedAt", task.getClosedAt());
             m.put("createdAt", task.getCreatedAt());
-            m.put("updatedAt", task.getUpdatedAt());
             m.put("sprintId", task.getSprint() != null ? task.getSprint().getId() : null);
             m.put("milestoneId", task.getMilestone() != null ? task.getMilestone().getId() : null);
             m.put("tags", task.getTags() != null ? task.getTags().stream().map(Tag::getId).toList() : null);
