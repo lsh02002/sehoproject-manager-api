@@ -137,7 +137,16 @@ public class SnapshotFunc {
             m.put("sprintId", task.getSprint() != null ? task.getSprint().getId() : null);
             m.put("milestoneId", task.getMilestone() != null ? task.getMilestone().getId() : null);
             m.put("tags", task.getTags() != null ? task.getTags().stream().map(Tag::getId).toList() : null);
-            m.put("assignees", task.getAssignees() != null ? task.getAssignees().stream().map(TaskAssignee::getAssigneeId).toList() : null);
+            m.put("assignees",
+                    task.getAssignees() != null
+                            ? task.getAssignees().stream()
+                            .map(a -> Map.of(
+                                    "assigneeId", a.getAssigneeId(),
+                                    "assigneeType", a.getAssigneeType()
+                            ))
+                            .toList()
+                            : null
+            );
             m.put("dependencies", task.getDependencies() != null ? task.getDependencies().stream().map(TaskDependency::getId).toList() : null);
             m.put("logTargetType", task.logTargetType());
             m.put("logTargetId", task.logTargetId());
