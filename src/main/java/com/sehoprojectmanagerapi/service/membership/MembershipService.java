@@ -121,9 +121,10 @@ public class MembershipService {
 //        pm.setNote(req.note());
 
         Object aftermember = snapshotFunc.snapshot(pm);
-        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.logTargetId(), pm.logMessage(), target, project, null, aftermember);
 
-        projectMemberRepository.save(pm);
+        pm = projectMemberRepository.save(pm);
+
+        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.logTargetId(), pm.logMessage(), target, project, null, aftermember);
 
         return new MemberResponse(pm.getId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
     }
