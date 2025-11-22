@@ -33,7 +33,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
     }
 
-    @GetMapping("/assignee/{workspaceId}")
+    @GetMapping("/assignee/workspaces/{workspaceId}")
     public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
         return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId(), workspaceId));
     }
