@@ -73,6 +73,7 @@ public class UserService {
         SignupResponse signupResponse = SignupResponse.builder()
                 .userId(user.getId())
                 .name(user.getName())
+                .workspaceId(user.getWorkspaceId())
                 .build();
 
         return new UserResponse(HttpStatus.OK.value(), user.getName() + "님 회원 가입 완료 되었습니다.", signupResponse);
@@ -99,6 +100,7 @@ public class UserService {
         SignupResponse signupResponse = SignupResponse.builder()
                 .userId(user.getId())
                 .name(user.getName())
+                .workspaceId(user.getWorkspaceId())
                 .build();
 
         String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
@@ -143,5 +145,15 @@ public class UserService {
 
         return userRepository.findAll()
                 .stream().map(userMapper::toAssigneeRequest).toList();
+    }
+
+    @Transactional
+    public Long setWorkspaceId(Long userId, Long workspaceId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));
+
+        user.setWorkspaceId(workspaceId);
+
+        return user.getWorkspaceId();
     }
 }

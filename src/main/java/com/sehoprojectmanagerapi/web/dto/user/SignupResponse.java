@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record SignupResponse(
         Long userId,
-        String name
+        String name,
+        Long workspaceId
 ) {
 }

@@ -72,7 +72,7 @@ public class SnapshotFunc {
         if (obj instanceof Milestone milestone) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", milestone.getId());
-            m.put("projectId", milestone.logProject().getId());
+            m.put("projectId", milestone.getProject().getId());
             m.put("name", milestone.getName());
             m.put("position", milestone.getPosition());
             m.put("description", milestone.getDescription());

@@ -40,4 +40,7 @@ public class User extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "workspace_id")
+    private Long workspaceId;
 }

@@ -62,14 +62,11 @@ public class WorkspaceService {
     private final RoleFunc roleFunc;
     private final UserMapper userMapper;
 
-    public List<TreeRow> getTreeRowsForCurrentUser(Long userId) {
-
-        // 1️⃣ 사용자가 속한 workspace id 목록 조회
-        List<Long> workspaceIds = workspaceMemberRepository.findWorkspaceIdsByUserId(userId);
+    public List<TreeRow> getTreeRowsForCurrentUser(Long userId, Long workspaceId) {
 
         // 2️⃣ 접근 가능한 항목만 반환
         return spaceRepository.findTreeRowsVisibleToUser(
-                workspaceIds,
+                workspaceId,
                 userId,
                 Role.rolesGrantingSpaceVisibility(),
                 Role.rolesGrantingProjectVisibility()
@@ -474,5 +471,12 @@ public class WorkspaceService {
                 .build();
 
         taskService.createTask(userId, taskRequest2);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));
+
+        if(user.getWorkspaceId() == null) {
+            user.setWorkspaceId(workspaceResponse.id());
+        }
     }
 }

@@ -48,6 +48,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserInfos(customUserDetails.getId()));
     }
 
+    @PostMapping("/workspaces/{workspaceId}")
+    public ResponseEntity<Long> setUserWorkspaceId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
+        return ResponseEntity.ok(userService.setWorkspaceId(customUserDetails.getId(), workspaceId));
+    }
+
     @GetMapping(value = "/entrypoint")
     public void entrypointException(@RequestParam(name = "accessToken", required = false) String token) {
         if (token == null) throw new NotAcceptableException("로그인(Jwt 토큰)이 필요합니다.", null);
