@@ -33,9 +33,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
     }
 
-    @GetMapping("/assignee")
-    public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId()));
+    @GetMapping("/assignee/{workspaceId}")
+    public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
+        return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId(), workspaceId));
     }
 
     @PostMapping("/create")

@@ -111,11 +111,11 @@ public class TaskService {
     }
 
     @Transactional
-    public List<TaskResponse> getTasksByAssigneeId(Long userId) {
+    public List<TaskResponse> getTasksByAssigneeId(Long userId, Long workspaceId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자가 없습니다.", userId));
 
-        return taskRepository.findTasksVisibleToUser(userId)
+        return taskRepository.findTasksVisibleToUser(userId, workspaceId)
                 .stream().map(taskMapper::toTaskResponse).toList();
     }
 

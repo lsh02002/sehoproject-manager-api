@@ -27,12 +27,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     void detachTasksFromSprint(@Param("sprintId") Long sprintId);
 
     @Query("""
-                select distinct t
-                from Task t
-                join t.assignees ta
-                left join ta.expandedUsers eu
-                where (ta.assigneeType = 'USER' and ta.assigneeId = :userId)
-                   or (ta.assigneeType = 'TEAM' and eu.user.id = :userId)
-            """)
-    List<Task> findTasksVisibleToUser(@Param("userId") Long userId);
+    select distinct t
+    from Task t
+    join t.assignees ta
+    left join ta.expandedUsers eu
+    where t.project.space.workspace.id = :workspaceId
+      and (
+            (ta.assigneeType = 'USER' and ta.assigneeId = :userId)
+         or (ta.assigneeType = 'TEAM' and eu.user.id = :userId)
+      )
+""")
+    List<Task> findTasksVisibleToUser(
+            @Param("userId") Long userId,
+            @Param("workspaceId") Long workspaceId
+    );
 }
