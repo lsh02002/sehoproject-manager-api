@@ -76,6 +76,7 @@ public class SnapshotFunc {
             m.put("name", milestone.getName());
             m.put("position", milestone.getPosition());
             m.put("description", milestone.getDescription());
+            m.put("status", milestone.getStatus());
             m.put("startDate", milestone.getStartDate());
             m.put("dueDate", milestone.getDueDate());
             m.put("tasks", milestone.getTasks() != null ? milestone.getTasks().stream().map(Task::getId).toList() : null);
