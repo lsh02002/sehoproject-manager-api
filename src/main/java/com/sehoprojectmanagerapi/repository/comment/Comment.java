@@ -37,6 +37,6 @@ public class Comment extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "TASK '" + task.getName() + "'의 COMMENT '" + body + "' ";
     }
 }

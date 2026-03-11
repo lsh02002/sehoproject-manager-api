@@ -50,6 +50,6 @@ public class ProjectMember extends BaseEntity implements Loggable {
     // --- Loggable ---
     @Override
     public String logMessage() {
-        return "name=";
+        return "프로젝트 아이디 '" + project.getId() + "' 의멤버 " + user.getNickname() + "에게 '" + role.name() + "'";
     }
 }

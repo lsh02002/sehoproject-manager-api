@@ -1,26 +1,44 @@
 package com.sehoprojectmanagerapi.config.function;
 
+import com.sehoprojectmanagerapi.repository.attachment.Attachment;
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
+import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMember;
+import com.sehoprojectmanagerapi.repository.space.Space;
+import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMember;
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
-import com.sehoprojectmanagerapi.repository.task.taskassignee.TaskAssignee;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
+import com.sehoprojectmanagerapi.repository.user.User;
+import com.sehoprojectmanagerapi.repository.workspace.Workspace;
+import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
 
 @Component
 public class SnapshotFunc {
     public Map<String, Object> snapshot(Object obj) {
         if (obj == null) return null;
+
+        if(obj instanceof Attachment attachment) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", attachment.getId());
+            m.put("taskId", attachment.getTask().getId());
+            m.put("projectId", attachment.getTask().getProject().getId());
+            m.put("uploaderId", attachment.getUploader() != null ? attachment.getUploader().getId() : null);
+            m.put("fileName", attachment.getFileName());
+            m.put("fileUrl", attachment.getFileUrl());
+            m.put("mimeType", attachment.getMimeType());
+            m.put("sizeBytes", attachment.getSizeBytes());
+            m.put("deleted", attachment.getDeleted());
+            m.put("logMessage", attachment.logMessage());
+            return m;
+        }
 
         // Comment 객체일 경우
         if (obj instanceof Comment comment) {
@@ -150,6 +168,90 @@ public class SnapshotFunc {
             );
             m.put("dependencies", task.getDependencies() != null ? task.getDependencies().stream().map(TaskDependency::getId).toList() : null);
             m.put("logMessage", task.logMessage());
+            return m;
+        }
+
+        if(obj instanceof Notification notification) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", notification.getId());
+            m.put("receiverId", notification.getReceiver());
+            m.put("message", notification.getMessage());
+            m.put("type", notification.getType());
+            m.put("relatedId", notification.getRelatedId());
+            m.put("readFlag", notification.isReadFlag());
+            m.put("logMessage", notification.logMessage());
+            m.put("createdAt", notification.getCreatedAt());
+            m.put("updatedAt", notification.getUpdatedAt());
+            return m;
+        }
+
+        if(obj instanceof Space space) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", space.getId());
+            m.put("workspaceId", space.getWorkspace().getId());
+            m.put("name", space.getName());
+            m.put("slug", space.getSlug());
+            m.put("visibility", space.getVisibility());
+            m.put("createdBy", space.getCreatedBy());
+            m.put("position", space.getPosition());
+            m.put("logMessage", space.logMessage());
+            m.put("createdAt", space.getCreatedAt());
+            m.put("updatedAt", space.getUpdatedAt());
+            return m;
+        }
+
+        if(obj instanceof SpaceMember spaceMember) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", spaceMember.getId());
+            m.put("spaceId", spaceMember.getSpace().getId());
+            m.put("userId", spaceMember.getUser().getId());
+            m.put("status", spaceMember.getStatus());
+            m.put("role", spaceMember.getRole());
+            m.put("joinedAt", spaceMember.getJoinedAt());
+            m.put("logMessage", spaceMember.logMessage());
+            m.put("createdAt", spaceMember.getCreatedAt());
+            m.put("updatedAt", spaceMember.getUpdatedAt());
+            return m;
+        }
+
+        if(obj instanceof Workspace workspace) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", workspace.getId());
+            m.put("name", workspace.getName());
+            m.put("slug", workspace.getSlug());
+            m.put("visibility", workspace.getVisibility());
+            m.put("createdBy", workspace.getCreatedBy().getId());
+            m.put("position", workspace.getPosition());
+            m.put("logMessage", workspace.logMessage());
+            m.put("createdAt", workspace.getCreatedAt());
+            m.put("updatedAt", workspace.getUpdatedAt());
+            return m;
+        }
+
+        if(obj instanceof WorkspaceMember workspaceMember) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", workspaceMember.getId());
+            m.put("workspaceId", workspaceMember.getWorkspace().getId());
+            m.put("userId", workspaceMember.getUser().getId());
+            m.put("role", workspaceMember.getRole());
+            m.put("status", workspaceMember.getStatus());
+            m.put("joinedAt", workspaceMember.getJoinedAt());
+            m.put("logMessage", workspaceMember.logMessage());
+            m.put("createdAt", workspaceMember.getCreatedAt());
+            m.put("updatedAt", workspaceMember.getUpdatedAt());
+            return m;
+        }
+
+        if (obj instanceof User user) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", user.getId());
+            m.put("email", user.getEmail());
+            m.put("password", user.getPasswordHash());
+            m.put("nickname", user.getNickname());
+            m.put("userStatus", user.getUserStatus());
+            m.put("deletedAt", user.getDeletedAt());
+            m.put("createdAt", user.getCreatedAt());
+            m.put("updatedAt", user.getUpdatedAt());
             return m;
         }
         // 다른 엔티티 타입이 들어오면 필요한 경우 여기에 추가

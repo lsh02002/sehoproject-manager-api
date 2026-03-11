@@ -68,7 +68,7 @@ public class Space extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "스페이스 아이디 '" + id + "'";
     }
 
     // 편의 메서드

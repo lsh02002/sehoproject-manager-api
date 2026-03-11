@@ -24,7 +24,7 @@ public class CustomUserDetails implements UserDetails {
     private Long id;
 
     @Getter
-    private String name;
+    private String nickname;
 
     @Getter
     private String email;

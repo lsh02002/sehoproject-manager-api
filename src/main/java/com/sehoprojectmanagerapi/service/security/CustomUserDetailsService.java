@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .name(user.getName())
+                .nickname(user.getNickname())
                 .createdAt(user.getCreatedAt())
                 .deletedAt(user.getDeletedAt())
                 .build();

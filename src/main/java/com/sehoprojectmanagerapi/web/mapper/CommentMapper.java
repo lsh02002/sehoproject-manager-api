@@ -13,7 +13,7 @@ public class CommentMapper {
                 .commentId(comment.getId())
                 .taskId(comment.getTask().getId())
                 .authorId(comment.getAuthor().getId())
-                .authorName(comment.getAuthor().getName())
+                .authorName(comment.getAuthor().getNickname())
                 .avatarUrl(comment.getAuthor().getAvatarUrl())
                 .content(comment.getBody())
                 .createdAt(comment.getCreatedAt())

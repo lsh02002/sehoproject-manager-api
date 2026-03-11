@@ -45,6 +45,6 @@ public class Tag extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "프로젝트 아이디 '" + project.getId() + "'의 태그 '" + name + "'";
     }
 }

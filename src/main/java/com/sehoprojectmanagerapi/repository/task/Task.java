@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.repository.task;
 
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.attachment.Attachment;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -110,9 +111,12 @@ public class Task extends BaseEntity implements Loggable {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<TaskDependency> dependencies = new ArrayList<>();
 
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attachment> taskImages = new ArrayList<>();
+
     @Override
     public String logMessage() {
-        return "name=";
+        return "프로젝트 아이디 '" + project.getId() + "'의 태스크 '" + name + "'";
     }
 
     /* -------------------------

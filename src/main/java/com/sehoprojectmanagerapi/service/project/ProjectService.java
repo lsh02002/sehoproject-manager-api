@@ -320,21 +320,28 @@ public class ProjectService {
 
     @Transactional
     public void deleteProject(Long userId, Long projectId) {
-        projectRepository.findById(projectId)
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
 
-        ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
+        ProjectMember requesterMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId));
 
-        if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
+        if (!roleFunc.hasAtLeast(requesterMember.getRole(), RoleProject.MANAGER)) {
             throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
         }
 
-        Object beforeproject = snapshotFunc.snapshot(projectMember.getProject());
+        Object beforeProject = snapshotFunc.snapshot(project);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().getId(), projectMember.getProject().logMessage(), projectMember.getUser(), beforeproject, null);
+        activityLogService.log(
+                ActivityEntityType.PROJECT,
+                ActivityAction.DELETE,
+                project.getId(),
+                project.logMessage(),
+                requesterMember.getUser(),
+                beforeProject,
+                null
+        );
 
-        projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
-        projectRepository.deleteById(projectId);
+        projectRepository.delete(project);
     }
 }

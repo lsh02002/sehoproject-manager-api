@@ -1,10 +1,14 @@
 package com.sehoprojectmanagerapi.service.notification;
 
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.repository.notification.NotificationRepository;
 import com.sehoprojectmanagerapi.repository.notification.NotificationType;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -23,6 +27,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper;
+    private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public List<NotificationResponse> getNotificationsByUserId(Long receiverId) {
@@ -32,7 +38,7 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse createNotification(Long userId, NotificationRequest notificationRequest) {
-        userRepository.findById(userId)
+        User sender = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
 
         User receiver = userRepository.findById(notificationRequest.receiverId())
@@ -57,12 +63,16 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
+        Object afternotification = snapshotFunc.snapshot(notification);
+
+        activityLogService.log(ActivityEntityType.NOTIFICATION, ActivityAction.CREATE, notification.getId(), notification.logMessage(), sender, null, afternotification);
+
         return notificationMapper.toResponse(notification);
     }
 
     @Transactional
     public NotificationResponse updateNotification(Long userId, Long notificationId, NotificationRequest notificationRequest) {
-        userRepository.findById(userId)
+        User sender = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
 
         User receiver = userRepository.findById(notificationRequest.receiverId())
@@ -70,6 +80,8 @@ public class NotificationService {
 
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new NotFoundException("해당 알림을 찾을 수 없습니다.", notificationId));
+
+        Object beforenotification = snapshotFunc.snapshot(notification);
 
         notification.setReceiver(receiver);
 
@@ -91,17 +103,27 @@ public class NotificationService {
             notification.setRelatedId(notificationRequest.relatedId());
         }
 
-        notificationRepository.save(notification);
+        Object afternotification = snapshotFunc.snapshot(notification);
+
+        activityLogService.log(ActivityEntityType.NOTIFICATION, ActivityAction.UPDATE, notification.getId(), notification.logMessage(), sender, beforenotification, afternotification);
+
         return notificationMapper.toResponse(notification);
     }
 
     @Transactional
     public void deleteNotification(Long userId, Long notificationId) {
         try {
-            userRepository.findById(userId)
+            User user = userRepository.findById(userId)
                     .orElseThrow(() -> new NotFoundException("송신자를 찾을 수 없습니다.", userId));
 
-            notificationRepository.deleteById(notificationId);
+            Notification notification = notificationRepository.findById(notificationId)
+                            .orElseThrow(()-> new NotFoundException("해당 알림을 찾을 수 없습니다.", notificationId));
+
+            Object beforenotification = snapshotFunc.snapshot(notification);
+
+            activityLogService.log(ActivityEntityType.NOTIFICATION, ActivityAction.DELETE, notification.getId(), notification.logMessage(), user, beforenotification, null);
+
+            notificationRepository.delete(notification);
         } catch (RuntimeException e) {
             throw new NotAcceptableException("해당 알림 삭제가 잘 되지 않았습니다.", null);
         }

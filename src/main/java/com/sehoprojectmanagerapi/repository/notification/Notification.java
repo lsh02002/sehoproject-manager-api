@@ -42,6 +42,6 @@ public class Notification extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "알림 '" + message + "'";
     }
 }

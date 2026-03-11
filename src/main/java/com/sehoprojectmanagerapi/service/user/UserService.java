@@ -1,11 +1,15 @@
 package com.sehoprojectmanagerapi.service.user;
 
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.config.redis.RedisUtil;
 import com.sehoprojectmanagerapi.config.security.JwtTokenProvider;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshToken;
 import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshTokenRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -23,8 +27,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +41,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
     private final UserMapper userMapper;
+    private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     @Transactional
     public UserResponse signUp(SignupRequest signupRequest) {
@@ -43,18 +51,30 @@ public class UserService {
 
         if (!email.matches("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$")) {
             throw new BadRequestException("이메일을 정확히 입력해주세요.", email);
-        } else if (signupRequest.getName().matches("01\\d{9}")) {
-            throw new BadRequestException("전화번호를 이름으로 사용할수 없습니다.", signupRequest.getName());
+        }
+
+        if (signupRequest.getNickname().matches("01\\d{9}")) {
+            throw new BadRequestException("전화번호를 이름으로 사용할수 없습니다.", signupRequest.getNickname());
         }
 
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("이미 입력하신 " + email + " 이메일로 가입된 계정이 있습니다.", email);
-        } else if (signupRequest.getName().trim().isEmpty() || signupRequest.getName().length() > 30) {
-            throw new BadRequestException("이름은 비어있지 않고 30자리 이하여야 합니다.", signupRequest.getName());
-        } else if (!password.matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]+$")
+        }
+
+        if (userRepository.existsByNickname(signupRequest.getNickname())) {
+            throw new ConflictException("이미 입력하신 " + email + " 이메일로 가입된 계정이 있습니다.", email);
+        }
+
+        if (signupRequest.getNickname().trim().isEmpty() || signupRequest.getNickname().length() > 30) {
+            throw new BadRequestException("이름은 비어있지 않고 30자리 이하여야 합니다.", signupRequest.getNickname());
+        }
+
+        if (!password.matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]+$")
                 || !(password.length() >= 8 && password.length() <= 20)) {
             throw new BadRequestException("비밀번호는 8자 이상 20자 이하 숫자와 영문소문자 조합 이어야 합니다.", password);
-        } else if (!signupRequest.getPasswordConfirm().equals(password)) {
+        }
+
+        if (!signupRequest.getPasswordConfirm().equals(password)) {
             throw new BadRequestException("비밀번호와 비밀번호 확인이 같지 않습니다.", "password : " + password + ", password_confirm : " + signupRequest.getPasswordConfirm());
         }
 
@@ -63,20 +83,25 @@ public class UserService {
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .passwordHash(signupRequest.getPassword())
-                .name(signupRequest.getName())
+                .nickname(signupRequest.getNickname())
                 .timezone(signupRequest.getTimezone())
+                .userStatus("정상")
                 .isActive(true)
                 .build();
 
         userRepository.save(user);
 
+        Object afteruser = snapshotFunc.snapshot(user);
+
         SignupResponse signupResponse = SignupResponse.builder()
                 .userId(user.getId())
-                .name(user.getName())
+                .nickname(user.getNickname())
                 .workspaceId(user.getWorkspaceId())
                 .build();
 
-        return new UserResponse(HttpStatus.OK.value(), user.getName() + "님 회원 가입 완료 되었습니다.", signupResponse);
+        activityLogService.log(ActivityEntityType.USER, ActivityAction.CREATE, user.getId(), user.logMessage(), user, null, afteruser);
+
+        return new UserResponse(HttpStatus.OK.value(), user.getNickname() + "님 회원 가입 완료 되었습니다.", signupResponse);
     }
 
     @Transactional
@@ -99,7 +124,7 @@ public class UserService {
 
         SignupResponse signupResponse = SignupResponse.builder()
                 .userId(user.getId())
-                .name(user.getName())
+                .nickname(user.getNickname())
                 .workspaceId(user.getWorkspaceId())
                 .build();
 
@@ -136,6 +161,26 @@ public class UserService {
         }
 
         return new UserResponse(HttpStatus.OK.value(), "로그아웃에 성공 하였습니다.", null);
+    }
+
+    @Transactional
+    public UserResponse withdrawal(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException("계정을 찾을 수 없습니다. 다시 로그인 해주세요.", email));
+
+        Object beforeUser = snapshotFunc.snapshot(user);
+
+        if (user.getUserStatus().equals("탈퇴")) {
+            throw new BadRequestException("이미 탈퇴처리된 회원 입니다.", email);
+        }
+        user.setUserStatus("탈퇴");
+        user.setDeletedAt(LocalDateTime.now());
+
+        Object afterUser = snapshotFunc.snapshot(user);
+
+        activityLogService.log(ActivityEntityType.USER, ActivityAction.DELETE, user.getId(), user.logMessage(), user, beforeUser, afterUser);
+
+        return new UserResponse(200, "회원탈퇴 완료 되었습니다.", user.getNickname());
     }
 
     @Transactional

@@ -10,7 +10,7 @@ public class NotificationMapper {
         return NotificationResponse.builder()
                 .notificationId(n.getId())
                 .receiverId(n.getReceiver().getId())
-                .receiverName(n.getReceiver().getName())
+                .receiverName(n.getReceiver().getNickname())
                 .message(n.getMessage())
                 .type(n.getType().name())
                 .relatedId(n.getRelatedId())

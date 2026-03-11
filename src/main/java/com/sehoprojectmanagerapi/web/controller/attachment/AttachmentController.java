@@ -25,8 +25,8 @@ public class AttachmentController {
     }
 
     @PostMapping(path = "/{taskId}/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<AttachmentResponse>> uploadManyFile(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestPart("files") List<MultipartFile> files) {
-        return ResponseEntity.ok(attachmentService.uploadManyFile(customUserDetails.getId(), taskId, files));
+    public ResponseEntity<List<AttachmentResponse>> uploadManyFiles(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestPart("files") List<MultipartFile> files) {
+        return ResponseEntity.ok(attachmentService.uploadManyFiles(customUserDetails.getId(), taskId, files));
     }
 
     @GetMapping("/{attachmentId}")

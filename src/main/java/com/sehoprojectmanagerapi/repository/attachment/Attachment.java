@@ -41,8 +41,11 @@ public class Attachment extends BaseEntity implements Loggable {
     @Column(name = "size_bytes")
     private Long sizeBytes;
 
+    @Column
+    private Boolean deleted;
+
     @Override
     public String logMessage() {
-        return "name=";
+        return "TASK '" + task.getName() + "'의 이미지 파일 '" + fileName + "' ";
     }
 }

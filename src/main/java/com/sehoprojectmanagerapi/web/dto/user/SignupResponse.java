@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Builder
 public record SignupResponse(
         Long userId,
-        String name,
+        String nickname,
         Long workspaceId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

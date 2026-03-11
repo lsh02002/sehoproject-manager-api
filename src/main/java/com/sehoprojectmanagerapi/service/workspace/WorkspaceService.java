@@ -1,9 +1,13 @@
 package com.sehoprojectmanagerapi.service.workspace;
 
 import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.config.security.SecurityUtil;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.common.Role;
 import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
+import com.sehoprojectmanagerapi.repository.space.spacemember.SpaceMember;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
@@ -13,6 +17,7 @@ import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceI
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInviteRepository;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
@@ -62,6 +67,8 @@ public class WorkspaceService {
     private final TaskService taskService;
     private final RoleFunc roleFunc;
     private final UserMapper userMapper;
+    private final ActivityLogService activityLogService;
+    private final SnapshotFunc snapshotFunc;
 
     public List<TreeRow> getTreeRowsForCurrentUser(Long userId, Long workspaceId) {
 
@@ -76,7 +83,6 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse createWorkspace(Long userId, WorkspaceRequest request) {
-
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
 
@@ -95,6 +101,8 @@ public class WorkspaceService {
                 .build();
         workspace = workspaceRepository.save(workspace);
 
+        Object afterworkspace = snapshotFunc.snapshot(workspace);
+
         // 작성자 = OWNER 로 멤버십 자동 생성
         WorkspaceMember owner = WorkspaceMember.builder()
                 .workspace(workspace)
@@ -103,6 +111,12 @@ public class WorkspaceService {
                 .joinedAt(OffsetDateTime.now())
                 .build();
         workspaceMemberRepository.save(owner);
+
+        Object afterworkspacemember = snapshotFunc.snapshot(owner);
+
+        activityLogService.log(ActivityEntityType.WORKSPACE_MEMBER, ActivityAction.CREATE, owner.getId(), owner.logMessage(), creator, null, afterworkspacemember);
+
+        activityLogService.log(ActivityEntityType.WORKSPACE, ActivityAction.CREATE, workspace.getId(), workspace.logMessage(), creator, null, afterworkspace);
 
         WorkspaceResponse response = workspaceMapper.toResponse(workspace);
 
@@ -133,8 +147,13 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse updateWorkspace(Long userId, Long id, WorkspaceRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
+
         Workspace workspace = workspaceRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", id));
+
+        Object beforeworkspace = snapshotFunc.snapshot(workspace);
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(userId, id)
                 .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 수정할 수 있습니다.", null));
@@ -153,21 +172,35 @@ public class WorkspaceService {
         workspace.setName(request.name());
         workspace.setSlug(request.slug());
 
-        workspace = workspaceRepository.save(workspace);
+        Object afterworkspace = snapshotFunc.snapshot(workspace);
+
+        activityLogService.log(
+                ActivityEntityType.WORKSPACE, ActivityAction.UPDATE,
+                workspace.getId(), workspace.logMessage(),
+                user,
+                beforeworkspace, afterworkspace
+        );
 
         return workspaceMapper.toResponse(workspace);
     }
 
     @Transactional
     public void deleteWorkspace(Long currentUserId, Long id) {
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(()-> new NotFoundException("해당 유저를 찾을 수 없습니다.", currentUserId));
+
         Workspace workspace = workspaceRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", id));
+
+        Object beforeworkspace = snapshotFunc.snapshot(workspace);
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, id)
                 .orElseThrow(() -> new BadCredentialsException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
         if (role != WorkspaceRole.OWNER) {
             throw new BadCredentialsException("OWNER만 워크스페이스를 삭제할 수 있습니다.", null);
         }
+
+        activityLogService.log(ActivityEntityType.WORKSPACE, ActivityAction.DELETE, workspace.getId(), workspace.logMessage(), user, beforeworkspace, null);
 
         workspaceRepository.delete(workspace);
     }

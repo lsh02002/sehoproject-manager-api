@@ -50,6 +50,6 @@ public class Sprint extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "프로젝트 아이디: '" + project.getId() + "' 의 스프린트 '" + name + "'";
     }
 }

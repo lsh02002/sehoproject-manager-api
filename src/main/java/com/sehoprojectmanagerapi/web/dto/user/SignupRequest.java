@@ -11,6 +11,6 @@ public class SignupRequest {
     private String email;
     private String password;
     private String passwordConfirm;
-    private String name;
+    private String nickname;
     private String timezone;
 }

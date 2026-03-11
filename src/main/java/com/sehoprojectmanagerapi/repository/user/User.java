@@ -24,8 +24,8 @@ public class User extends BaseEntity implements Loggable {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(length = 255, nullable = false)
-    private String name;
+    @Column(length = 255, unique = true, nullable = false)
+    private String nickname;
 
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
@@ -45,8 +45,11 @@ public class User extends BaseEntity implements Loggable {
     @Column(name = "workspace_id")
     private Long workspaceId;
 
+    @Column(nullable = false)
+    private String userStatus;
+
     @Override
     public String logMessage() {
-        return "name=";
+        return "사용자 '" + nickname + "'";
     }
 }
