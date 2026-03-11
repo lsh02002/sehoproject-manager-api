@@ -46,6 +46,6 @@ public class SpaceMember extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "스페이스 아이디 '" + space.getId() + "' 의멤버 " + user.getNickname() + "에게 '" + role.name() + "'";
+        return "스페이스 아이디 '" + space.getId() + "' 의멤버 " + user.getNickname() + "에게 권한 '" + role.name() + "'";
     }
 }

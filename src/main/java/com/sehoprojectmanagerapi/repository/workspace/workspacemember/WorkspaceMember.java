@@ -46,6 +46,6 @@ public class WorkspaceMember extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "워크스페이스 아이디 '" + workspace.getId() + "' 의멤버 " + user.getNickname() + "에게 권한 '" + role.name() + "'";
     }
 }
