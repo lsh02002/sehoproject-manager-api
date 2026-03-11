@@ -164,9 +164,9 @@ public class AttachmentService {
             attachment.setDeleted(true);
         }
 
-        Object afterDiaryImage = snapshotFunc.snapshot(attachment);
+        Object afterattachimage = snapshotFunc.snapshot(attachment);
 
-        activityLogService.log(ActivityEntityType.ATTACHMENT, ActivityAction.DELETE, attachment.getId(), attachment.logMessage(), user, null, afterDiaryImage);
+        activityLogService.log(ActivityEntityType.ATTACHMENT, ActivityAction.DELETE, attachment.getId(), attachment.logMessage(), user, null, afterattachimage);
     }
 
     public void deleteFile(User user, Attachment attachment) {
@@ -174,9 +174,9 @@ public class AttachmentService {
             attachment.setDeleted(true);
         }
 
-        Object afterDiaryImage = snapshotFunc.snapshot(attachment);
+        Object afterattachimage = snapshotFunc.snapshot(attachment);
 
-        activityLogService.log(ActivityEntityType.ATTACHMENT, ActivityAction.DELETE, attachment.getId(), attachment.logMessage(), user, null, afterDiaryImage);
+        activityLogService.log(ActivityEntityType.ATTACHMENT, ActivityAction.DELETE, attachment.getId(), attachment.logMessage(), user, null, afterattachimage);
     }
 
     public void deleteFileByUserAndTaskImage(User user, Attachment image) {

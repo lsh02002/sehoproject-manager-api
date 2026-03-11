@@ -62,7 +62,7 @@ public class UserService {
         }
 
         if (userRepository.existsByNickname(signupRequest.getNickname())) {
-            throw new ConflictException("이미 입력하신 " + email + " 이메일로 가입된 계정이 있습니다.", email);
+           throw new ConflictException("이미 입력하신 " + signupRequest.getNickname() + " 이메일로 가입된 계정이 있습니다.", signupRequest.getNickname());
         }
 
         if (signupRequest.getNickname().trim().isEmpty() || signupRequest.getNickname().length() > 30) {
