@@ -19,7 +19,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.attachment.AttachmentResponse;
 import com.sehoprojectmanagerapi.web.dto.attachment.FileRequest;
-import com.sehoprojectmanagerapi.web.mapper.AttachmentMapper;
+import com.sehoprojectmanagerapi.web.mapper.attachment.AttachmentMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

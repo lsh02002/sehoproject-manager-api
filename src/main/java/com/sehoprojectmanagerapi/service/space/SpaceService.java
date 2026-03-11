@@ -20,7 +20,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceRequest;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;
-import com.sehoprojectmanagerapi.web.mapper.SpaceMapper;
+import com.sehoprojectmanagerapi.web.mapper.space.SpaceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

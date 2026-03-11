@@ -1,7 +1,8 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.milestone;
 
 import com.sehoprojectmanagerapi.repository.milestone.Milestone;
 import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneResponse;
+import com.sehoprojectmanagerapi.web.mapper.task.TaskMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

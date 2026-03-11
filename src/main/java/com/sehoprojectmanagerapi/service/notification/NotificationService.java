@@ -14,7 +14,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationRequest;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationResponse;
-import com.sehoprojectmanagerapi.web.mapper.NotificationMapper;
+import com.sehoprojectmanagerapi.web.mapper.notification.NotificationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

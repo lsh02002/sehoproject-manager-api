@@ -34,7 +34,7 @@ import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;
-import com.sehoprojectmanagerapi.web.mapper.TaskMapper;
+import com.sehoprojectmanagerapi.web.mapper.task.TaskMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

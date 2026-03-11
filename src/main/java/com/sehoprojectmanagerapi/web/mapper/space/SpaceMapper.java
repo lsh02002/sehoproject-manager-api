@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.space;
 
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.web.dto.space.SpaceResponse;

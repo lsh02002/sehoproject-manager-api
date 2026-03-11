@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.task;
 
 // TaskMapper.java
 
@@ -10,6 +10,7 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
+import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -25,7 +25,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddMemberRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
-import com.sehoprojectmanagerapi.web.mapper.UserMapper;
+import com.sehoprojectmanagerapi.web.mapper.user.UserMapper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

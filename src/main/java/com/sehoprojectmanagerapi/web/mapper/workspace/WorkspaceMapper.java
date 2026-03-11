@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.workspace;
 
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceInvite;

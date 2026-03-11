@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.user;
 
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;

@@ -18,7 +18,7 @@ import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
 import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
 import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
 import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
-import com.sehoprojectmanagerapi.web.mapper.UserMapper;
+import com.sehoprojectmanagerapi.web.mapper.user.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

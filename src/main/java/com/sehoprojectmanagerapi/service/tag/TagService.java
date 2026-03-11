@@ -17,7 +17,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.tag.TagRequest;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
-import com.sehoprojectmanagerapi.web.mapper.TagMapper;
+import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

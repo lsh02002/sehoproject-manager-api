@@ -22,7 +22,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneRequest;
 import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneResponse;
-import com.sehoprojectmanagerapi.web.mapper.MilestoneMapper;
+import com.sehoprojectmanagerapi.web.mapper.milestone.MilestoneMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

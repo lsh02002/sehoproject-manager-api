@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.attachment;
 
 import com.sehoprojectmanagerapi.repository.attachment.Attachment;
 import com.sehoprojectmanagerapi.web.dto.attachment.AttachmentResponse;

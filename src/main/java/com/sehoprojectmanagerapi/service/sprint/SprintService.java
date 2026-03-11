@@ -22,7 +22,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintRequest;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintResponse;
-import com.sehoprojectmanagerapi.web.mapper.SprintMapper;
+import com.sehoprojectmanagerapi.web.mapper.sprint.SprintMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

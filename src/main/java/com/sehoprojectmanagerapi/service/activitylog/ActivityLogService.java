@@ -7,7 +7,7 @@ import com.sehoprojectmanagerapi.repository.activity.ActivityLogRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.web.dto.activitylog.ActivityLogResponse;
-import com.sehoprojectmanagerapi.web.mapper.ActivityLogMapper;
+import com.sehoprojectmanagerapi.web.mapper.activitylog.ActivityLogMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -18,7 +18,7 @@ import com.sehoprojectmanagerapi.web.dto.team.TeamInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.team.TeamRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamResponse;
-import com.sehoprojectmanagerapi.web.mapper.TeamMapper;
+import com.sehoprojectmanagerapi.web.mapper.team.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;

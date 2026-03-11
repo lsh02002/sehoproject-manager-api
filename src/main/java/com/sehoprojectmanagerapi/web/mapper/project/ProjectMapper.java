@@ -1,9 +1,10 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.project;
 
 // ProjectMapper.java
 
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
+import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
 import org.springframework.stereotype.Component;
 
 @Component

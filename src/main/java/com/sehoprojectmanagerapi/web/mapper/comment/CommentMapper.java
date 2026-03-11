@@ -1,10 +1,8 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.comment;
 
 import com.sehoprojectmanagerapi.repository.comment.Comment;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentResponse;
 import org.springframework.stereotype.Component;
-
-import java.time.OffsetDateTime;
 
 @Component
 public class CommentMapper {

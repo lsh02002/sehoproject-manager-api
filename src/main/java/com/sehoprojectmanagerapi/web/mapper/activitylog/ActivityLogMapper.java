@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.activitylog;
 
 import com.sehoprojectmanagerapi.repository.activity.ActivityLog;
 import com.sehoprojectmanagerapi.web.dto.activitylog.ActivityLogResponse;

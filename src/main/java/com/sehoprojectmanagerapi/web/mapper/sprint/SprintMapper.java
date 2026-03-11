@@ -1,7 +1,8 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.sprint;
 
 import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintResponse;
+import com.sehoprojectmanagerapi.web.mapper.task.TaskMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

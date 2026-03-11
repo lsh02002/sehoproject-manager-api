@@ -1,5 +1,5 @@
 // com.sehoprojectmanagerapi.config.mapper.TagMapper (수동 매핑)
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.tag;
 
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;

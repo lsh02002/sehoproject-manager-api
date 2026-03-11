@@ -1,4 +1,4 @@
-package com.sehoprojectmanagerapi.web.mapper;
+package com.sehoprojectmanagerapi.web.mapper.notification;
 
 import com.sehoprojectmanagerapi.repository.notification.Notification;
 import com.sehoprojectmanagerapi.web.dto.notification.NotificationResponse;

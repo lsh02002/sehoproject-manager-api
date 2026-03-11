@@ -15,7 +15,7 @@ import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentRequest;
 import com.sehoprojectmanagerapi.web.dto.comment.CommentResponse;
-import com.sehoprojectmanagerapi.web.mapper.CommentMapper;
+import com.sehoprojectmanagerapi.web.mapper.comment.CommentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

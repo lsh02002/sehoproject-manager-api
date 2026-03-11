@@ -25,7 +25,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectRequest;
 import com.sehoprojectmanagerapi.web.dto.project.ProjectResponse;
-import com.sehoprojectmanagerapi.web.mapper.ProjectMapper;
+import com.sehoprojectmanagerapi.web.mapper.project.ProjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
