@@ -30,9 +30,8 @@ public class SnapshotFunc {
             m.put("projectId", comment.getTask().getProject().getId());
             m.put("authorId", comment.getAuthor() != null ? comment.getAuthor().getId() : null);
             m.put("createdAt", comment.getCreatedAt());
+            m.put("updatedAt", comment.getUpdatedAt());
             m.put("body", comment.getBody() != null ? comment.getBody() : null);
-            m.put("logTargetType", comment.logTargetType());
-            m.put("logTargetId", comment.logTargetId());
             m.put("logMessage", comment.logMessage());
             return m;
         }
@@ -53,8 +52,7 @@ public class SnapshotFunc {
             m.put("createdBy", project.getCreatedBy().getId());
             m.put("spaceId", project.getSpace().getId());
             m.put("createdAt", project.getCreatedAt());
-            m.put("logTargetType", project.logTargetType());
-            m.put("logTargetId", project.logTargetId());
+            m.put("updatedAt", project.getUpdatedAt());
             m.put("logMessage", project.logMessage());
             return m;
         }
@@ -65,6 +63,9 @@ public class SnapshotFunc {
             m.put("projectId", projectMember.getProject().getId());
             m.put("role", projectMember.getRole());
             m.put("userId", projectMember.getUser().getId());
+            m.put("createdAt", projectMember.getCreatedAt());
+            m.put("updatedAt", projectMember.getUpdatedAt());
+            m.put("logMessage", projectMember.logMessage());
             return m;
         }
 
@@ -81,8 +82,7 @@ public class SnapshotFunc {
             m.put("dueDate", milestone.getDueDate());
             m.put("tasks", milestone.getTasks() != null ? milestone.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", milestone.getCreatedAt());
-            m.put("logTargetType", milestone.logTargetType());
-            m.put("logTargetId", milestone.logTargetId());
+            m.put("updatedAt", milestone.getUpdatedAt());
             m.put("logMessage", milestone.logMessage());
             return m;
         }
@@ -98,8 +98,7 @@ public class SnapshotFunc {
             m.put("state", sprint.getState());
             m.put("tasks", sprint.getTasks() != null ? sprint.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", sprint.getCreatedAt());
-            m.put("logTargetType", sprint.logTargetType());
-            m.put("logTargetId", sprint.logTargetId());
+            m.put("updatedAt", sprint.getUpdatedAt());
             m.put("logMessage", sprint.logMessage());
             return m;
         }
@@ -110,8 +109,8 @@ public class SnapshotFunc {
             m.put("projectId", tag.getProject().getId());
             m.put("name", tag.getName());
             m.put("description", tag.getDescription());
-            m.put("logTargetType", tag.logTargetType());
-            m.put("logTargetId", tag.logTargetId());
+            m.put("createdAt", tag.getCreatedAt());
+            m.put("updatedAt", tag.getUpdatedAt());
             m.put("logMessage", tag.logMessage());
             return m;
         }
@@ -135,6 +134,7 @@ public class SnapshotFunc {
             m.put("closedById", task.getClosedBy() != null ? task.getClosedBy().getId() : null);
             m.put("closedAt", task.getClosedAt());
             m.put("createdAt", task.getCreatedAt());
+            m.put("updatedAt", task.getUpdatedAt());
             m.put("sprintId", task.getSprint() != null ? task.getSprint().getId() : null);
             m.put("milestoneId", task.getMilestone() != null ? task.getMilestone().getId() : null);
             m.put("tags", task.getTags() != null ? task.getTags().stream().map(Tag::getId).toList() : null);
@@ -149,8 +149,6 @@ public class SnapshotFunc {
                             : null
             );
             m.put("dependencies", task.getDependencies() != null ? task.getDependencies().stream().map(TaskDependency::getId).toList() : null);
-            m.put("logTargetType", task.logTargetType());
-            m.put("logTargetId", task.logTargetId());
             m.put("logMessage", task.logMessage());
             return m;
         }

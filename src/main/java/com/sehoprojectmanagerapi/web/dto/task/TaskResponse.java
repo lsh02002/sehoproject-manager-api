@@ -6,6 +6,7 @@ import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -25,6 +26,7 @@ public record TaskResponse(
         List<TagResponse> tags,             // 여러 태그
         List<Long> dependencyIds,      // 여러 선행 작업
         LocalDate dueDate,
-        java.time.LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

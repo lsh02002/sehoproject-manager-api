@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.repository.workspace;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.space.Space;
@@ -8,7 +9,6 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Workspace extends BaseEntity {
+public class Workspace extends BaseEntity implements Loggable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,6 +56,11 @@ public class Workspace extends BaseEntity {
     @Builder.Default
     @JsonIgnore
     private List<Space> spaces = new ArrayList<>();
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 
     // 편의 메서드
     public void addSpace(Space space) {

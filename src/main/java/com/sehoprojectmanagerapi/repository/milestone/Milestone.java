@@ -63,22 +63,7 @@ public class Milestone extends BaseEntity implements Loggable {
     }
 
     @Override
-    public ActivityEntityType logTargetType() {
-        return ActivityEntityType.MILESTONE;
-    }
-
-    @Override
-    public Long logTargetId() {
-        return id;
-    }
-
-    @Override
     public String logMessage() {
-        return "name=" + name;
-    }
-
-    @Override
-    public Project logProject() {
-        return this.project;
+        return "name=";
     }
 }

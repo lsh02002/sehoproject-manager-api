@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.dto.comment;
 
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Builder
@@ -12,7 +13,7 @@ public record CommentResponse(
         String authorName,
         String content,
         String avatarUrl,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

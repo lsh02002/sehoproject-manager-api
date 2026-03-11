@@ -3,6 +3,7 @@ package com.sehoprojectmanagerapi.web.dto.workspace.invite;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Builder
@@ -15,7 +16,8 @@ public record WorkspaceInviteResponse(
         String message,
         WorkspaceRole requestedRole,
         String status,
-        OffsetDateTime expiresAt,
-        String createdAt
+        LocalDateTime expiresAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

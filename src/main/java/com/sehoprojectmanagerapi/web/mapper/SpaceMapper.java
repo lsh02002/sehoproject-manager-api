@@ -12,6 +12,8 @@ public class SpaceMapper {
                 .name(space.getName())
                 .slug(space.getSlug())
                 .workspaceId(space.getWorkspace().getId())
+                .createdAt(space.getCreatedAt())
+                .updatedAt(space.getUpdatedAt())
                 .build();
     }
 }

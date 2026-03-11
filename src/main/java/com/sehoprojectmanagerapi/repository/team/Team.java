@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.team;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Team extends BaseEntity {
+public class Team extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,4 +28,9 @@ public class Team extends BaseEntity {
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamMember> members = new ArrayList<>();
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

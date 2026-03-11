@@ -111,23 +111,8 @@ public class Task extends BaseEntity implements Loggable {
     private List<TaskDependency> dependencies = new ArrayList<>();
 
     @Override
-    public ActivityEntityType logTargetType() {
-        return ActivityEntityType.TASK;
-    }
-
-    @Override
-    public Long logTargetId() {
-        return id;
-    }
-
-    @Override
     public String logMessage() {
-        return "name=" + name;
-    }
-
-    @Override
-    public Project logProject() {
-        return this.project;
+        return "name=";
     }
 
     /* -------------------------

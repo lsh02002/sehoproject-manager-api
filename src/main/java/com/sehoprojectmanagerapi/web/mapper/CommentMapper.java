@@ -16,8 +16,8 @@ public class CommentMapper {
                 .authorName(comment.getAuthor().getName())
                 .avatarUrl(comment.getAuthor().getAvatarUrl())
                 .content(comment.getBody())
-                .createdAt(OffsetDateTime.from(comment.getCreatedAt()))
-                .updatedAt(OffsetDateTime.from(comment.getUpdatedAt()))
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }

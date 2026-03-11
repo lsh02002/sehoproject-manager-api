@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.notification;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notification extends BaseEntity {
+public class Notification extends BaseEntity implements Loggable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,5 +38,10 @@ public class Notification extends BaseEntity {
 
     public void markAsRead() {
         this.readFlag = true;
+    }
+
+    @Override
+    public String logMessage() {
+        return "name=";
     }
 }

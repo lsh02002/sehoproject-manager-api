@@ -19,6 +19,8 @@ public class SprintMapper {
                 .taskIds(sprint.getTasks().stream().map(taskMapper::toTaskResponse).toList())
                 .startDate(sprint.getStartDate())
                 .endDate(sprint.getEndDate())
+                .createdAt(sprint.getCreatedAt())
+                .updatedAt(sprint.getUpdatedAt())
                 .build();
     }
 }

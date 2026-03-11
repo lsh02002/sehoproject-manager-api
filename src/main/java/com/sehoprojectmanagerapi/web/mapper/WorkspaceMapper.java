@@ -13,6 +13,8 @@ public class WorkspaceMapper {
                 .id(workspace.getId())
                 .name(workspace.getName())
                 .slug(workspace.getSlug())
+                .createdAt(workspace.getCreatedAt())
+                .updatedAt(workspace.getUpdatedAt())
                 .build();
     }
 
@@ -27,7 +29,8 @@ public class WorkspaceMapper {
                 .requestedRole(invite.getRequestedRole())
                 .status(invite.getStatus().name())
                 .expiresAt(invite.getExpiresAt())
-                .createdAt(invite.getCreatedAt().toString())
+                .createdAt(invite.getCreatedAt())
+                .updatedAt(invite.getUpdatedAt())
                 .build();
 
     }

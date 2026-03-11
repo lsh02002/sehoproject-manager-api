@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.space.spacemember;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.CommonStatus;
 import com.sehoprojectmanagerapi.repository.space.Space;
 import com.sehoprojectmanagerapi.repository.space.SpaceRole;
@@ -17,7 +19,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpaceMember {
+public class SpaceMember extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,4 +43,9 @@ public class SpaceMember {
 
     @Column(nullable = false)
     private OffsetDateTime joinedAt;
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

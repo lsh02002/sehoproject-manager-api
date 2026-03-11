@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.webhook;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import jakarta.persistence.*;
@@ -12,7 +13,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Webhook extends BaseEntity {
+public class Webhook extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,4 +33,9 @@ public class Webhook extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

@@ -87,22 +87,7 @@ public class Project extends BaseEntity implements Loggable {
     private List<Task> tasks = new ArrayList<>();
 
     @Override
-    public ActivityEntityType logTargetType() {
-        return ActivityEntityType.PROJECT;
-    }
-
-    @Override
-    public Long logTargetId() {
-        return id;
-    }
-
-    @Override
     public String logMessage() {
-        return "name=" + name;
-    }
-
-    @Override
-    public Project logProject() {
-        return this;
+        return "name=";
     }
 }

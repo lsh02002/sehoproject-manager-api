@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.repository.space;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.common.Visibility;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -29,8 +30,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Space extends BaseEntity {
+public class Space extends BaseEntity implements Loggable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,6 +65,11 @@ public class Space extends BaseEntity {
     @Builder.Default
     @JsonIgnore
     private List<Project> projects = new ArrayList<>();
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 
     // 편의 메서드
     public void addProject(Project project) {

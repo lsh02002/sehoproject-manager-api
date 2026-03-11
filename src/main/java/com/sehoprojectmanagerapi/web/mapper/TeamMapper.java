@@ -21,6 +21,7 @@ public class TeamMapper {
                 .status(invite.getStatus().name())
                 .expiresAt(invite.getExpiresAt())
                 .createdAt(invite.getCreatedAt())
+                .updatedAt(invite.getUpdatedAt())
                 .build();
 
     }
@@ -29,6 +30,8 @@ public class TeamMapper {
         return TeamResponse.builder()
                 .id(team.getId())
                 .name(team.getName())
+                .createdAt(team.getCreatedAt())
+                .updatedAt(team.getUpdatedAt())
                 .build();
     }
 }

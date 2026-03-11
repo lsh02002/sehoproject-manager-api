@@ -69,6 +69,7 @@ public class TaskMapper {
                 .dependencyIds(t.getDependencies().stream().map(d -> d.getDependsOn().getId()).toList())
                 .dueDate(t.getDueDate())
                 .createdAt(t.getCreatedAt())
+                .updatedAt(t.getUpdatedAt())
                 .build();
     }
 }

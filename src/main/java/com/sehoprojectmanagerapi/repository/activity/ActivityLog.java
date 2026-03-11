@@ -9,10 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "activity_logs", indexes = {
-        @Index(name = "idx_activity_project_created", columnList = "project_id,created_at")
-})
-
+@Table(name = "activity_logs")
 @Getter
 @Setter
 @Builder
@@ -22,10 +19,6 @@ public class ActivityLog extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id", nullable = false)
@@ -53,13 +46,12 @@ public class ActivityLog extends BaseEntity {
     @Column(name = "after_json", columnDefinition = "JSON")
     private Object afterJson;
 
-    public ActivityLog(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project, Object beforeJson, Object afterJson) {
+    public ActivityLog(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Object beforeJson, Object afterJson) {
         this.entityType = type;
         this.action = action;
         this.entityId = targetId;
         this.message = message;
         this.actor = actor;
-        this.project = project;
         this.beforeJson = beforeJson;
         this.afterJson = afterJson;
     }

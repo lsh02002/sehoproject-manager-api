@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.attachment;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.user.User;
@@ -15,7 +16,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Attachment extends BaseEntity {
+public class Attachment extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,4 +40,9 @@ public class Attachment extends BaseEntity {
 
     @Column(name = "size_bytes")
     private Long sizeBytes;
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

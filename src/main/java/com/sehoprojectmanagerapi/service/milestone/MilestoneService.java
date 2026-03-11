@@ -116,7 +116,7 @@ public class MilestoneService {
 
         Object aftermilestone = snapshotFunc.snapshot(savedmilestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.logTargetId(), savedmilestone.logMessage(), projectMember.getUser(), savedmilestone.logProject(), null, aftermilestone);
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.CREATE, savedmilestone.getId(), savedmilestone.logMessage(), projectMember.getUser(), null, aftermilestone);
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -213,7 +213,7 @@ public class MilestoneService {
 
         Object aftermilestone = snapshotFunc.snapshot(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), beforemilestone, aftermilestone);
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.UPDATE, milestone.getId(), milestone.logMessage(), projectMember.getUser(), beforemilestone, aftermilestone);
 
         milestoneRepository.save(milestone);
 
@@ -235,7 +235,7 @@ public class MilestoneService {
 
         Object beforemilestone = snapshotFunc.snapshot(milestone);
 
-        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.logTargetId(), milestone.logMessage(), projectMember.getUser(), milestone.logProject(), beforemilestone, null);
+        activityLogService.log(ActivityEntityType.MILESTONE, ActivityAction.DELETE, milestone.getId(), milestone.logMessage(), projectMember.getUser(), beforemilestone, null);
 
         // 3. 삭제 수행
         taskRepository.detachTasksFromMilestone(milestone.getId());

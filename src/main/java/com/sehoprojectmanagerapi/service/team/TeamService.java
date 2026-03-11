@@ -25,6 +25,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -174,7 +175,7 @@ public class TeamService {
         invite.setStatus(TeamInvite.Status.PENDING);
         invite.setMessage(request.message());
         invite.setRequestedRole(request.requestedRole());
-        invite.setExpiresAt(OffsetDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
+        invite.setExpiresAt(LocalDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
 
         TeamInvite saved = teamInviteRepository.save(invite);
 
@@ -196,7 +197,7 @@ public class TeamService {
             throw new ConflictException("이미 처리된 초대입니다.", inviteId);
         }
 
-        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(OffsetDateTime.now())) {
+        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(LocalDateTime.now())) {
             invite.setStatus(TeamInvite.Status.EXPIRED);
             teamInviteRepository.save(invite);
             throw new ConflictException("초대가 만료되었습니다.", inviteId);

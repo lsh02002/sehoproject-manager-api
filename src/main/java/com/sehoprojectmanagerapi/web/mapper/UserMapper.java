@@ -12,8 +12,9 @@ public class UserMapper {
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .createdAt(String.valueOf(user.getCreatedAt()))
-                .deletedAt(String.valueOf(user.getDeletedAt()))
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .deletedAt(user.getDeletedAt())
                 .build();
     }
 

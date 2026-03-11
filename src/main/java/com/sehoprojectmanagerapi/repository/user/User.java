@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.user;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User extends BaseEntity {
+public class User extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,4 +44,9 @@ public class User extends BaseEntity {
 
     @Column(name = "workspace_id")
     private Long workspaceId;
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

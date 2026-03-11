@@ -1,11 +1,14 @@
 package com.sehoprojectmanagerapi.repository.team.teamInvite;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -14,7 +17,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamInvite {
+public class TeamInvite extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,10 +42,12 @@ public class TeamInvite {
     @Enumerated(EnumType.STRING)
     private RoleTeam requestedRole;
 
-    private OffsetDateTime expiresAt;
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private LocalDateTime expiresAt;
 
     public enum Status {PENDING, ACCEPTED, DECLINED, EXPIRED}
 
-    // getters/setters
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

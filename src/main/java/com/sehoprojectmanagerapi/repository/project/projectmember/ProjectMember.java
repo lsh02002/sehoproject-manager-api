@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.repository.project.projectmember;
 
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectMember implements Loggable {
+public class ProjectMember extends BaseEntity implements Loggable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,8 +48,8 @@ public class ProjectMember implements Loggable {
     }
 
     // --- Loggable ---
-    @Override public ActivityEntityType logTargetType() { return ActivityEntityType.PROJECT_MEMBER; }
-    @Override public Long logTargetId() { return id; }
-    @Override public String logMessage() { return "name=" + role + " joinedAt=" + joinedAt; }
-    @Override public Project logProject() { return project; }
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

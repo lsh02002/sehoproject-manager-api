@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.repository.tag;
 
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import jakarta.persistence.*;
@@ -23,7 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString(onlyExplicitlyIncluded = true)
-public class Tag implements Loggable {
+public class Tag extends BaseEntity implements Loggable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,22 +44,7 @@ public class Tag implements Loggable {
     private List<Task> tasks = new ArrayList<>();
 
     @Override
-    public ActivityEntityType logTargetType() {
-        return ActivityEntityType.TAG;
-    }
-
-    @Override
-    public Long logTargetId() {
-        return id;
-    }
-
-    @Override
     public String logMessage() {
-        return "name=" + name;
-    }
-
-    @Override
-    public Project logProject() {
-        return this.project;
+        return "name=";
     }
 }

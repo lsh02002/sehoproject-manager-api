@@ -19,8 +19,8 @@ public class ActivityLogService {
     private final ActivityLogRepository activityLogRepository;
 
     @Transactional
-    public void log(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Project project, Object beforeJson, Object afterJson) {
-        ActivityLog log = new ActivityLog(type, action, targetId, message, actor, project, beforeJson, afterJson);
+    public void log(ActivityEntityType type, ActivityAction action, Long targetId, String message, User actor, Object beforeJson, Object afterJson) {
+        ActivityLog log = new ActivityLog(type, action, targetId, message, actor, beforeJson, afterJson);
 
         if(Objects.equals(beforeJson, afterJson)) {
             throw new NotAcceptableException("변경된 사항이 없습니다.", null);

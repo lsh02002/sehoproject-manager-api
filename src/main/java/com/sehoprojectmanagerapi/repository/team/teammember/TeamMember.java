@@ -1,5 +1,7 @@
 package com.sehoprojectmanagerapi.repository.team.teammember;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
+import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
@@ -19,7 +21,7 @@ import java.time.OffsetDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamMember {
+public class TeamMember extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;  // 단일 기본키
@@ -41,4 +43,9 @@ public class TeamMember {
 
     @Column(name = "joined_at")
     private OffsetDateTime joinedAt;  // 가입 시각
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

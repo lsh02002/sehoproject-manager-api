@@ -13,6 +13,8 @@ public class TagMapper {
                 .projectId(tag.getProject() != null ? tag.getProject().getId() : null)
                 .name(tag.getName())
                 .description(tag.getDescription())
+                .createdAt(tag.getCreatedAt())
+                .updatedAt(tag.getUpdatedAt())
                 .build();
     }
 }

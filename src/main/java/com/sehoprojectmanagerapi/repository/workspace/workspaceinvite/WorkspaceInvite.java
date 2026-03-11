@@ -1,5 +1,6 @@
 package com.sehoprojectmanagerapi.repository.workspace.workspaceinvite;
 
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
@@ -7,6 +8,7 @@ import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -15,7 +17,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkspaceInvite extends BaseEntity {
+public class WorkspaceInvite extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,7 +41,12 @@ public class WorkspaceInvite extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private WorkspaceRole requestedRole; // 선택
 
-    private OffsetDateTime expiresAt;
+    private LocalDateTime expiresAt;
 
     public enum Status {PENDING, ACCEPTED, DECLINED, EXPIRED}
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 }

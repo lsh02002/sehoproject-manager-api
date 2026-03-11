@@ -71,7 +71,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), null, savedComment);
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.CREATE, comment.getId(), comment.logMessage(), user, null, savedComment);
 
         return commentMapper.toResponse(savedComment);
     }
@@ -99,7 +99,7 @@ public class CommentService {
 
         Object aftercomment = snapshotFunc.snapshot(comment);
 
-        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), beforecomment, aftercomment);
+        activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.UPDATE, comment.getId(), comment.logMessage(), user, beforecomment, aftercomment);
 
         commentRepository.save(comment);
 
@@ -117,7 +117,7 @@ public class CommentService {
 
             Object beforecomment = snapshotFunc.snapshot(comment);
 
-            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.logTargetId(), comment.logMessage(), user, comment.logProject(), beforecomment, null);
+            activityLogService.log(ActivityEntityType.COMMENT, ActivityAction.DELETE, comment.getId(), comment.logMessage(), user, beforecomment, null);
 
             commentRepository.deleteByAuthorIdAndId(userId, commentId);
         } catch (RuntimeException e) {

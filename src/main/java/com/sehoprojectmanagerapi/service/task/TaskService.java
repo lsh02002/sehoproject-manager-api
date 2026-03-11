@@ -294,7 +294,7 @@ public class TaskService {
 
         Object aftertask = snapshotFunc.snapshot(savedtask);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, savedtask.logTargetId(), savedtask.logMessage(), projectMember.getUser(), savedtask.logProject(), null, aftertask);
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.CREATE, savedtask.getId(), savedtask.logMessage(), projectMember.getUser(), null, aftertask);
 
         // 12) 응답
         return taskMapper.toTaskResponse(task);
@@ -522,7 +522,7 @@ public class TaskService {
 
         Object aftertask = snapshotFunc.snapshot(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), beforetask, aftertask);
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, task.getId(), task.logMessage(), projectMember.getUser(), beforetask, aftertask);
         // 8) 저장 & 응답
         taskRepository.save(task);
 
@@ -543,7 +543,7 @@ public class TaskService {
 
         Object beforetask = snapshotFunc.snapshot(task);
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.logTargetId(), task.logMessage(), projectMember.getUser(), task.logProject(), beforetask, null);
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.DELETE, task.getId(), task.logMessage(), projectMember.getUser(), beforetask, null);
 
         try {
             taskRepository.delete(task);

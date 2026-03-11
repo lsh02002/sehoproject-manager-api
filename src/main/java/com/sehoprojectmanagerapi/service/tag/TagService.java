@@ -91,7 +91,7 @@ public class TagService {
 
         Object aftertag = snapshotFunc.snapshot(savedtag);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.logTargetId(), savedtag.logMessage(), pm.getUser(), savedtag.logProject(), null, aftertag);
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.CREATE, savedtag.getId(), savedtag.logMessage(), pm.getUser(), null, aftertag);
 
         return tagMapper.toResponse(tag);
     }
@@ -122,7 +122,7 @@ public class TagService {
 
         Object aftertage = snapshotFunc.snapshot(tag);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject(), beforetag, aftertage);
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.UPDATE, tag.getId(), tag.logMessage(), pm.getUser(), beforetag, aftertage);
 
         tagRepository.save(tag);
 
@@ -141,7 +141,7 @@ public class TagService {
                 .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
 
-        activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.logTargetId(), tag.logMessage(), pm.getUser(), tag.logProject(), beforetag, null);
+        activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.getId(), tag.logMessage(), pm.getUser(), beforetag, null);
         // 연결된 TaskTag가 있으면 FK/제약 위반될 수 있습니다.
         // orphanRemoval/ON DELETE CASCADE 설정에 맞춰 예외 처리
         tagRepository.delete(tag);

@@ -16,6 +16,7 @@ public class NotificationMapper {
                 .relatedId(n.getRelatedId())
                 .readFlag(n.isReadFlag())
                 .createdAt(n.getCreatedAt())
+                .updatedAt(n.getUpdatedAt())
                 .build();
 
     }

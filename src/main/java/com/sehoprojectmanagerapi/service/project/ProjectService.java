@@ -119,9 +119,9 @@ public class ProjectService {
 
         Object aftermember = snapshotFunc.snapshot(savedProject);
 
-        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, projectMember.logTargetId(), projectMember.logMessage(), user, project.logProject(), null, aftermember);
+        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, projectMember.getId(), projectMember.logMessage(), user, null, aftermember);
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.logTargetId(), savedProject.logMessage(), user, savedProject.logProject(), null, afterproject);
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.CREATE, savedProject.getId(), savedProject.logMessage(), user, null, afterproject);
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -203,8 +203,8 @@ public class ProjectService {
 
                 activityLogService.log(
                         ActivityEntityType.TAG, ActivityAction.DELETE,
-                        tag.logTargetId(), tag.logMessage(),
-                        projectMember.getUser(), tag.logProject(),
+                        tag.getId(), tag.logMessage(),
+                        projectMember.getUser(),
                         beforeTag, null
                 );
             }
@@ -251,8 +251,8 @@ public class ProjectService {
 
                     activityLogService.log(
                             ActivityEntityType.TAG, ActivityAction.DELETE,
-                            tag.logTargetId(), tag.logMessage(),
-                            projectMember.getUser(), tag.logProject(),
+                            tag.getId(), tag.logMessage(),
+                            projectMember.getUser(),
                             beforeTag, null
                     );
                 }
@@ -296,8 +296,8 @@ public class ProjectService {
             Object afterTag = snapshotFunc.snapshot(created);
             activityLogService.log(
                     ActivityEntityType.TAG, ActivityAction.CREATE,
-                    created.logTargetId(), created.logMessage(),
-                    projectMember.getUser(), created.logProject(),
+                    created.getId(), created.logMessage(),
+                    projectMember.getUser(),
                     null, afterTag
             );
         }
@@ -306,8 +306,8 @@ public class ProjectService {
 
         activityLogService.log(
                 ActivityEntityType.PROJECT, ActivityAction.UPDATE,
-                project.logTargetId(), project.logMessage(),
-                projectMember.getUser(), project.logProject(),
+                project.getId(), project.logMessage(),
+                projectMember.getUser(),
                 beforeproject, afterproject
         );
 
@@ -332,7 +332,7 @@ public class ProjectService {
 
         Object beforeproject = snapshotFunc.snapshot(projectMember.getProject());
 
-        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().logTargetId(), projectMember.getProject().logMessage(), projectMember.getUser(), projectMember.getProject().logProject(), beforeproject, null);
+        activityLogService.log(ActivityEntityType.PROJECT, ActivityAction.DELETE, projectMember.getProject().getId(), projectMember.getProject().logMessage(), projectMember.getUser(), beforeproject, null);
 
         projectMemberRepository.deleteByUserIdAndProjectId(userId, projectId);
         projectRepository.deleteById(projectId);

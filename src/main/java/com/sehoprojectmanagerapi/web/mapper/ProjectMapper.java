@@ -28,6 +28,8 @@ public class ProjectMapper {
                 .creatorId(project.getCreatedBy() != null ? project.getCreatedBy().getId() : null)
                 .creatorName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
                 .tagResponses(project.getTags() != null ? project.getTags().stream().map(tagMapper::toResponse).toList() : null)
+                .createdAt(project.getCreatedAt())
+                .updatedAt(project.getUpdatedAt())
                 .build();
     }
 }

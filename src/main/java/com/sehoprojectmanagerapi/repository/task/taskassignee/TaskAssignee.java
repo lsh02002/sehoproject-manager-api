@@ -1,6 +1,7 @@
 package com.sehoprojectmanagerapi.repository.task.taskassignee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.team.Team;
@@ -19,7 +20,7 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class TaskAssignee extends BaseEntity {
+public class TaskAssignee extends BaseEntity implements Loggable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,6 +48,11 @@ public class TaskAssignee extends BaseEntity {
     private List<TaskAssigneeUser> expandedUsers = new ArrayList<>();
 
     private OffsetDateTime assignedAt;
+
+    @Override
+    public String logMessage() {
+        return "name=";
+    }
 
     // id는 제외한 생성자
     private TaskAssignee(Task task,

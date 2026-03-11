@@ -4,6 +4,7 @@ import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,4 +26,6 @@ public class ProjectResponse {
     private Long creatorId;
     private String creatorName;
     private List<TagResponse> tagResponses;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

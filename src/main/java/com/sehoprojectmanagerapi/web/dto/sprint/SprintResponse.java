@@ -4,6 +4,7 @@ import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -17,6 +18,8 @@ public record SprintResponse(
         String state,
         LocalDate startDate,
         LocalDate endDate,
-        List<TaskResponse> taskIds
+        List<TaskResponse> taskIds,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

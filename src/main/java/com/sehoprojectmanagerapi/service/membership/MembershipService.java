@@ -124,7 +124,7 @@ public class MembershipService {
 
         pm = projectMemberRepository.save(pm);
 
-        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.logTargetId(), pm.logMessage(), target, project, null, aftermember);
+        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.getId(), pm.logMessage(), target, null, aftermember);
 
         return new MemberResponse(pm.getId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
     }

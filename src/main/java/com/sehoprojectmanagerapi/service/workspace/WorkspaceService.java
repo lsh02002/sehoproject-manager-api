@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -233,7 +234,7 @@ public class WorkspaceService {
         invite.setStatus(WorkspaceInvite.Status.PENDING);
         invite.setMessage(request.message());
         invite.setRequestedRole(request.requestedRole()); // 예: RoleWorkspace.MEMBER 등 (null이면 기본)
-        invite.setExpiresAt(OffsetDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
+        invite.setExpiresAt(LocalDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
 
         // 7) 저장
         WorkspaceInvite saved = workspaceInviteRepository.save(invite);
@@ -261,7 +262,7 @@ public class WorkspaceService {
         if (invite.getStatus() != WorkspaceInvite.Status.PENDING) {
             throw new ConflictException("이미 처리되었거나 만료된 초대입니다.", workspaceId);
         }
-        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(OffsetDateTime.now())) {
+        if (invite.getExpiresAt() != null && invite.getExpiresAt().isBefore(LocalDateTime.now())) {
             invite.setStatus(WorkspaceInvite.Status.EXPIRED);
             workspaceInviteRepository.save(invite);
             throw new ConflictException("초대 기간이 만료되었습니다.", workspaceId);

@@ -2,6 +2,8 @@ package com.sehoprojectmanagerapi.web.dto.notification;
 
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Builder
 public record NotificationResponse(
         Long notificationId,
@@ -11,7 +13,8 @@ public record NotificationResponse(
         String type,
         Long relatedId,
         boolean readFlag,
-        java.time.LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }
 
