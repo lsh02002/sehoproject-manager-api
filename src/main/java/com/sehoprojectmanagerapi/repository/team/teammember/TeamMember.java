@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -42,7 +42,7 @@ public class TeamMember extends BaseEntity implements Loggable {
     private boolean active = true;  // 활동 여부
 
     @Column(name = "joined_at")
-    private OffsetDateTime joinedAt;  // 가입 시각
+    private LocalDateTime joinedAt;  // 가입 시각
 
     @Override
     public String logMessage() {

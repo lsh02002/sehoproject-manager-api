@@ -9,7 +9,7 @@ import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "workspace_members",
@@ -42,7 +42,7 @@ public class WorkspaceMember extends BaseEntity implements Loggable {
     private CommonStatus status = CommonStatus.ACTIVE;
 
     @Column(nullable = false)
-    private OffsetDateTime joinedAt;
+    private LocalDateTime joinedAt;
 
     @Override
     public String logMessage() {

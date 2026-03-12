@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.repository.project.projectmember;
 
-import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
@@ -8,7 +7,7 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -40,11 +39,11 @@ public class ProjectMember extends BaseEntity implements Loggable {
     private RoleProject role = RoleProject.CONTRIBUTOR;
 
     @Builder.Default
-    private OffsetDateTime joinedAt = null;
+    private LocalDateTime joinedAt = null;
 
     @PrePersist
     void prePersist() {
-        if (joinedAt == null) joinedAt = OffsetDateTime.now();
+        if (joinedAt == null) joinedAt = LocalDateTime.now();
     }
 
     // --- Loggable ---

@@ -39,7 +39,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -202,7 +202,7 @@ public class TaskService {
         task.setDueDate(request.dueDate());
         task.setSprint(sprint);
         task.setMilestone(milestone);
-        task.setCreatedAt(OffsetDateTime.now().toLocalDateTime());
+        task.setCreatedAt(LocalDateTime.now());
 
         // 7) 먼저 저장해서 PK 확보
         task = taskRepository.save(task);
@@ -230,7 +230,7 @@ public class TaskService {
                         }
 
                         assigneeSource = taskAssigneeRepository.save(
-                                TaskAssignee.forUser(task, assignee, creator, OffsetDateTime.now())
+                                TaskAssignee.forUser(task, assignee, creator, LocalDateTime.now())
                         );
 
                         // (선택) 확장 테이블 쓰는 경우
@@ -252,7 +252,7 @@ public class TaskService {
                         }
 
                         assigneeSource = taskAssigneeRepository.save(
-                                TaskAssignee.forTeam(task, team, creator, dynamic, OffsetDateTime.now())
+                                TaskAssignee.forTeam(task, team, creator, dynamic, LocalDateTime.now())
                         );
 
                         // (선택) 확장: 팀 멤버 전원 사용자 단위로 upsert
@@ -469,7 +469,7 @@ public class TaskService {
 
                             if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), type, assignee.getId())) {
                                 assigneeSource = taskAssigneeRepository.save(
-                                        TaskAssignee.forUser(task, assignee, updater, OffsetDateTime.now())
+                                        TaskAssignee.forUser(task, assignee, updater, LocalDateTime.now())
                                 );
                                 if (!taskAssigneeUserRepository.existsByTaskIdAndUserId(task.getId(), assignee.getId())) {
                                     taskAssigneeUserRepository.save(new TaskAssigneeUser(task, assignee, assigneeSource));
@@ -490,7 +490,7 @@ public class TaskService {
 
                             if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), type, team.getId())) {
                                 assigneeSource = taskAssigneeRepository.save(
-                                        TaskAssignee.forTeam(task, team, updater, dynamic, OffsetDateTime.now())
+                                        TaskAssignee.forTeam(task, team, updater, dynamic, LocalDateTime.now())
                                 );
 
                                 List<User> members = teamMemberRepository.findActiveUsersByTeamId(team.getId());
@@ -518,7 +518,7 @@ public class TaskService {
 
         // 7) 감사 필드 업데이트(있다면)
 //        task.setUpdatedBy(updater);
-        task.setUpdatedAt(OffsetDateTime.now().toLocalDateTime());
+        task.setUpdatedAt(LocalDateTime.now());
 
         Object aftertask = snapshotFunc.snapshot(task);
 

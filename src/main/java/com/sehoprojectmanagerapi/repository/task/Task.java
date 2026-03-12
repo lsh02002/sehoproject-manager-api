@@ -18,7 +18,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -85,7 +85,7 @@ public class Task extends BaseEntity implements Loggable {
     @JoinColumn(name = "closed_by")
     private User closedBy;
 
-    private OffsetDateTime closedAt;
+    private LocalDateTime closedAt;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "sprint_id")
@@ -126,13 +126,13 @@ public class Task extends BaseEntity implements Loggable {
     // Assignee
     // Task 엔티티 내부
     public void addAssignee(User user, User actor) {
-        TaskAssignee ta = TaskAssignee.forUser(this, user, actor, OffsetDateTime.now());
+        TaskAssignee ta = TaskAssignee.forUser(this, user, actor, LocalDateTime.now());
         ta.setTask(this);
         assignees.add(ta);
     }
 
     public void addAssignee(Team team, User actor, boolean dynamic) {
-        TaskAssignee ta = TaskAssignee.forTeam(this, team, actor, dynamic, OffsetDateTime.now());
+        TaskAssignee ta = TaskAssignee.forTeam(this, team, actor, dynamic, LocalDateTime.now());
         ta.setTask(this);
         assignees.add(ta);
     }

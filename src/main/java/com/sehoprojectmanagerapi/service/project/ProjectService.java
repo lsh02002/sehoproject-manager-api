@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject.MANAGER;
@@ -113,7 +113,7 @@ public class ProjectService {
         projectMember.setProject(savedProject);
         projectMember.setUser(user);
         projectMember.setRole(MANAGER);
-        projectMember.setJoinedAt(OffsetDateTime.now());
+        projectMember.setJoinedAt(LocalDateTime.now());
 
         projectMemberRepository.save(projectMember);
 

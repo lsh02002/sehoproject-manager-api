@@ -53,6 +53,7 @@ public class UserService {
 
     private final SpaceRepository spaceRepository;
     private final ProjectRepository projectRepository;
+    private final WorkspaceRepository workspaceRepository;
 
     @Transactional
     public UserResponse signUp(SignupRequest signupRequest) {
@@ -227,6 +228,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));
 
+        workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", workspaceId));
+
         if(Objects.equals(user.getWorkspaceId(), workspaceId) && Objects.equals(user.getSpaceId(), spaceId) && Objects.equals(user.getProjectId(), projectId)) {
             throw new NotAcceptableException("변경된 사항이 없습니다.", null);
         }
@@ -260,6 +264,7 @@ public class UserService {
         }
 
         // 3. user에 반영
+        user.setWorkspaceId(workspaceId);
         user.setSpaceId(targetSpaceId);
         user.setProjectId(targetProjectId);
 

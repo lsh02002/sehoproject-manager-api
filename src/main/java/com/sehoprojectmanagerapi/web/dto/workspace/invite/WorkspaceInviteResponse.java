@@ -4,7 +4,6 @@ import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 @Builder
 public record WorkspaceInviteResponse(

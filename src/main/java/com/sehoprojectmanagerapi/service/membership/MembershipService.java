@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -82,7 +82,7 @@ public class MembershipService {
         sm.setSpace(space);
         sm.setUser(target);
         sm.setRole(SpaceRole.valueOf(req.requestRole())); // 유효성 검사 필요시 try-catch
-        sm.setJoinedAt(OffsetDateTime.now());
+        sm.setJoinedAt(LocalDateTime.now());
 //        sm.setGrantedBy(em.getReference(User.class, granterUserId));
 //        sm.setNote(req.note());
         spaceMemberRepository.save(sm);
@@ -116,7 +116,7 @@ public class MembershipService {
         pm.setProject(project);
         pm.setUser(target);
         pm.setRole(RoleProject.valueOf(req.roleProject())); // 프로젝트 역할 Enum 별도라면 바꾸세요
-        pm.setJoinedAt(OffsetDateTime.now());
+        pm.setJoinedAt(LocalDateTime.now());
 //        pm.setGrantedBy(em.getReference(User.class, granterUserId));
 //        pm.setNote(req.note());
 

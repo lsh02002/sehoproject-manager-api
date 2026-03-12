@@ -43,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,7 +105,7 @@ public class WorkspaceService {
                 .workspace(workspace)
                 .user(creator)
                 .role(WorkspaceRole.OWNER)
-                .joinedAt(OffsetDateTime.now())
+                .joinedAt(LocalDateTime.now())
                 .build();
         workspaceMemberRepository.save(owner);
 
@@ -251,7 +250,7 @@ public class WorkspaceService {
                         request.workspaceId(),
                         invited.getId(),
                         List.of(WorkspaceInvite.Status.PENDING),
-                        OffsetDateTime.now()
+                        LocalDateTime.now()
                 );
         if (hasPending) {
             throw new ConflictException("진행 중인 초대가 이미 있습니다.", request.workspaceId());
@@ -305,7 +304,7 @@ public class WorkspaceService {
             invite.setStatus(WorkspaceInvite.Status.ACCEPTED);
             workspaceInviteRepository.save(invite);
             // 같은 사용자에 대한 다른 PENDING 초대 무효화(선택)
-            workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), OffsetDateTime.now());
+            workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), LocalDateTime.now());
             return workspaceMapper.toResponse(workspace);
         }
 
@@ -318,14 +317,14 @@ public class WorkspaceService {
         newMember.setWorkspace(workspace);
         newMember.setUser(invite.getInvitedUser());
         newMember.setRole(role);
-        newMember.setJoinedAt(OffsetDateTime.now());
+        newMember.setJoinedAt(LocalDateTime.now());
 
         workspaceMemberRepository.save(newMember);
 
         // 6) 초대 상태 갱신 + 동일 사용자 다른 초대 무효화
         invite.setStatus(WorkspaceInvite.Status.ACCEPTED);
         workspaceInviteRepository.save(invite);
-        workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), OffsetDateTime.now());
+        workspaceInviteRepository.expireOtherPendings(workspaceId, userId, invite.getId(), LocalDateTime.now());
 
         // 7) (옵션) 이벤트/알림 발행
         // domainEvents.publish(new WorkspaceMemberJoinedEvent(workspace.getId(), userId, role));

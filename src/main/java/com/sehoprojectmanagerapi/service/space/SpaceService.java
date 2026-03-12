@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -75,7 +75,7 @@ public class SpaceService {
                 .space(space)
                 .user(creator)
                 .role(SpaceRole.ADMIN)
-                .joinedAt(OffsetDateTime.now())
+                .joinedAt(LocalDateTime.now())
                 .build();
         spaceMemberRepository.save(spaceOwner);
 

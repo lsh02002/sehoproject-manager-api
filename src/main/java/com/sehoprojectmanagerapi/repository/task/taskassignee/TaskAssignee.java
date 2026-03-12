@@ -9,7 +9,7 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class TaskAssignee extends BaseEntity implements Loggable {
     @Builder.Default
     private List<TaskAssigneeUser> expandedUsers = new ArrayList<>();
 
-    private OffsetDateTime assignedAt;
+    private LocalDateTime assignedAt;
 
     @Override
     public String logMessage() {
@@ -60,7 +60,7 @@ public class TaskAssignee extends BaseEntity implements Loggable {
                          Long assigneeId,
                          User createdBy,
                          boolean dynamic,
-                         OffsetDateTime assignedAt) {
+                         LocalDateTime assignedAt) {
         if (task == null || type == null || assigneeId == null || createdBy == null || assignedAt == null) {
             throw new IllegalArgumentException("TaskAssignee requires non-null arguments");
         }
@@ -73,12 +73,12 @@ public class TaskAssignee extends BaseEntity implements Loggable {
     }
 
     // --- 정적 팩토리: 사용자 담당자 ---
-    public static TaskAssignee forUser(Task task, User user, User actor, OffsetDateTime at) {
+    public static TaskAssignee forUser(Task task, User user, User actor, LocalDateTime at) {
         return new TaskAssignee(task, AssigneeType.USER, user.getId(), actor, false, at);
     }
 
     // --- 정적 팩토리: 팀 담당자 ---
-    public static TaskAssignee forTeam(Task task, Team team, User actor, boolean dynamic, OffsetDateTime at) {
+    public static TaskAssignee forTeam(Task task, Team team, User actor, boolean dynamic, LocalDateTime at) {
         return new TaskAssignee(task, AssigneeType.TEAM, team.getId(), actor, dynamic, at);
     }
 

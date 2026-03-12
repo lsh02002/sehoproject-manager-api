@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
             Long workspaceId,
             Long invitedUserId,
             List<WorkspaceInvite.Status> statuses,
-            OffsetDateTime now);
+            LocalDateTime now);
 
     // 수락/거절용 조회 (Fetch join 포함 버전)
     @Query("""
@@ -50,7 +50,7 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
     int expireOtherPendings(@Param("workspaceId") Long workspaceId,
                             @Param("userId") Long userId,
                             @Param("currentInviteId") Long currentInviteId,
-                            @Param("now") OffsetDateTime now);
+                            @Param("now") LocalDateTime now);
 
     List<WorkspaceInvite> findByInviterId(Long userId);
 }

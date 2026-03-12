@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -73,7 +72,7 @@ public class TeamService {
         teamMember.setTeam(savedTeam);
         teamMember.setUser(user);
         teamMember.setRole(RoleTeam.OWNER);
-        teamMember.setJoinedAt(OffsetDateTime.now());
+        teamMember.setJoinedAt(LocalDateTime.now());
 
         teamMemberRepository.save(teamMember);
 
@@ -162,7 +161,7 @@ public class TeamService {
 
         // 4) 중복 PENDING 초대 검사
         boolean hasPending = teamInviteRepository.existsByTeamIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
-                teamId, invited.getId(), List.of(TeamInvite.Status.PENDING), OffsetDateTime.now());
+                teamId, invited.getId(), List.of(TeamInvite.Status.PENDING), LocalDateTime.now());
         if (hasPending) {
             throw new ConflictException("대기 중인 초대가 이미 존재합니다.", invited.getId());
         }
@@ -209,14 +208,14 @@ public class TeamService {
             newMember.setTeam(invite.getTeam());
             newMember.setUser(invite.getInvitedUser());
             newMember.setRole(invite.getRequestedRole() != null ? invite.getRequestedRole() : RoleTeam.MEMBER);
-            newMember.setJoinedAt(OffsetDateTime.now());
+            newMember.setJoinedAt(LocalDateTime.now());
             teamMemberRepository.save(newMember);
         }
 
         // 상태 변경 및 다른 PENDING 초대 만료
         invite.setStatus(TeamInvite.Status.ACCEPTED);
         teamInviteRepository.save(invite);
-        teamInviteRepository.expireOtherPendings(teamId, userId, invite.getId(), OffsetDateTime.now());
+        teamInviteRepository.expireOtherPendings(teamId, userId, invite.getId(), LocalDateTime.now());
 
         return teamMapper.toTeamResponse(invite.getTeam()); // 기존 변환기 재사용
     }

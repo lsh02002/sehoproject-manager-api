@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -17,10 +17,10 @@ public interface TeamInviteRepository extends JpaRepository<TeamInvite, Long> {
     Optional<TeamInvite> findByIdAndTeamId(Long id, Long teamId);
 
     boolean existsByTeamIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
-            Long teamId, Long invitedUserId, Collection<TeamInvite.Status> statuses, OffsetDateTime now);
+            Long teamId, Long invitedUserId, Collection<TeamInvite.Status> statuses, LocalDateTime now);
 
     @Transactional
-    default int expireOtherPendings(Long teamId, Long userId, Long keptInviteId, OffsetDateTime now) {
+    default int expireOtherPendings(Long teamId, Long userId, Long keptInviteId, LocalDateTime now) {
         return expireOtherPendings0(teamId, userId, keptInviteId, now,
                 TeamInvite.Status.PENDING, TeamInvite.Status.EXPIRED);
     }
@@ -38,7 +38,7 @@ public interface TeamInviteRepository extends JpaRepository<TeamInvite, Long> {
     int expireOtherPendings0(@Param("teamId") Long teamId,
                              @Param("userId") Long userId,
                              @Param("keptInviteId") Long keptInviteId,
-                             @Param("now") OffsetDateTime now,
+                             @Param("now") LocalDateTime now,
                              @Param("pending") TeamInvite.Status pending,
                              @Param("expired") TeamInvite.Status expired);
 }
