@@ -44,7 +44,7 @@ public class WorkspaceController {
         return ResponseEntity.ok(workspaceService.getWorkspace(customUserDetails.getId(), id));
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public WorkspaceResponse updateWorkspace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                              @PathVariable Long id,
                                              @RequestBody WorkspaceRequest request) {

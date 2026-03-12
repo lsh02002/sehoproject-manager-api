@@ -33,9 +33,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(customUserDetails.getId(), taskId));
     }
 
-    @GetMapping("/assignee/workspaces/{workspaceId}")
-    public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
-        return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId(), workspaceId));
+    @GetMapping("/assignee/project/{projectId}")
+    public ResponseEntity<List<TaskResponse>> getTasksByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId(), projectId));
     }
 
     @PostMapping("/create")
@@ -43,7 +43,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
     }
 
-    @PutMapping("/{taskId}/edit")
+    @PostMapping("/{taskId}/edit")
     public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestBody TaskUpdateRequest request) {
         return ResponseEntity.ok(taskService.updateTask(customUserDetails.getId(), taskId, request));
     }

@@ -37,7 +37,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.createProject(customUserDetails.getId(), projectRequest));
     }
 
-    @PutMapping("/{projectId}/edit")
+    @PostMapping("/{projectId}/edit")
     public ResponseEntity<ProjectResponse> updateProject(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId, @RequestBody ProjectRequest projectRequest) {
         return ResponseEntity.ok(projectService.updateProject(customUserDetails.getId(), projectId, projectRequest));
     }

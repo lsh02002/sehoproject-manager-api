@@ -5,13 +5,20 @@ import com.sehoprojectmanagerapi.config.redis.RedisUtil;
 import com.sehoprojectmanagerapi.config.security.JwtTokenProvider;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.project.Project;
+import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
+import com.sehoprojectmanagerapi.repository.space.Space;
+import com.sehoprojectmanagerapi.repository.space.SpaceRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshToken;
 import com.sehoprojectmanagerapi.repository.user.refreshToken.RefreshTokenRepository;
+import com.sehoprojectmanagerapi.repository.workspace.Workspace;
+import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
+import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
@@ -30,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +50,9 @@ public class UserService {
     private final UserMapper userMapper;
     private final ActivityLogService activityLogService;
     private final SnapshotFunc snapshotFunc;
+
+    private final SpaceRepository spaceRepository;
+    private final ProjectRepository projectRepository;
 
     @Transactional
     public UserResponse signUp(SignupRequest signupRequest) {
@@ -96,6 +107,8 @@ public class UserService {
                 .userId(user.getId())
                 .nickname(user.getNickname())
                 .workspaceId(user.getWorkspaceId())
+                .spaceId(user.getSpaceId())
+                .projectId(user.getProjectId())
                 .build();
 
         activityLogService.log(ActivityEntityType.USER, ActivityAction.CREATE, user.getId(), user.logMessage(), user, null, afteruser);
@@ -125,6 +138,8 @@ public class UserService {
                 .userId(user.getId())
                 .nickname(user.getNickname())
                 .workspaceId(user.getWorkspaceId())
+                .spaceId(user.getSpaceId())
+                .projectId(user.getProjectId())
                 .build();
 
         String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
@@ -183,6 +198,22 @@ public class UserService {
     }
 
     @Transactional
+    public SignupResponse getUserByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
+
+        return SignupResponse.builder()
+                .userId(user.getId())
+                .nickname(user.getNickname())
+                .workspaceId(user.getWorkspaceId())
+                .spaceId(user.getSpaceId())
+                .projectId(user.getProjectId())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    @Transactional
     public List<AssigneeRequest> getUserInfos(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
@@ -192,12 +223,46 @@ public class UserService {
     }
 
     @Transactional
-    public Long setWorkspaceId(Long userId, Long workspaceId) {
+    public Long setUserProjectId(Long userId, Long workspaceId, Long spaceId, Long projectId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));
+                .orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));
 
-        user.setWorkspaceId(workspaceId);
+        if(Objects.equals(user.getWorkspaceId(), workspaceId) && Objects.equals(user.getSpaceId(), spaceId) && Objects.equals(user.getProjectId(), projectId)) {
+            throw new NotAcceptableException("변경된 사항이 없습니다.", null);
+        }
 
-        return user.getWorkspaceId();
+        Long targetSpaceId;
+        Long targetProjectId;
+
+        // 1. space 결정
+        if (spaceRepository.existsByIdAndWorkspaceId(spaceId, workspaceId)) {
+            targetSpaceId = spaceId;
+        } else {
+            List<Space> fallbackSpaces = spaceRepository.findFirstByWorkspaceIdOrderByIdAsc(workspaceId);
+
+            if(fallbackSpaces.isEmpty()) {
+                throw  new NotFoundException("해당 워크스페이스에 스페이스가 없습니다.", workspaceId);
+            }
+
+            targetSpaceId = fallbackSpaces.get(0).getId();
+        }
+
+        // 2. project 결정
+        if (projectRepository.existsByIdAndSpaceId(projectId, targetSpaceId)) {
+            targetProjectId = projectId;
+        } else {
+            List<Project> fallbackProjects = projectRepository.findFirstBySpaceIdOrderByIdAsc(targetSpaceId);
+
+            if(fallbackProjects.isEmpty()) {
+                throw new NotFoundException("해당 스페이스에 프로젝트가 없습니다.", targetSpaceId);
+            }
+            targetProjectId = fallbackProjects.get(0).getId();
+        }
+
+        // 3. user에 반영
+        user.setSpaceId(targetSpaceId);
+        user.setProjectId(targetProjectId);
+
+        return user.getProjectId();
     }
 }

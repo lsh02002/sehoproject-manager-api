@@ -34,7 +34,7 @@ public class SprintController {
         return ResponseEntity.ok(sprintService.createSprint(customUserDetails.getId(), request));
     }
 
-    @PutMapping("/{sprintId}")
+    @PostMapping("/{sprintId}")
     public ResponseEntity<SprintResponse> updateSprint(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long sprintId, @RequestBody SprintRequest request) {
         return ResponseEntity.ok(sprintService.updateSprint(customUserDetails.getId(), sprintId, request));
     }

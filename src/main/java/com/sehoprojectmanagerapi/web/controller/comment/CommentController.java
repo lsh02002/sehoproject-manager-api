@@ -37,7 +37,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.createComment(customUserDetails.getId(), commentRequest));
     }
 
-    @PutMapping("/{commentId}")
+    @PostMapping("/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("commentId") Long commentId, @RequestBody CommentRequest commentRequest) {
         return ResponseEntity.ok(commentService.updateComment(customUserDetails.getId(), commentId, commentRequest));
     }

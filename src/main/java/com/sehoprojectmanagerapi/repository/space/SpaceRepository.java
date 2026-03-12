@@ -101,4 +101,7 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
             @Param("rolesGrantingProject") Collection<Role> rolesGrantingProject
     );
 
+    boolean existsByIdAndWorkspaceId(Long spaceId, Long workspaceId);
+
+    List<Space> findFirstByWorkspaceIdOrderByIdAsc(Long workspaceId);
 }

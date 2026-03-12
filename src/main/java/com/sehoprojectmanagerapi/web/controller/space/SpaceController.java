@@ -38,7 +38,7 @@ public class SpaceController {
         return ResponseEntity.ok(spaceService.getSpace(customUserDetails.getId(), workspaceId, spaceId));
     }
 
-    @PutMapping("/{workspaceId}/spaces/{spaceId}")
+    @PostMapping("/{workspaceId}/spaces/{spaceId}")
     public ResponseEntity<SpaceResponse> updateSpace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                      @PathVariable Long workspaceId,
                                                      @PathVariable Long spaceId,

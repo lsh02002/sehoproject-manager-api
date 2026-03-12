@@ -29,7 +29,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
     select t
     from Task t
-    where t.project.space.workspace.id = :workspaceId
+    where t.project.id = :projectId
       and (
         t.id in (
           select ta.task.id
@@ -48,6 +48,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 """)
     List<Task> findTasksVisibleToUser(
             @Param("userId") Long userId,
-            @Param("workspaceId") Long workspaceId
+            @Param("projectId") Long projectId
     );
 }

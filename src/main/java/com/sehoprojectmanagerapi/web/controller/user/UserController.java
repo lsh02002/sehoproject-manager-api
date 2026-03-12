@@ -7,6 +7,7 @@ import com.sehoprojectmanagerapi.service.user.UserService;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
 import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
+import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
 import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,14 +49,19 @@ public class UserController {
         return ResponseEntity.ok(userService.withdrawal(customUserDetails.getEmail()));
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<SignupResponse> getUserByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return ResponseEntity.ok(userService.getUserByUser(customUserDetails.getId()));
+    }
+
     @GetMapping
     public ResponseEntity<List<AssigneeRequest>> getAllUsers(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return ResponseEntity.ok(userService.getUserInfos(customUserDetails.getId()));
     }
 
-    @PostMapping("/workspaces/{workspaceId}")
-    public ResponseEntity<Long> setUserWorkspaceId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId) {
-        return ResponseEntity.ok(userService.setWorkspaceId(customUserDetails.getId(), workspaceId));
+    @PostMapping("/setting/{workspaceId}/{spaceId}/{projectId}")
+    public ResponseEntity<Long> setUserProjectId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long workspaceId, @PathVariable Long spaceId, @PathVariable Long projectId) {
+        return ResponseEntity.ok(userService.setUserProjectId(customUserDetails.getId(), workspaceId, spaceId, projectId));
     }
 
     @GetMapping(value = "/entrypoint")

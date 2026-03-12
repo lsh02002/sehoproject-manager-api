@@ -9,6 +9,8 @@ public record SignupResponse(
         Long userId,
         String nickname,
         Long workspaceId,
+        Long spaceId,
+        Long projectId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

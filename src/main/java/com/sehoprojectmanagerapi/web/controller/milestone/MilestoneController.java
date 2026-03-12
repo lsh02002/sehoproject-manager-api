@@ -32,7 +32,7 @@ public class MilestoneController {
         return ResponseEntity.ok(milestoneService.createMilestone(customUserDetails.getId(), request));
     }
 
-    @PutMapping("/{milestoneId}")
+    @PostMapping("/{milestoneId}")
     public ResponseEntity<?> updateMilestone(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long milestoneId, @RequestBody MilestoneRequest request) {
         return ResponseEntity.ok(milestoneService.updateMilestone(customUserDetails.getId(), milestoneId, request));
     }

@@ -48,7 +48,7 @@ public class TagController {
     /**
      * 태그 수정
      */
-    @PutMapping("/{tagId}")
+    @PostMapping("/{tagId}")
     public ResponseEntity<TagResponse> updateTag(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long tagId, @RequestBody TagRequest tagRequest) {
         return ResponseEntity.ok(tagService.updateTag(customUserDetails.getId(), tagId, tagRequest));
     }

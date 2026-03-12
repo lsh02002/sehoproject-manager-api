@@ -27,7 +27,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.createNotification(customUserDetails.getId(), request));
     }
 
-    @PutMapping("/{notificationId}")
+    @PostMapping("/{notificationId}")
     public ResponseEntity<?> updateNotification(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("notificationId") Long notificationId, @RequestBody NotificationRequest request) {
         return ResponseEntity.ok(notificationService.updateNotification(customUserDetails.getId(), notificationId, request));
     }

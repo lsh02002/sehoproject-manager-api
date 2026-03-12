@@ -45,6 +45,12 @@ public class User extends BaseEntity implements Loggable {
     @Column(name = "workspace_id")
     private Long workspaceId;
 
+    @Column(name = "space_id")
+    private Long spaceId;
+
+    @Column(name = "project_id")
+    private Long projectId;
+
     @Column(nullable = false)
     private String userStatus;
 
