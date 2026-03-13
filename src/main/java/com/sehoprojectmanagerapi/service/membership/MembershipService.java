@@ -26,16 +26,12 @@ import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddMemberRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
 import com.sehoprojectmanagerapi.web.mapper.user.UserMapper;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,85 +44,128 @@ public class MembershipService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final EntityManager em;
     private final ActivityLogService activityLogService;
     private final SnapshotFunc snapshotFunc;
 
     @Transactional
-    public MemberResponse addSpaceMember(Long granterUserId,
-                                         Long workspaceId,
-                                         Long spaceId,
-                                         AddMemberRequest req) {
+    public List<MemberResponse> addSpaceAndProjectMembers(Long granterUserId,
+                                                          Long workspaceId,
+                                                          Long spaceId,
+                                                          List<Long> projectIds,
+                                                          List<AddMemberRequest> reqList) {
+
         ensureGranterCanGrant(granterUserId, workspaceId);
 
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new NotFoundException("스페이스 없음", null));
+
         if (!Objects.equals(space.getWorkspace().getId(), workspaceId)) {
             throw new NotAcceptableException("스페이스가 워크스페이스에 속하지 않음", null);
         }
 
-        User target = resolveTargetUserInWorkspace(workspaceId, req.email());
-
-        if (spaceMemberRepository.existsBySpaceIdAndUserId(space.getId(), target.getId())) {
-            // 이미 멤버면 idempotent 처리: 그냥 성공처럼 응답하거나 409 반환(정책 선택)
-            SpaceMember existing = em.createQuery("""
-                                select sm from SpaceMember sm
-                                where sm.space.id = :sid and sm.user.id = :uid
-                            """, SpaceMember.class)
-                    .setParameter("sid", space.getId()).setParameter("uid", target.getId())
-                    .getSingleResult();
-            return new MemberResponse(existing.getId(), target.getId(), space.getId(), "SPACE", existing.getRole().name(), null);
+        if (reqList == null || reqList.isEmpty()) {
+            throw new NotAcceptableException("대상 유저 정보가 비어있습니다", null);
         }
 
-        SpaceMember sm = new SpaceMember();
-        sm.setSpace(space);
-        sm.setUser(target);
-        sm.setRole(SpaceRole.valueOf(req.requestRole())); // 유효성 검사 필요시 try-catch
-        sm.setJoinedAt(LocalDateTime.now());
-//        sm.setGrantedBy(em.getReference(User.class, granterUserId));
-//        sm.setNote(req.note());
-        spaceMemberRepository.save(sm);
-
-        return new MemberResponse(sm.getId(), target.getId(), space.getId(), "SPACE", sm.getRole().name(), null);
-    }
-
-    @Transactional
-    public MemberResponse addProjectMember(Long granterUserId,
-                                           Long projectId,
-                                           AddMemberRequest req) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NotFoundException("프로젝트 없음", null));
-
-        Long workspaceId = project.getSpace().getWorkspace().getId();
-        ensureGranterCanGrant(granterUserId, workspaceId);
-
-        User target = resolveTargetUserInWorkspace(workspaceId, req.email());
-
-        if (projectMemberRepository.existsByUserIdAndProjectId(target.getId(), projectId)) {
-            ProjectMember existing = em.createQuery("""
-                                select pm from ProjectMember pm
-                                where pm.project.id = :pid and pm.user.id = :uid
-                            """, ProjectMember.class)
-                    .setParameter("pid", projectId).setParameter("uid", target.getId())
-                    .getSingleResult();
-            return new MemberResponse(existing.getId(), target.getId(), projectId, "PROJECT", null, existing.getRole().name());
+        if (projectIds == null || projectIds.isEmpty()) {
+            throw new NotAcceptableException("프로젝트 목록이 비어 있음", null);
         }
 
-        ProjectMember pm = new ProjectMember();
-        pm.setProject(project);
-        pm.setUser(target);
-        pm.setRole(RoleProject.valueOf(req.roleProject())); // 프로젝트 역할 Enum 별도라면 바꾸세요
-        pm.setJoinedAt(LocalDateTime.now());
-//        pm.setGrantedBy(em.getReference(User.class, granterUserId));
-//        pm.setNote(req.note());
+        List<Project> projects = projectRepository.findAllById(projectIds);
 
-        Object aftermember = snapshotFunc.snapshot(pm);
+        if (projects.size() != projectIds.size()) {
+            throw new NotFoundException("존재하지 않는 프로젝트가 포함되어 있음", null);
+        }
 
-        pm = projectMemberRepository.save(pm);
+        for (Project project : projects) {
+            if (!Objects.equals(project.getSpace().getId(), spaceId)) {
+                throw new NotAcceptableException(
+                        "프로젝트가 해당 스페이스에 속하지 않음. projectId=" + project.getId(),
+                        null
+                );
+            }
+        }
 
-        activityLogService.log(ActivityEntityType.PROJECT_MEMBER, ActivityAction.CREATE, pm.getId(), pm.logMessage(), target, null, aftermember);
+        List<MemberResponse> responses = new ArrayList<>();
 
-        return new MemberResponse(pm.getId(), target.getId(), projectId, "PROJECT", null, pm.getRole().name());
+        for (AddMemberRequest req : reqList) {
+            User target = resolveTargetUserInWorkspace(workspaceId, req.email());
+
+            // 1. SpaceMember 추가
+            if (spaceMemberRepository.existsBySpaceIdAndUserId(spaceId, target.getId())) {
+                throw new NotAcceptableException("이미 스페이스 권한이 부여되어 있습니다! " + target.getEmail(), null);
+            }
+
+            SpaceMember sm = new SpaceMember();
+            sm.setSpace(space);
+            sm.setUser(target);
+            sm.setRole(SpaceRole.valueOf(req.requestRole()));
+            sm.setJoinedAt(LocalDateTime.now());
+
+            sm = spaceMemberRepository.save(sm);
+
+            Object afterSpaceMember = snapshotFunc.snapshot(sm);
+
+            activityLogService.log(
+                    ActivityEntityType.SPACE_MEMBER,
+                    ActivityAction.CREATE,
+                    sm.getId(),
+                    sm.logMessage(),
+                    target,
+                    null,
+                    afterSpaceMember
+            );
+
+            responses.add(new MemberResponse(
+                    sm.getId(),
+                    target.getId(),
+                    space.getId(),
+                    "SPACE",
+                    sm.getRole().name(),
+                    null
+            ));
+
+            // 2. 여러 프로젝트에 ProjectMember 추가
+            for (Project project : projects) {
+                if (projectMemberRepository.existsByUserIdAndProjectId(target.getId(), project.getId())) {
+                    throw new NotAcceptableException(
+                            "이미 프로젝트의 멤버입니다. email=" + req.email() + ", projectId=" + project.getId(),
+                            null
+                    );
+                }
+
+                ProjectMember pm = new ProjectMember();
+                pm.setProject(project);
+                pm.setUser(target);
+                pm.setRole(RoleProject.valueOf(req.roleProject()));
+                pm.setJoinedAt(LocalDateTime.now());
+
+                pm = projectMemberRepository.save(pm);
+
+                Object afterProjectMember = snapshotFunc.snapshot(pm);
+
+                activityLogService.log(
+                        ActivityEntityType.PROJECT_MEMBER,
+                        ActivityAction.CREATE,
+                        pm.getId(),
+                        pm.logMessage(),
+                        target,
+                        null,
+                        afterProjectMember
+                );
+
+                responses.add(new MemberResponse(
+                        pm.getId(),
+                        target.getId(),
+                        project.getId(),
+                        "PROJECT",
+                        null,
+                        pm.getRole().name()
+                ));
+            }
+        }
+
+        return responses;
     }
 
     @Transactional

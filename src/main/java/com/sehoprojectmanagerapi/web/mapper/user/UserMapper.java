@@ -10,7 +10,7 @@ public class UserMapper {
     public UserInfoResponse toResponse(User user) {
         return UserInfoResponse.builder()
                 .userId(user.getId())
-                .name(user.getNickname())
+                .nickname(user.getNickname())
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
