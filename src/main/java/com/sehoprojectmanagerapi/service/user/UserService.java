@@ -171,7 +171,7 @@ public class UserService {
             refreshTokenRepository.delete(deletedToken);
         }
 
-        if (jwtTokenProvider.validateToken(accessToken)) {
+        if (jwtTokenProvider.validateAccessToken(accessToken)) {
             redisUtil.setBlackList(accessToken, "accessToken", 30);
         }
 
