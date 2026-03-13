@@ -22,6 +22,7 @@ import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintRequest;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintResponse;
+import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import com.sehoprojectmanagerapi.web.mapper.sprint.SprintMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,15 @@ public class SprintService {
                 .orElseThrow(() -> new NotAcceptableException("해당 스프린트에 접근 권한이 없습니다.", null));
 
         return sprintRepository.findByProjectId(projectId)
+                .stream().map(sprintMapper::toResponse).toList();
+    }
+
+    @Transactional
+    public List<SprintResponse> getSprintsByAssigneeId(Long userId, Long projectId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자가 없습니다.", userId));
+
+        return sprintRepository.findAllVisibleForUser(userId, projectId)
                 .stream().map(sprintMapper::toResponse).toList();
     }
 

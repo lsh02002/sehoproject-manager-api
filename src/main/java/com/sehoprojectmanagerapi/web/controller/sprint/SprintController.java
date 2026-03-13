@@ -24,6 +24,11 @@ public class SprintController {
         return ResponseEntity.ok(sprintService.getAllSprintsByUserIdAndProjectId(customUserDetails.getId(), projectId));
     }
 
+    @GetMapping("/assignee/project/{projectId}")
+    public ResponseEntity<List<SprintResponse>> getSprintsByAssigneeId(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(sprintService.getSprintsByAssigneeId(customUserDetails.getId(), projectId));
+    }
+
     @GetMapping("/{sprintId}")
     public ResponseEntity<SprintResponse> getSprintById(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long sprintId) {
         return ResponseEntity.ok(sprintService.getSprintById(customUserDetails.getId(), sprintId));
