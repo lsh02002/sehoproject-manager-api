@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.repository.workspace.workspacemember;
 
-import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -54,6 +53,4 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
             """)
     Optional<WorkspaceRole> findRole(@Param("workspaceId") Long workspaceId,
                                      @Param("userId") Long userId);
-
-    List<WorkspaceMember> findByWorkspaceId(Long workspaceId);
 }

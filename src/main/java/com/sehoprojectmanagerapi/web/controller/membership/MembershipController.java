@@ -37,9 +37,9 @@ public class MembershipController {
         return ResponseEntity.ok(membershipService.addSpaceAndProjectMembers(customUserDetails.getId(), workspaceId, spaceId, request.projectIds(), request.reqList()));
     }
 
-    @GetMapping("/workspaces/{workspaceId}/members")
-    public ResponseEntity<List<UserInfoResponse>> getWorkspaceMembers(@PathVariable Long workspaceId) {
-        return ResponseEntity.ok(membershipService.getWorkspaceMembers(workspaceId));
+    @GetMapping("/workspaces/{workspaceId}/spaces/{spaceId}/usersNotInSpace")
+    public ResponseEntity<List<UserInfoResponse>> getUsersNotInWorkspace(@PathVariable Long workspaceId, @PathVariable Long spaceId) {
+        return ResponseEntity.ok(membershipService.getWorkspaceMembersNotInSpace(workspaceId, spaceId));
     }
 
     @GetMapping("/projects/{projectId}/members")

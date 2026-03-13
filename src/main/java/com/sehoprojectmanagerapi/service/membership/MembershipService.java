@@ -168,11 +168,12 @@ public class MembershipService {
         return responses;
     }
 
-    @Transactional
-    public List<UserInfoResponse> getWorkspaceMembers(Long workspaceId) {
-        return workspaceMemberRepository.findByWorkspaceId(workspaceId)
-                .stream().map(WorkspaceMember::getUser)
-                .map(userMapper::toResponse).toList();
+    @Transactional(readOnly = true)
+    public List<UserInfoResponse> getWorkspaceMembersNotInSpace(Long workspaceId, Long spaceId) {
+        return userRepository.findWorkspaceMembersNotInSpace(workspaceId, spaceId)
+                .stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 
     @Transactional
