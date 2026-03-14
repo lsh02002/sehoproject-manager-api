@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.controller.membership;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.membership.MembershipService;
+import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddSpaceAndProjectMembersRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
@@ -37,8 +38,13 @@ public class MembershipController {
         return ResponseEntity.ok(membershipService.addSpaceAndProjectMembers(customUserDetails.getId(), workspaceId, spaceId, request.projectIds(), request.reqList()));
     }
 
+    @GetMapping("/workspaces/{workspaceId}/usersNotInWorkspace")
+    public ResponseEntity<List<UserInfoResponse>> getUsersNotInWorkspace(@PathVariable Long workspaceId) {
+        return ResponseEntity.ok(membershipService.getMembersNotInWorkspace(workspaceId));
+    }
+
     @GetMapping("/workspaces/{workspaceId}/spaces/{spaceId}/usersNotInSpace")
-    public ResponseEntity<List<UserInfoResponse>> getUsersNotInWorkspace(@PathVariable Long workspaceId, @PathVariable Long spaceId) {
+    public ResponseEntity<List<UserInfoResponse>> getUsersNotInSpace(@PathVariable Long workspaceId, @PathVariable Long spaceId) {
         return ResponseEntity.ok(membershipService.getWorkspaceMembersNotInSpace(workspaceId, spaceId));
     }
 

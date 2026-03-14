@@ -22,6 +22,7 @@ import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddMemberRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
@@ -166,6 +167,14 @@ public class MembershipService {
         }
 
         return responses;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserInfoResponse> getMembersNotInWorkspace(Long workspaceId) {
+        return userRepository.findUsersNotInWorkspace(workspaceId)
+                .stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

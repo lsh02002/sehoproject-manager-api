@@ -65,12 +65,11 @@ public class WorkspaceController {
     }
 
     @PostMapping("/invites")
-    public ResponseEntity<WorkspaceInviteResponse> inviteToWorkspace(
+    public ResponseEntity<List<WorkspaceInviteResponse>> inviteToWorkspace(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody WorkspaceInviteRequest request
+            @RequestBody List<WorkspaceInviteRequest> requestList
     ) {
-        WorkspaceInviteResponse invite = workspaceService.inviteToWorkspace(customUserDetails.getId(), request);
-        return ResponseEntity.ok(invite);
+        return ResponseEntity.ok(workspaceService.inviteToWorkspace(customUserDetails.getId(), requestList));
     }
 
     /* ==== 초대 수락 ==== */

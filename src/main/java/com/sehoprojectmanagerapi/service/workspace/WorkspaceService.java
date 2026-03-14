@@ -43,8 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -215,65 +215,113 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceInviteResponse inviteToWorkspace(Long inviterId, WorkspaceInviteRequest request) {
-        // 1) 필수 로드
-        Workspace workspace = workspaceRepository.findById(request.workspaceId())
-                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", request.workspaceId()));
+    public List<WorkspaceInviteResponse> inviteToWorkspace(Long inviterId, List<WorkspaceInviteRequest> requests) {
+        // 0) 요청값 검증
+        if (requests == null || requests.isEmpty()) {
+            throw new BadRequestException("초대 요청이 비어 있습니다.", null);
+        }
+
+        // 같은 워크스페이스만 허용
+        Long workspaceId = requests.get(0).workspaceId();
+        boolean hasDifferentWorkspaceId = requests.stream()
+                .anyMatch(req -> !workspaceId.equals(req.workspaceId()));
+
+        if (hasDifferentWorkspaceId) {
+            throw new BadRequestException("한 번의 요청에서는 동일한 워크스페이스만 초대할 수 있습니다.", null);
+        }
+
+        // 같은 유저 중복 초대 방지 (요청 내부 중복)
+        List<String> invitedUserEmails = new ArrayList<>();
+        for(WorkspaceInviteRequest request: requests) {
+            invitedUserEmails.add(request.invitedUserEmail());
+        }
+
+        // 1) 공통 엔티티 로드
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new NotFoundException("해당 워크스페이스를 찾을 수 없습니다.", workspaceId));
+
         User inviter = userRepository.findById(inviterId)
                 .orElseThrow(() -> new NotFoundException("초대한 사용자를 찾을 수 없습니다.", inviterId));
-        User invited = userRepository.findById(request.invitedUserId())
-                .orElseThrow(() -> new NotFoundException("초대된 사용자를 찾을 수 없습니다.", request.invitedUserId()));
 
-        // 2) 권한 체크: 초대자가 해당 워크스페이스 멤버인가?
-        if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(inviterId, request.workspaceId())) {
-            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", request.workspaceId());
-        }
-        // (필요 시 역할 레벨 체크도 추가: OWNER/MANAGER만 허용 등)
-        if (!roleFunc.hasAtLeast(workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspace.getId()).get(), WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", null);
+        // 2) 권한 체크
+        WorkspaceRole inviterRole = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspaceId)
+                .orElseThrow(() -> new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId));
+
+        if (!roleFunc.hasAtLeast(inviterRole, WorkspaceRole.ADMIN)) {
+            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
         }
 
-        // 3) 자기 자신 초대 방지
-        if (inviter.getId().equals(invited.getId())) {
-            throw new BadRequestException("자기 자신을 초대할 수 없습니다.", invited.getId());
+        // 3) 초대 대상 유저들 조회
+        List<User> invitedUsers = userRepository.findAllByEmailIn(invitedUserEmails);
+        Map<String, User> invitedUserMap = invitedUsers.stream()
+                .collect(Collectors.toMap(User::getEmail, Function.identity()));
+
+        if(invitedUserEmails.isEmpty()) {
+            throw new NotFoundException("이메일란이 비어있습니다", null);
         }
 
-        // 4) 이미 워크스페이스 멤버인지 검사
-        boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(invited.getId(), request.workspaceId());
-        if (alreadyMember) {
-            throw new ConflictException("이미 워크스페이스 멤버입니다.", invited.getId());
+        // 존재하지 않는 유저 체크
+        for (String invitedUserEmail : invitedUserEmails) {
+            if (!invitedUserMap.containsKey(invitedUserEmail)) {
+                throw new NotFoundException("초대된 사용자를 찾을 수 없습니다.", invitedUserEmail);
+            }
         }
 
-        // 5) 중복/유효 초대 존재 여부 (PENDING && 미만료)
-        boolean hasPending = workspaceInviteRepository
-                .existsByWorkspaceIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
-                        request.workspaceId(),
-                        invited.getId(),
-                        List.of(WorkspaceInvite.Status.PENDING),
-                        LocalDateTime.now()
-                );
-        if (hasPending) {
-            throw new ConflictException("진행 중인 초대가 이미 있습니다.", request.workspaceId());
+        LocalDateTime now = LocalDateTime.now();
+        List<WorkspaceInvite> invitesToSave = new ArrayList<>();
+
+        // 4) 요청별 검증 + 엔티티 생성
+        for (WorkspaceInviteRequest req : requests) {
+            User invited = invitedUserMap.get(req.invitedUserEmail());
+
+            // 자기 자신 초대 방지
+            if (inviter.getId().equals(invited.getId())) {
+                throw new BadRequestException("자기 자신을 초대할 수 없습니다.", invited.getId());
+            }
+
+            // 이미 멤버인지 검사
+            boolean alreadyMember = workspaceMemberRepository.existsByUserIdAndWorkspaceId(invited.getId(), workspaceId);
+            if (alreadyMember) {
+                throw new ConflictException("이미 워크스페이스 멤버입니다. " + invited.getEmail(), null);
+            }
+
+            // 진행 중인 초대 존재 여부
+            boolean hasPending = workspaceInviteRepository
+                    .existsByWorkspaceIdAndInvitedUserIdAndStatusInAndExpiresAtAfter(
+                            workspaceId,
+                            invited.getId(),
+                            List.of(WorkspaceInvite.Status.PENDING),
+                            now
+                    );
+
+            if (hasPending) {
+                throw new ConflictException("진행 중인 초대가 이미 있습니다.", invited.getId());
+            }
+
+            WorkspaceInvite invite = new WorkspaceInvite();
+            invite.setWorkspace(workspace);
+            invite.setInviter(inviter);
+            invite.setInvitedUser(invited);
+            invite.setStatus(WorkspaceInvite.Status.PENDING);
+            invite.setMessage(req.message());
+            invite.setRequestedRole(
+                    req.requestedRole() != null ? req.requestedRole() : WorkspaceRole.MEMBER
+            );
+            invite.setExpiresAt(now.plusDays(DEFAULT_INVITE_TTL_DAYS));
+
+            invitesToSave.add(invite);
         }
 
-        // 6) 초대 엔티티 생성
-        WorkspaceInvite invite = new WorkspaceInvite();
-        invite.setWorkspace(workspace);
-        invite.setInviter(inviter);
-        invite.setInvitedUser(invited);
-        invite.setStatus(WorkspaceInvite.Status.PENDING);
-        invite.setMessage(request.message());
-        invite.setRequestedRole(request.requestedRole()); // 예: RoleWorkspace.MEMBER 등 (null이면 기본)
-        invite.setExpiresAt(LocalDateTime.now().plusDays(DEFAULT_INVITE_TTL_DAYS));
+        // 5) 저장
+        List<WorkspaceInvite> savedInvites = workspaceInviteRepository.saveAll(invitesToSave);
 
-        // 7) 저장
-        WorkspaceInvite saved = workspaceInviteRepository.save(invite);
+        // 6) (옵션) 이벤트/알림 발행
+        // savedInvites.forEach(invite -> domainEvents.publish(new WorkspaceInviteCreatedEvent(invite.getId())));
 
-        // 8) (옵션) 이벤트/알림 발행
-        // domainEvents.publish(new WorkspaceInviteCreatedEvent(saved.getId()));
-
-        // 9) 응답
-        return workspaceMapper.toInviteResponse(saved);
+        // 7) 응답
+        return savedInvites.stream()
+                .map(workspaceMapper::toInviteResponse)
+                .toList();
     }
 
     @Transactional

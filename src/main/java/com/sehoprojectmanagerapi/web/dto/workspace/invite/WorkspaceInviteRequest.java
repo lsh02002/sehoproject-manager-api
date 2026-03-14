@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record WorkspaceInviteRequest(
-        Long invitedUserId,
+        String invitedUserEmail,
         String message,
         WorkspaceRole requestedRole, // null 허용
         Long workspaceId
