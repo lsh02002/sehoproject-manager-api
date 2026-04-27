@@ -27,12 +27,10 @@ public class S3StorageService {
     /**
      * 날짜 기반 하위 폴더 앞에 붙일 고정 루트(옵션, 필요 없으면 빈 문자열로 두셔도 됩니다)
      */
-    private static final String KEY_ROOT = "diaryImages";
+    private static final String KEY_ROOT = "attatchments";
     private final AmazonS3 s3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${cloud.aws.region.static}")
-    private String region;
 
     /**
      * 파일 업로드
@@ -132,13 +130,6 @@ public class S3StorageService {
 
     private String safeContentType(String ct) {
         return (ct != null && !ct.isBlank()) ? ct : "application/octet-stream";
-    }
-
-    /**
-     * S3 Virtual-hosted–style URL
-     */
-    private String buildS3Url(String key) {
-        return key;
     }
 
     private String buildHashKey(String hash) {
