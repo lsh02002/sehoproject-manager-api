@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.controller.user;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
+import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.user.UserService;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
@@ -66,8 +67,8 @@ public class UserController {
 
     @GetMapping(value = "/entrypoint")
     public void entrypointException(@RequestParam(name = "accessToken", required = false) String token) {
-        if (token == null) throw new NotAcceptableException("로그인(Jwt 토큰)이 필요합니다.", null);
-        else throw new NotAcceptableException("로그인(Jwt 토큰)이 만료 되었습니다. 다시 로그인 하세요", null);
+        if (token == null) throw new CustomBadCredentialsException("로그인(Jwt 토큰)이 필요합니다.", null);
+        else throw new CustomBadCredentialsException("로그인(Jwt 토큰)이 만료 되었습니다. 다시 로그인 하세요", null);
     }
 
     @GetMapping(value = "/access-denied")
