@@ -215,6 +215,11 @@ public class UserService {
             throw new BadRequestException("기존 비밀번호와 다른 비밀번호를 입력해주세요.", null);
         }
 
+        if (!changePasswordRequest.getNewPassword().matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]+$")
+                || !(changePasswordRequest.getNewPassword().length() >= 8 && changePasswordRequest.getNewPassword().length() <= 20)) {
+            throw new BadRequestException("비밀번호는 8자 이상 20자 이하 숫자와 영문소문자 조합 이어야 합니다.", changePasswordRequest.getNewPassword());
+        }
+
         String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
         user.setPasswordHash(encodedNewPassword);
 
