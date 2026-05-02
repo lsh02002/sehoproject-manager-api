@@ -134,6 +134,19 @@ public class TaskService {
             throw new NotAcceptableException("해당 태스크 생성 권한이 없습니다.", userId);
         }
 
+        if (request.name() == null || request.name().trim().isEmpty()) {
+            throw new BadRequestException("태스크명이 비어있습니다.", request.name());
+        }
+        if (request.priority() == null || request.priority().trim().isEmpty()) {
+            throw new BadRequestException("우선순위 란이 비어있습니다.", request.priority());
+        }
+        if (request.type() == null || request.type().trim().isEmpty()) {
+            throw new BadRequestException("형식명이 비어있습니다.", request.type());
+        }
+        if (request.state() == null || request.state().trim().isEmpty()) {
+            throw new BadRequestException("태스크 상태가 비어있습니다.", request.state());
+        }
+
         // 3) Sprint/Milestone 검증 (same project)
         Sprint sprint = null;
         if (request.sprintId() != null) {
