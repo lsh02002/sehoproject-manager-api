@@ -6,10 +6,7 @@ import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsExceptio
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.user.UserService;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
-import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
-import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
-import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
-import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
+import com.sehoprojectmanagerapi.web.dto.user.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +45,11 @@ public class UserController {
     @DeleteMapping("/withdrawal")
     public ResponseEntity<UserResponse> withdrawal(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return ResponseEntity.ok(userService.withdrawal(customUserDetails.getEmail()));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<UserResponse> changePassword(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody ChangePasswordRequest changePasswordRequest) {
+        return ResponseEntity.ok(userService.changePassword(customUserDetails.getEmail(), changePasswordRequest));
     }
 
     @GetMapping("/user")

@@ -21,10 +21,7 @@ import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
-import com.sehoprojectmanagerapi.web.dto.user.LoginRequest;
-import com.sehoprojectmanagerapi.web.dto.user.SignupRequest;
-import com.sehoprojectmanagerapi.web.dto.user.SignupResponse;
-import com.sehoprojectmanagerapi.web.dto.user.UserResponse;
+import com.sehoprojectmanagerapi.web.dto.user.*;
 import com.sehoprojectmanagerapi.web.mapper.user.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -196,6 +193,36 @@ public class UserService {
         activityLogService.log(ActivityEntityType.USER, ActivityAction.DELETE, user.getId(), user.logMessage(), user, beforeUser, afterUser);
 
         return new UserResponse(200, "회원탈퇴 완료 되었습니다.", user.getNickname());
+    }
+
+    @Transactional
+    public UserResponse changePassword(String email, ChangePasswordRequest changePasswordRequest) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("입력하신 이메일의 계정을 찾을 수 없습니다.", email));
+
+        Object beforeUser = snapshotFunc.snapshot(user);
+
+        String p1 = user.getPasswordHash();
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), p1)) {
+            throw new BadRequestException("이전 비밀번호가 잘 맞지 않습니다.", null);
+        }
+
+        if(!Objects.equals(changePasswordRequest.getNewPassword(), changePasswordRequest.getNewPasswordConfirm())) {
+            throw new BadRequestException("새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.", null);
+        }
+
+        if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("기존 비밀번호와 다른 비밀번호를 입력해주세요.", null);
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        user.setPasswordHash(encodedNewPassword);
+
+        Object afterUser = snapshotFunc.snapshot(user);
+
+        activityLogService.log(ActivityEntityType.USER, ActivityAction.UPDATE, user.getId(), user.logMessage(), user, beforeUser, afterUser);
+
+        return new UserResponse(200, "비밀번호 변경 완료 되었습니다.", user.getNickname());
     }
 
     @Transactional
