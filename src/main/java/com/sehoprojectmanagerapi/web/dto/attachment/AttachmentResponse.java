@@ -15,6 +15,7 @@ public class AttachmentResponse {
     String fileUrl;
     String mimeType;
     Long sizeBytes;
+    Boolean deleted;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

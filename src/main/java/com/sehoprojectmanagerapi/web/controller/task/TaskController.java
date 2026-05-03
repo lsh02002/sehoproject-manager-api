@@ -6,9 +6,11 @@ import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskUpdateRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -38,14 +40,14 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTasksByAssigneeId(customUserDetails.getId(), projectId));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody TaskRequest request) {
-        return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request));
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<TaskResponse> createTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestPart TaskRequest request, @RequestPart(required = false) List<MultipartFile> files) {
+        return ResponseEntity.ok(taskService.createTask(customUserDetails.getId(), request, files));
     }
 
-    @PostMapping("/{taskId}/edit")
-    public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestBody TaskUpdateRequest request) {
-        return ResponseEntity.ok(taskService.updateTask(customUserDetails.getId(), taskId, request));
+    @PostMapping(value = "/{taskId}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long taskId, @RequestPart TaskUpdateRequest request, @RequestPart(required = false) List<MultipartFile> files) {
+        return ResponseEntity.ok(taskService.updateTask(customUserDetails.getId(), taskId, request, files));
     }
 
     @DeleteMapping("/{taskId}/projects/{projectId}")

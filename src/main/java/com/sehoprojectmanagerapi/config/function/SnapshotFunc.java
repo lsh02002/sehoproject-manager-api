@@ -18,6 +18,7 @@ import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceM
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -160,6 +161,15 @@ public class SnapshotFunc {
                             : null
             );
             m.put("dependencies", task.getDependencies() != null ? task.getDependencies().stream().map(TaskDependency::getId).toList() : null);
+            m.put(
+                    "taskImages",
+                    task.getTaskImages() == null
+                            ? List.of()
+                            : task.getTaskImages().stream()
+                            .filter(image -> !image.getDeleted())
+                            .map(Attachment::getFileUrl)
+                            .toList()
+            );
             m.put("logMessage", task.logMessage());
             return m;
         }

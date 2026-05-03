@@ -26,6 +26,7 @@ import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
+import com.sehoprojectmanagerapi.service.attachment.AttachmentService;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
@@ -38,6 +39,7 @@ import com.sehoprojectmanagerapi.web.mapper.task.TaskMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -67,6 +69,7 @@ public class TaskService {
     private final RoleFunc roleFunc;
     private final ActivityLogService activityLogService;
     private final SnapshotFunc snapshotFunc;
+    private final AttachmentService attachmentService;
 
     @Transactional
     public List<TaskResponse> getAllTasksByUser(Long userId) {
@@ -120,7 +123,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(Long userId, TaskRequest request) {
+    public TaskResponse createTask(Long userId, TaskRequest request, List<MultipartFile> files) {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
 
@@ -302,6 +305,8 @@ public class TaskService {
             task.setDependencies(deps);
         }
 
+        attachmentService.uploadManyFiles(userId, task.getId(), files);
+
         // 11) 최종 저장
         Task savedtask = taskRepository.save(task);
 
@@ -314,7 +319,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse updateTask(Long userId, Long taskId, TaskUpdateRequest request) {
+    public TaskResponse updateTask(Long userId, Long taskId, TaskUpdateRequest request, List<MultipartFile> files) {
         // 0) 공통 로드 & 권한
         User updater = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
@@ -531,11 +536,19 @@ public class TaskService {
 
         // 7) 감사 필드 업데이트(있다면)
 //        task.setUpdatedBy(updater);
+
+        attachmentService.uploadManyFiles(userId, task.getId(), files);
+
         task.setUpdatedAt(LocalDateTime.now());
 
-        Object aftertask = snapshotFunc.snapshot(task);
+        taskRepository.flush();
 
-        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, task.getId(), task.logMessage(), projectMember.getUser(), beforetask, aftertask);
+        Task reloadedTask = taskRepository.findById(task.getId())
+                .orElseThrow(()-> new NotFoundException("해당 태스크를 찾을 수 없습니다", null));
+
+        Object aftertask = snapshotFunc.snapshot(reloadedTask);
+
+        activityLogService.log(ActivityEntityType.TASK, ActivityAction.UPDATE, reloadedTask.getId(), reloadedTask.logMessage(), projectMember.getUser(), beforetask, aftertask);
         // 8) 저장 & 응답
         taskRepository.save(task);
 

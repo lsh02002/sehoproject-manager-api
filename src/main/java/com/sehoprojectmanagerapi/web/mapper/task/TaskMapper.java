@@ -11,6 +11,7 @@ import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
 import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
+import com.sehoprojectmanagerapi.web.mapper.taskimage.TaskImageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ public class TaskMapper {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final TagMapper tagMapper;
+    private final TaskImageMapper taskImageMapper;
 
     public TaskResponse toTaskResponse(Task t) {
         return TaskResponse.builder()
@@ -69,6 +71,7 @@ public class TaskMapper {
                 )
                 .dependencyIds(t.getDependencies().stream().map(d -> d.getDependsOn().getId()).toList())
                 .dueDate(t.getDueDate())
+                .imageResponses(t.getTaskImages() != null ? t.getTaskImages().stream().filter(diaryImage -> !diaryImage.getDeleted()).map(taskImageMapper::toResponse).toList() : null)
                 .createdAt(t.getCreatedAt())
                 .updatedAt(t.getUpdatedAt())
                 .build();

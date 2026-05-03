@@ -447,7 +447,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest);
+        taskService.createTask(userId, taskRequest, List.of());
 
         taskRequest = TaskRequest.builder()
                 .projectId(projectResponse.getId())
@@ -465,7 +465,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest);
+        taskService.createTask(userId, taskRequest, List.of());
 
         taskRequest = TaskRequest.builder()
                 .projectId(projectResponse.getId())
@@ -483,7 +483,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest);
+        taskService.createTask(userId, taskRequest, List.of());
 
         ProjectRequest projectRequest2 = ProjectRequest.builder()
                 .spaceId(spaceResponse.id())
@@ -513,7 +513,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest2);
+        taskService.createTask(userId, taskRequest2, List.of());
 
         taskRequest2 = TaskRequest.builder()
                 .projectId(projectResponse2.getId())
@@ -531,7 +531,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest2);
+        taskService.createTask(userId, taskRequest2, List.of());
 
         taskRequest2 = TaskRequest.builder()
                 .projectId(projectResponse2.getId())
@@ -549,7 +549,7 @@ public class WorkspaceService {
                 .dueDate(LocalDate.now())
                 .build();
 
-        taskService.createTask(userId, taskRequest2);
+        taskService.createTask(userId, taskRequest2, List.of());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException("해당 유저를 찾을 수 없습니다.", userId));

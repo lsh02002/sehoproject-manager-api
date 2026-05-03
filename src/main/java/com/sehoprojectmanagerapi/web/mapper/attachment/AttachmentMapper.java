@@ -15,6 +15,7 @@ public class AttachmentMapper {
                 .fileUrl(a.getFileUrl())
                 .mimeType(a.getMimeType())
                 .sizeBytes(a.getSizeBytes())
+                .deleted(a.getDeleted())
                 .createdAt(a.getCreatedAt())
                 .updatedAt(a.getUpdatedAt())
                 .build();

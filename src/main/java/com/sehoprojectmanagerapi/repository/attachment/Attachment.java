@@ -41,8 +41,9 @@ public class Attachment extends BaseEntity implements Loggable {
     @Column(name = "size_bytes")
     private Long sizeBytes;
 
-    @Column
-    private Boolean deleted;
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean deleted = false;
 
     @Override
     public String logMessage() {

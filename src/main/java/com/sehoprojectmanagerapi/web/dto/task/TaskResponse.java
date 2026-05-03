@@ -2,6 +2,7 @@ package com.sehoprojectmanagerapi.web.dto.task;
 
 // TaskResponse.java
 
+import com.sehoprojectmanagerapi.web.dto.attachment.AttachmentResponse;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import lombok.Builder;
 
@@ -26,6 +27,7 @@ public record TaskResponse(
         List<TagResponse> tags,             // 여러 태그
         List<Long> dependencyIds,      // 여러 선행 작업
         LocalDate dueDate,
+        List<AttachmentResponse> imageResponses,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
