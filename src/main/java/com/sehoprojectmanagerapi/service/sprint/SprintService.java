@@ -16,10 +16,7 @@ import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintRequest;
 import com.sehoprojectmanagerapi.web.dto.sprint.SprintResponse;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
@@ -58,7 +55,7 @@ public class SprintService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("해당 스프린트에 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 스프린트에 접근 권한이 없습니다.", null));
 
         return sprintRepository.findByProjectId(projectId)
                 .stream().map(sprintMapper::toResponse).toList();
@@ -81,7 +78,7 @@ public class SprintService {
         Project project = sprint.getProject();
 
         projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(() -> new NotAcceptableException("해당 스프린트에 접근 권한이 없습니다.", sprintId));
+                .orElseThrow(() -> new AccessDeniedException("해당 스프린트에 접근 권한이 없습니다.", sprintId));
 
         return sprintMapper.toResponse(sprint);
     }
@@ -93,10 +90,10 @@ public class SprintService {
     public SprintResponse createSprint(Long userId, SprintRequest request) {
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 스프린트 생성 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 생성 권한이 없습니다.", userId);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -140,10 +137,10 @@ public class SprintService {
 
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 스프린트 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 수정 권한이 없습니다.", userId);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -237,10 +234,10 @@ public class SprintService {
         Object beforesprint = snapshotFunc.snapshot(sprint);
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, sprint.getProject().getId())
-                .orElseThrow(() -> new CustomBadCredentialsException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 스프린트 삭제할 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 삭제할 권한이 없습니다.", userId);
         }
 
         activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.getId(), sprint.logMessage(), projectMember.getUser(), beforesprint, null);

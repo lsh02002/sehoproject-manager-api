@@ -15,6 +15,7 @@ import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRepository;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
+import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -47,9 +48,9 @@ public class SpaceService {
                 .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", workspaceId));
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, workspaceId)
-                .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 스페이스를 생성할 수 있습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버만 스페이스를 생성할 수 있습니다.", null));
         if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("OWNER 또는 ADMIN만 스페이스를 생성할 수 있습니다.", null);
+            throw new AccessDeniedException("OWNER 또는 ADMIN만 스페이스를 생성할 수 있습니다.", null);
         }
 
         if (spaceRepository.existsByWorkspaceIdAndSlug(workspaceId, request.slug())) {
@@ -91,7 +92,7 @@ public class SpaceService {
     @Transactional
     public List<SpaceResponse> listSpaces(Long currentUserId, Long workspaceId) {
         if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(currentUserId, workspaceId)) {
-            throw new NotAcceptableException("워크스페이스 멤버만 스페이스 목록을 조회할 수 있습니다.", null);
+            throw new AccessDeniedException("워크스페이스 멤버만 스페이스 목록을 조회할 수 있습니다.", null);
         }
 
         return spaceRepository.findByWorkspaceId(workspaceId)
@@ -108,7 +109,7 @@ public class SpaceService {
         }
 
         if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(currentUserId, workspaceId)) {
-            throw new NotAcceptableException("워크스페이스 멤버만 스페이스를 조회할 수 있습니다.", null);
+            throw new AccessDeniedException("워크스페이스 멤버만 스페이스를 조회할 수 있습니다.", null);
         }
 
         return spaceMapper.toResponse(space);
@@ -129,9 +130,9 @@ public class SpaceService {
         }
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, workspaceId)
-                .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 수정할 수 있습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버만 수정할 수 있습니다.", null));
         if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("OWNER 또는 ADMIN만 스페이스를 수정할 수 있습니다.", null);
+            throw new AccessDeniedException("OWNER 또는 ADMIN만 스페이스를 수정할 수 있습니다.", null);
         }
 
         if (!space.getSlug().equals(request.slug()) &&
@@ -169,9 +170,9 @@ public class SpaceService {
         }
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, workspaceId)
-                .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
         if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("OWNER 또는 ADMIN만 스페이스를 삭제할 수 있습니다.", null);
+            throw new AccessDeniedException("OWNER 또는 ADMIN만 스페이스를 삭제할 수 있습니다.", null);
         }
 
         activityLogService.log(ActivityEntityType.SPACE, ActivityAction.DELETE, space.getId(), space.logMessage(), user, beforespace, null);

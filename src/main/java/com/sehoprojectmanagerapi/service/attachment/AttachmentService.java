@@ -14,6 +14,7 @@ import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
+import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -123,7 +124,7 @@ public class AttachmentService {
                 );
 
         if(!hasPermission) {
-            throw new NotAcceptableException("해당 사용자는 이미지 업로드 권한이 없습니다!", null);
+            throw new AccessDeniedException("해당 사용자는 이미지 업로드 권한이 없습니다!", null);
         }
 
         List<Attachment> currentImages = task.getTaskImages().stream()
@@ -190,7 +191,7 @@ public class AttachmentService {
                 );
 
         if(!hasPermission) {
-            throw new NotAcceptableException("해당 사용자는 이미지 삭제 권한이 없습니다!", null);
+            throw new AccessDeniedException("해당 사용자는 이미지 삭제 권한이 없습니다!", null);
         }
 
         Object beforeattachimage = snapshotFunc.snapshot(image);

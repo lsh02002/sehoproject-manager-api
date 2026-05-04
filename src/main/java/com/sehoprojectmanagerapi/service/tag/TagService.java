@@ -11,10 +11,7 @@ import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.tag.TagRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.tag.TagRequest;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
@@ -48,7 +45,7 @@ public class TagService {
 
         // 프로젝트 멤버 여부
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 조회할 수 있습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 조회할 수 있습니다.", userId));
 
         return tagRepository.findAllByProjectId(projectId)
                 .stream().map(tagMapper::toResponse).toList();
@@ -65,7 +62,7 @@ public class TagService {
     @Transactional
     public TagResponse createTag(Long userId, TagRequest request) {
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 생성할 수 있습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 생성할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", userId);
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -105,7 +102,7 @@ public class TagService {
         Object beforetag = snapshotFunc.snapshot(tag);
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 수정할 수 있습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 수정할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 수정 권한이 없습니다.", userId);
 
         if (request.name() != null && !request.name().trim().isEmpty()) {
@@ -138,7 +135,7 @@ public class TagService {
         Object beforetag = snapshotFunc.snapshot(tag);
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
 
         activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.getId(), tag.logMessage(), pm.getUser(), beforetag, null);

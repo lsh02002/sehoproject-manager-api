@@ -20,6 +20,7 @@ import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
+import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
@@ -72,7 +73,7 @@ public class ProjectService {
 
         return projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .map(projectMember -> projectMapper.toProjectResponse(projectMember.getProject()))
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", null));
     }
 
     @Transactional
@@ -85,9 +86,9 @@ public class ProjectService {
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
         var role = spaceMemberRepository.findRoleBySpaceIdAndUserId(space.getId(), user.getId())
-                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트를 생성할 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트를 생성할 권한이 없습니다.", null));
         if (role != SpaceRole.ADMIN) {
-            throw new NotAcceptableException("스페이스 ADMIN만 프로젝트를 생성할 수 있습니다.", null);
+            throw new AccessDeniedException("스페이스 ADMIN만 프로젝트를 생성할 수 있습니다.", null);
         }
 
         if (projectRequest.getName() == null || projectRequest.getName().trim().isEmpty()) {
@@ -132,10 +133,10 @@ public class ProjectService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("프로젝트 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("프로젝트 수정 권한이 없습니다.", userId);
         }
 
         // project는 영속 상태여야 함 (@Transactional 내 조회 가정)
@@ -324,10 +325,10 @@ public class ProjectService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다", projectId));
 
         ProjectMember requesterMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 삭제 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(requesterMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("프로젝트 삭제 권한이 없습니다.", userId);
+            throw new AccessDeniedException("프로젝트 삭제 권한이 없습니다.", userId);
         }
 
         Object beforeProject = snapshotFunc.snapshot(project);

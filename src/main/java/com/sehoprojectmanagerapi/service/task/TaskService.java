@@ -27,10 +27,7 @@ import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.attachment.AttachmentService;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskRequest;
 import com.sehoprojectmanagerapi.web.dto.task.TaskResponse;
@@ -92,7 +89,7 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
         // 멤버십 확인: 권한 예외 사용(403)
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
         // 정렬 보장: 리포지토리 쿼리에서 ORDER BY 권장 (createdAt or custom position)
         var tasks = taskRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
@@ -108,7 +105,7 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, task.getProject().getId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", null));
 
         return taskMapper.toTaskResponse(task);
     }
@@ -131,10 +128,10 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
-            throw new NotAcceptableException("해당 태스크 생성 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 태스크 생성 권한이 없습니다.", userId);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -242,7 +239,7 @@ public class TaskService {
 
                         // 정책: 담당자는 프로젝트 멤버여야 함
                         if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
-                            throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
+                            throw new AccessDeniedException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                         }
 
                         assigneeSource = taskAssigneeRepository.save(
@@ -264,7 +261,7 @@ public class TaskService {
                                 teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
                         if (!allMembersInProject) {
                             // 완화 정책을 원하면 여기서 교집합만 확장하도록 분기 가능
-                            throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                            throw new AccessDeniedException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
                         }
 
                         assigneeSource = taskAssigneeRepository.save(
@@ -332,10 +329,10 @@ public class TaskService {
         Project project = task.getProject();
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
-            throw new NotAcceptableException("해당 태스크 업데이트할 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 태스크 업데이트할 권한이 없습니다.", userId);
         }
 
         // 1) 스프린트/마일스톤 변경 (null = 변경 없음, Optional.empty 의미의 특별 플래그가 없다면: 빈 값 명시 지우기용 필드 권장)
@@ -482,7 +479,7 @@ public class TaskService {
                             User assignee = userRepository.findByEmail(assigneeRequest.getEmail())
                                     .orElseThrow(() -> new NotFoundException("담당자 사용자를 찾을 수 없습니다.", assigneeRequest.getEmail()));
                             if (!projectMemberRepository.existsByUserIdAndProjectId(assignee.getId(), project.getId())) {
-                                throw new ConflictException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
+                                throw new AccessDeniedException("담당자는 프로젝트 멤버여야 합니다.", assignee.getId());
                             }
 
                             if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), type, assignee.getId())) {
@@ -503,7 +500,7 @@ public class TaskService {
                             boolean allMembersInProject =
                                     teamMemberRepository.countActiveByTeamIdNotInProject(team.getId(), project.getId()) == 0;
                             if (!allMembersInProject) {
-                                throw new ConflictException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
+                                throw new AccessDeniedException("팀 구성원 전원이 프로젝트 멤버여야 합니다.", team.getId());
                             }
 
                             if (!taskAssigneeRepository.existsByTaskIdAndAssigneeTypeAndAssigneeId(task.getId(), type, team.getId())) {
@@ -558,10 +555,10 @@ public class TaskService {
     @Transactional
     public void deleteTask(Long userId, Long projectId, Long taskId) {
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("해당 프로젝트에 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
-            throw new NotAcceptableException("해당 태스크 삭제할 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 태스크 삭제할 권한이 없습니다.", userId);
         }
 
         Task task = taskRepository.findByProjectIdAndId(projectMember.getProject().getId(), taskId)

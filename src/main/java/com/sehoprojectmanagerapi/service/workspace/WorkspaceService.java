@@ -17,10 +17,7 @@ import com.sehoprojectmanagerapi.repository.workspace.workspaceinvite.WorkspaceI
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.service.project.ProjectService;
 import com.sehoprojectmanagerapi.service.space.SpaceService;
 import com.sehoprojectmanagerapi.service.task.TaskService;
@@ -136,7 +133,7 @@ public class WorkspaceService {
                 .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", id));
 
         if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(userId, id)) {
-            throw new NotAcceptableException("워크스페이스 멤버만 조회할 수 있습니다.", null);
+            throw new AccessDeniedException("워크스페이스 멤버만 조회할 수 있습니다.", null);
         }
 
         return workspaceMapper.toResponse(workspace);
@@ -153,9 +150,9 @@ public class WorkspaceService {
         Object beforeworkspace = snapshotFunc.snapshot(workspace);
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(userId, id)
-                .orElseThrow(() -> new NotAcceptableException("워크스페이스 멤버만 수정할 수 있습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버만 수정할 수 있습니다.", null));
         if (!(role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("OWNER 또는 ADMIN만 수정할 수 있습니다.", null);
+            throw new AccessDeniedException("OWNER 또는 ADMIN만 수정할 수 있습니다.", null);
         }
 
         if (request.name() == null || request.name().isEmpty()) {
@@ -192,9 +189,9 @@ public class WorkspaceService {
         Object beforeworkspace = snapshotFunc.snapshot(workspace);
 
         var role = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(currentUserId, id)
-                .orElseThrow(() -> new BadCredentialsException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버만 삭제할 수 있습니다.", null));
         if (role != WorkspaceRole.OWNER) {
-            throw new BadCredentialsException("OWNER만 워크스페이스를 삭제할 수 있습니다.", null);
+            throw new AccessDeniedException("OWNER만 워크스페이스를 삭제할 수 있습니다.", null);
         }
 
         activityLogService.log(ActivityEntityType.WORKSPACE, ActivityAction.DELETE, workspace.getId(), workspace.logMessage(), user, beforeworkspace, null);
@@ -245,10 +242,10 @@ public class WorkspaceService {
 
         // 2) 권한 체크
         WorkspaceRole inviterRole = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspaceId)
-                .orElseThrow(() -> new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", workspaceId));
 
         if (!roleFunc.hasAtLeast(inviterRole, WorkspaceRole.ADMIN)) {
-            throw new NotAcceptableException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
+            throw new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
         }
 
         // 3) 초대 대상 유저들 조회

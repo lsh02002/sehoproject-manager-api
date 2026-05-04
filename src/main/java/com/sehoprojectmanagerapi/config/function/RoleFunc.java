@@ -3,14 +3,14 @@ package com.sehoprojectmanagerapi.config.function;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
 import com.sehoprojectmanagerapi.repository.team.teammember.RoleTeam;
 import com.sehoprojectmanagerapi.repository.workspace.WorkspaceRole;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
+import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RoleFunc {
     public void requireAtLeast(RoleProject actual, RoleProject required, String msg, Object ctx) {
         if (rank(actual) > rank(required)) {
-            throw new NotAcceptableException(msg, ctx);
+            throw new AccessDeniedException(msg, ctx);
         }
     }
 

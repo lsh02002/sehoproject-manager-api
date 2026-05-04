@@ -10,10 +10,7 @@ import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
 import com.sehoprojectmanagerapi.web.dto.team.TeamRequest;
@@ -50,7 +47,7 @@ public class TeamService {
     public TeamResponse getTeamByUserIdAndTeamId(Long userId, Long teamId) {
         return teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
                 .map(teamMember -> teamMapper.toTeamResponse(teamMember.getTeam()))
-                .orElseThrow(() -> new NotAcceptableException("해당 정보에 접근할 수 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 정보에 접근할 수 없습니다.", null));
     }
 
     @Transactional
@@ -82,14 +79,14 @@ public class TeamService {
     @Transactional
     public TeamResponse updateTeam(Long userId, Long teamId, TeamRequest teamRequest) {
         TeamMember teamMember = teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
-                .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
 
         Team team = teamMember.getTeam();
 
         boolean teamOk = roleFunc.hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
 
         if (!teamOk) {
-            throw new NotAcceptableException("팀 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("팀 수정 권한이 없습니다.", userId);
         }
 
         // 3) 이름 변경 처리
@@ -116,12 +113,12 @@ public class TeamService {
         // - 팀 OWNER/MANAGER 이거나
         // - 프로젝트 ROLE이 MANAGER/ADMIN/OWNER 여야 함
         TeamMember tm = teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
-                .orElseThrow(() -> new NotAcceptableException("해당 팀의 멤버가 아닙니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀의 멤버가 아닙니다.", userId));
 
         boolean teamOk = roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
 
         if (!teamOk) {
-            throw new NotAcceptableException("팀 삭제 권한이 없습니다.", userId);
+            throw new AccessDeniedException("팀 삭제 권한이 없습니다.", userId);
         }
 
         // 4) 삭제 (Team.members는 orphanRemoval=true 이므로 함께 제거)
@@ -139,9 +136,9 @@ public class TeamService {
     public TeamInviteResponse inviteToTeam(Long inviterId, Long teamId, TeamInviteRequest request) {
         // 1) 권한자 확인
         TeamMember inviterMember = teamMemberRepository.findByUserIdAndTeamId(inviterId, teamId)
-                .orElseThrow(() -> new NotFoundException("해당 팀에 본 사용자는 권한이 없습니다.", inviterId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", inviterId));
         if (inviterMember.getRole() != RoleTeam.OWNER) {
-            throw new ConflictException("초대 권한이 없습니다.", inviterId);
+            throw new AccessDeniedException("초대 권한이 없습니다.", inviterId);
         }
 
         // 2) 팀/유저 조회

@@ -16,10 +16,7 @@ import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.TaskRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
-import com.sehoprojectmanagerapi.service.exceptions.CustomBadCredentialsException;
-import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
-import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
+import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneRequest;
 import com.sehoprojectmanagerapi.web.dto.milestone.MilestoneResponse;
 import com.sehoprojectmanagerapi.web.mapper.milestone.MilestoneMapper;
@@ -54,7 +51,7 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new NotAcceptableException("해당 마일스톤 접근 권한이 없습니다.", null));
+                .orElseThrow(() -> new AccessDeniedException("해당 마일스톤 접근 권한이 없습니다.", null));
 
         return milestoneRepository.findByProjectId(projectId)
                 .stream().map(milestoneMapper::toResponse).toList();
@@ -71,7 +68,7 @@ public class MilestoneService {
         Project project = milestone.getProject();
 
         projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(() -> new NotAcceptableException("해당 마일스톤 접근 권한이 없습니다.", milestoneId));
+                .orElseThrow(() -> new AccessDeniedException("해당 마일스톤 접근 권한이 없습니다.", milestoneId));
 
         return milestoneMapper.toResponse(milestone);
     }
@@ -82,10 +79,10 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("마일스톤 생성 권한이 없습니다.", userId);
+            throw new AccessDeniedException("마일스톤 생성 권한이 없습니다.", userId);
         }
 
         if (request.name().isEmpty()) {
@@ -127,10 +124,10 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new NotFoundException("해당 마일스톤 수정 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 마일스톤 수정 권한이 없습니다.", request.projectId()));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 마일스톤 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 마일스톤 수정 권한이 없습니다.", userId);
         }
 
         if (request.name() == null || request.name().isEmpty()) {
@@ -227,10 +224,10 @@ public class MilestoneService {
                 .orElseThrow(() -> new NotFoundException("해당 마일스톤을 찾을 수 없습니다.", milestoneId));
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, milestone.getProject().getId())
-                .orElseThrow(() -> new CustomBadCredentialsException("해당 마일스톤을 삭제할 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 마일스톤을 삭제할 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new NotAcceptableException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 마일스톤을 삭제할 권한이 없습니다.", userId);
         }
 
         Object beforemilestone = snapshotFunc.snapshot(milestone);

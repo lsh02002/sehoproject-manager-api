@@ -20,6 +20,7 @@ import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceM
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMemberRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
+import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
 import com.sehoprojectmanagerapi.service.exceptions.NotAcceptableException;
 import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
@@ -94,7 +95,7 @@ public class MembershipService {
 
             // 1. SpaceMember 추가
             if (spaceMemberRepository.existsBySpaceIdAndUserId(spaceId, target.getId())) {
-                throw new NotAcceptableException("이미 스페이스 권한이 부여되어 있습니다! " + target.getEmail(), null);
+                throw new ConflictException("이미 스페이스 권한이 부여되어 있습니다! " + target.getEmail(), null);
             }
 
             SpaceMember sm = new SpaceMember();
@@ -196,7 +197,7 @@ public class MembershipService {
         WorkspaceRole role = workspaceMemberRepository.findRole(workspaceId, granterUserId)
                 .orElseThrow(() -> new AccessDeniedException("워크스페이스 멤버가 아님", null));
         if (!CAN_GRANT.contains(role)) {
-            throw new NotAcceptableException("권한 부여 권한이 없음", null);
+            throw new AccessDeniedException("권한 부여 권한이 없음", null);
         }
     }
 
@@ -204,7 +205,7 @@ public class MembershipService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("대상 유저를 찾을 수 없음:", email));
         if (!workspaceMemberRepository.existsByUserIdAndWorkspaceId(user.getId(), workspaceId)) {
-            throw new NotAcceptableException("대상 유저가 해당 워크스페이스 멤버가 아님", user.getId());
+            throw new NotFoundException("대상 유저가 해당 워크스페이스 멤버가 아님", user.getId());
         }
         return user;
     }
