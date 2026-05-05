@@ -1,10 +1,10 @@
 package com.sehoprojectmanagerapi.repository.sprint;
 
-import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;
 import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.task.Task;
+import com.sehoprojectmanagerapi.repository.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +44,10 @@ public class Sprint extends BaseEntity implements Loggable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private SprintState state = SprintState.PLANNED;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     @OneToMany(mappedBy = "sprint")
     private List<Task> tasks = new ArrayList<>();

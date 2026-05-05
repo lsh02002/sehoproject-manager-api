@@ -56,6 +56,7 @@ public class NotificationService {
         }
 
         Notification notification = new Notification();
+        notification.setSender(sender);
         notification.setReceiver(receiver);
         notification.setMessage(notificationRequest.message());
         notification.setType(type);

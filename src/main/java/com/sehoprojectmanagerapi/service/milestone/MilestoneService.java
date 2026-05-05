@@ -108,6 +108,7 @@ public class MilestoneService {
         milestone.setDueDate(request.dueDate());
         milestone.setStatus(MilestoneStatus.valueOf(request.status()));
         milestone.setTasks(tasks);
+        milestone.setCreatedBy(projectMember.getUser());
 
         Milestone savedmilestone = milestoneRepository.save(milestone);
 

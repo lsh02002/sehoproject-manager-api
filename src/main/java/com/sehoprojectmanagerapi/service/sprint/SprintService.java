@@ -117,6 +117,7 @@ public class SprintService {
         sprint.setEndDate(request.endDate());
         sprint.setState(SprintState.valueOf(request.state()));
         sprint.setTasks(tasks);
+        sprint.setCreatedBy(projectMember.getUser());
 
         Sprint savedsprint = sprintRepository.save(sprint);
 

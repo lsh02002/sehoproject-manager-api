@@ -82,6 +82,7 @@ public class TagService {
                 .project(project)
                 .name(request.name().trim())
                 .description(request.description())
+                .createdBy(pm.getUser())
                 .build();
 
         Tag savedtag = tagRepository.save(tag);

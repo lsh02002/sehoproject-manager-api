@@ -96,6 +96,7 @@ public class SnapshotFunc {
             m.put("status", milestone.getStatus());
             m.put("startDate", milestone.getStartDate());
             m.put("dueDate", milestone.getDueDate());
+            m.put("createdBy", milestone.getCreatedBy().getId());
             m.put("tasks", milestone.getTasks() != null ? milestone.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", milestone.getCreatedAt());
             m.put("logMessage", milestone.logMessage());
@@ -111,6 +112,7 @@ public class SnapshotFunc {
             m.put("startDate", sprint.getStartDate());
             m.put("endDate", sprint.getEndDate());
             m.put("state", sprint.getState());
+            m.put("createdBy", sprint.getCreatedBy().getId());
             m.put("tasks", sprint.getTasks() != null ? sprint.getTasks().stream().map(Task::getId).toList() : null);
             m.put("createdAt", sprint.getCreatedAt());
             m.put("logMessage", sprint.logMessage());
@@ -123,6 +125,7 @@ public class SnapshotFunc {
             m.put("projectId", tag.getProject().getId());
             m.put("name", tag.getName());
             m.put("description", tag.getDescription());
+            m.put("createdBy", tag.getCreatedBy().getId());
             m.put("createdAt", tag.getCreatedAt());
             m.put("logMessage", tag.logMessage());
             return m;
@@ -177,6 +180,7 @@ public class SnapshotFunc {
         if(obj instanceof Notification notification) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", notification.getId());
+            m.put("senderId", notification.getSender().getId());
             m.put("receiverId", notification.getReceiver().getId());
             m.put("message", notification.getMessage());
             m.put("type", notification.getType());
