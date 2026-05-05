@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface SpaceRepository extends JpaRepository<Space, Long> {
+    boolean existsByWorkspaceIdAndName(Long workspaceId, String name);
     boolean existsByWorkspaceIdAndSlug(Long workspaceId, String slug);
 
     List<Space> findByWorkspaceId(Long workspaceId);
