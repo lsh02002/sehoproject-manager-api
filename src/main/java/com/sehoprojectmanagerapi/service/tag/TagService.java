@@ -78,10 +78,6 @@ public class TagService {
             throw new ConflictException("동일한 이름의 태그가 이미 존재합니다.", request.name());
         }
 
-        if (pm.getUser() == null) {
-            throw new NotFoundException("ProjectMember user is null. pmId=", pm.getId());
-        }
-
         Tag tag = Tag.builder()
                 .project(project)
                 .name(request.name().trim())
