@@ -177,7 +177,7 @@ public class SnapshotFunc {
         if(obj instanceof Notification notification) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", notification.getId());
-            m.put("receiverId", notification.getReceiver());
+            m.put("receiverId", notification.getReceiver().getId());
             m.put("message", notification.getMessage());
             m.put("type", notification.getType());
             m.put("relatedId", notification.getRelatedId());
@@ -194,7 +194,7 @@ public class SnapshotFunc {
             m.put("name", space.getName());
             m.put("slug", space.getSlug());
             m.put("visibility", space.getVisibility());
-            m.put("createdBy", space.getCreatedBy());
+            m.put("createdBy", space.getCreatedBy().getId());
             m.put("position", space.getPosition());
             m.put("logMessage", space.logMessage());
             m.put("createdAt", space.getCreatedAt());
