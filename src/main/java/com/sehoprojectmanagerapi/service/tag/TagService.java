@@ -4,6 +4,7 @@ import com.sehoprojectmanagerapi.config.function.RoleFunc;
 import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
 import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
 import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
+import com.sehoprojectmanagerapi.repository.project.Project;
 import com.sehoprojectmanagerapi.repository.project.ProjectRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.ProjectMemberRepository;
 import com.sehoprojectmanagerapi.repository.project.projectmember.RoleProject;
@@ -16,6 +17,7 @@ import com.sehoprojectmanagerapi.web.dto.tag.TagRequest;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +72,7 @@ public class TagService {
         }
 
         // 프로젝트 존재 체크
-        var project = projectRepository.findById(request.projectId())
+        Project project = projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         // (project_id, name) 중복 검사

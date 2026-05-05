@@ -268,6 +268,7 @@ public class ProjectService {
                             .name(originalName)
                             .project(project)
                             .description(null)
+                            .createdBy(projectMember.getUser())
                             .build();
 
                     created = tagRepository.save(created);
