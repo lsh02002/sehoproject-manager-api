@@ -12,12 +12,14 @@ import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.tag.TagRepository;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
 import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
-import com.sehoprojectmanagerapi.service.exceptions.*;
+import com.sehoprojectmanagerapi.service.exceptions.AccessDeniedException;
+import com.sehoprojectmanagerapi.service.exceptions.BadRequestException;
+import com.sehoprojectmanagerapi.service.exceptions.ConflictException;
+import com.sehoprojectmanagerapi.service.exceptions.NotFoundException;
 import com.sehoprojectmanagerapi.web.dto.tag.TagRequest;
 import com.sehoprojectmanagerapi.web.dto.tag.TagResponse;
 import com.sehoprojectmanagerapi.web.mapper.tag.TagMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

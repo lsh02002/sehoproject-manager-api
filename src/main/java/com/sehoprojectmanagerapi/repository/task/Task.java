@@ -1,6 +1,5 @@
 package com.sehoprojectmanagerapi.repository.task;
 
-import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.activity.logger.Loggable;
 import com.sehoprojectmanagerapi.repository.attachment.Attachment;
 import com.sehoprojectmanagerapi.repository.baseentity.BaseEntity;

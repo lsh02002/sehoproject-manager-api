@@ -2,7 +2,6 @@ package com.sehoprojectmanagerapi.web.controller.membership;
 
 import com.sehoprojectmanagerapi.repository.user.userdetails.CustomUserDetails;
 import com.sehoprojectmanagerapi.service.membership.MembershipService;
-import com.sehoprojectmanagerapi.web.dto.task.AssigneeRequest;
 import com.sehoprojectmanagerapi.web.dto.user.UserInfoResponse;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.AddSpaceAndProjectMembersRequest;
 import com.sehoprojectmanagerapi.web.dto.workspace.privilege.MemberResponse;
