@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Builder
 public record NotificationResponse(
         Long notificationId,
+        Long senderId,
         Long receiverId,
         String receiverName,
         String message,
