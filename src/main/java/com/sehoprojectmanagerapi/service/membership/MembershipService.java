@@ -58,6 +58,9 @@ public class MembershipService {
 
         ensureGranterCanGrant(granterUserId, workspaceId);
 
+        User granterUser = userRepository.findById(granterUserId)
+                .orElseThrow(()->new NotFoundException("해당 사용자를 찾을 수 없습니다.", null));
+
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new NotFoundException("스페이스 없음", null));
 
@@ -113,7 +116,7 @@ public class MembershipService {
                     ActivityAction.CREATE,
                     sm.getId(),
                     sm.logMessage(),
-                    target,
+                    granterUser,
                     null,
                     afterSpaceMember
             );
@@ -151,7 +154,7 @@ public class MembershipService {
                         ActivityAction.CREATE,
                         pm.getId(),
                         pm.logMessage(),
-                        target,
+                        granterUser,
                         null,
                         afterProjectMember
                 );
