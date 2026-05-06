@@ -65,9 +65,10 @@ public class AttachmentService {
                         .task(task)
                         .uploader(uploader)
                         .fileName(stored.originalFileName())
-                        .fileUrl(stored.url())
+                        .fileUrl("/" + stored.storedKey())
                         .mimeType(stored.mimeType())
                         .sizeBytes(stored.sizeBytes())
+                        .deleted(false)
                         .build()
         );
 
