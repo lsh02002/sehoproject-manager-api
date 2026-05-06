@@ -139,6 +139,11 @@ public class SpaceService {
             throw new AccessDeniedException("OWNER 또는 ADMIN만 스페이스를 수정할 수 있습니다.", null);
         }
 
+        if (!space.getName().equals(request.name()) &&
+                spaceRepository.existsByWorkspaceIdAndName(workspaceId, request.name())) {
+            throw new ConflictException("해당 워크스페이스 내에서 중복된 스페이스 이름입니다.", request.name());
+        }
+
         if (!space.getSlug().equals(request.slug()) &&
                 spaceRepository.existsByWorkspaceIdAndSlug(workspaceId, request.slug())) {
             throw new ConflictException("해당 워크스페이스 내에서 중복된 스페이스 슬러그입니다.", request.slug());
