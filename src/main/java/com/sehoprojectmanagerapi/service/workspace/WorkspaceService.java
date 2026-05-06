@@ -84,6 +84,10 @@ public class WorkspaceService {
             throw new ConflictException("이름란이 비어있습니다.", null);
         }
 
+        if (workspaceRepository.existsByName(request.name())) {
+            throw new ConflictException("중복된 워크스페이스 이름입니다.", request.name());
+        }
+
         if (workspaceRepository.existsBySlug(request.slug())) {
             throw new ConflictException("중복된 워크스페이스 슬러그입니다.", request.slug());
         }
@@ -157,6 +161,10 @@ public class WorkspaceService {
 
         if (request.name() == null || request.name().isEmpty()) {
             throw new ConflictException("이름란이 비어있습니다.", null);
+        }
+
+        if (!workspace.getName().equals(request.name()) && workspaceRepository.existsByName(request.name())) {
+            throw new ConflictException("중복된 워크스페이스 이름입니다.", request.name());
         }
 
         if (!workspace.getSlug().equals(request.slug()) && workspaceRepository.existsBySlug(request.slug())) {
