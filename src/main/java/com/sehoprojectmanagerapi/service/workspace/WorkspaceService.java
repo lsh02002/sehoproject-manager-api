@@ -570,6 +570,8 @@ public class WorkspaceService {
 
         if(user.getWorkspaceId() == null) {
             user.setWorkspaceId(workspaceResponse.id());
+            user.setSpaceId(spaceResponse.id());
+            user.setProjectId(projectResponse.getId());
         }
     }
 }
