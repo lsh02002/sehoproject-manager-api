@@ -46,7 +46,7 @@ public class Sprint extends BaseEntity implements Loggable {
     private SprintState state = SprintState.PLANNED;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
     @OneToMany(mappedBy = "sprint")

@@ -42,7 +42,7 @@ public class Milestone extends BaseEntity implements Loggable {
     private LocalDate dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
     @Enumerated(EnumType.STRING)

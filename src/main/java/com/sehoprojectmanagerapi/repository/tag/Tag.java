@@ -41,7 +41,7 @@ public class Tag extends BaseEntity implements Loggable {
     private Project project;   // 태그는 특정 프로젝트 범위 안에서만 유효하도록
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
     @ManyToMany(mappedBy = "tags")
