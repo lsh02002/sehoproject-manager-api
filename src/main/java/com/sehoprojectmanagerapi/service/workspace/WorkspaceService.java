@@ -81,8 +81,12 @@ public class WorkspaceService {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
 
-        if (request.name() == null || request.name().isEmpty()) {
+        if (request.name() == null || request.name().trim().isEmpty()) {
             throw new ConflictException("이름란이 비어있습니다.", null);
+        }
+
+        if (request.slug() == null || request.slug().trim().isEmpty()) {
+            throw new ConflictException("슬러그란이 비어있습니다.", null);
         }
 
         if (workspaceRepository.existsByName(request.name())) {
@@ -160,8 +164,12 @@ public class WorkspaceService {
             throw new AccessDeniedException("OWNER 또는 ADMIN만 수정할 수 있습니다.", null);
         }
 
-        if (request.name() == null || request.name().isEmpty()) {
+        if (request.name() == null || request.name().trim().isEmpty()) {
             throw new ConflictException("이름란이 비어있습니다.", null);
+        }
+
+        if (request.slug() == null || request.slug().trim().isEmpty()) {
+            throw new ConflictException("슬러그란이 비어있습니다.", null);
         }
 
         if (!workspace.getName().equals(request.name()) && workspaceRepository.existsByName(request.name())) {

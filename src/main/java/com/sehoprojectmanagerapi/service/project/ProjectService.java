@@ -138,6 +138,10 @@ public class ProjectService {
             throw new AccessDeniedException("프로젝트 수정 권한이 없습니다.", userId);
         }
 
+        if (projectRequest.getName() == null || projectRequest.getName().trim().isEmpty()) {
+            throw new BadRequestException("프로젝트명이 비어있습니다.", null);
+        }
+
         // project는 영속 상태여야 함 (@Transactional 내 조회 가정)
         Project project = projectMember.getProject();
 
