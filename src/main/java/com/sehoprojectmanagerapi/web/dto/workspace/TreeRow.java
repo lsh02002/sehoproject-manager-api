@@ -31,9 +31,14 @@ public class TreeRow {
     private String sprintName;
     private Integer sprintPosition;
 
+    private Long taskId;
+    private String taskName;
+    private Integer taskPosition;
+
     private boolean canEnterWorkspace;
     private boolean canEnterSpace;
     private boolean canEnterProject;
     private boolean canEnterMilestone;
     private boolean canEnterSprint;
+    private boolean canEnterTask;
 }
