@@ -338,6 +338,19 @@ public class TaskService {
             throw new AccessDeniedException("해당 태스크 업데이트할 권한이 없습니다.", userId);
         }
 
+        if (request.name() == null || request.name().trim().isEmpty()) {
+            throw new BadRequestException("태스크명이 비어있습니다.", request.name());
+        }
+        if (request.priority() == null || request.priority().trim().isEmpty()) {
+            throw new BadRequestException("우선순위 란이 비어있습니다.", request.priority());
+        }
+        if (request.type() == null || request.type().trim().isEmpty()) {
+            throw new BadRequestException("형식명이 비어있습니다.", request.type());
+        }
+        if (request.state() == null || request.state().trim().isEmpty()) {
+            throw new BadRequestException("태스크 상태가 비어있습니다.", request.state());
+        }
+
         // 1) 스프린트/마일스톤 변경 (null = 변경 없음, Optional.empty 의미의 특별 플래그가 없다면: 빈 값 명시 지우기용 필드 권장)
         if (request.sprintId() != null) {
             if (request.sprintId() <= 0) {
@@ -366,11 +379,11 @@ public class TaskService {
         }
 
         // 2) 기본 필드들 (null => 변경 없음)
-        if (request.name() != null) task.setName(request.name());
+        task.setName(request.name());
+        task.setPriority(TaskPriority.from(request.priority()));
+        task.setType(TaskType.from(request.type()));
+        task.setState(TaskState.from(request.state()));
         if (request.description() != null) task.setDescription(request.description());
-        if (request.priority() != null) task.setPriority(TaskPriority.from(request.priority()));
-        if (request.type() != null) task.setType(TaskType.from(request.type()));
-        if (request.state() != null) task.setState(TaskState.from(request.state()));
         if (request.storyPoints() != null) task.setStoryPoints(request.storyPoints());
         if (request.dueDate() != null) task.setDueDate(request.dueDate());
         task.setProject(project);

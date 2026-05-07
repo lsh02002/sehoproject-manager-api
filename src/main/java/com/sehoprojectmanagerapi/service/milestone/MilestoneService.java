@@ -87,11 +87,11 @@ public class MilestoneService {
             throw new AccessDeniedException("마일스톤 생성 권한이 없습니다.", userId);
         }
 
-        if (request.name().isEmpty()) {
+        if (request.name().trim().isEmpty()) {
             throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());
         }
 
-        if (request.status().isEmpty()) {
+        if (request.status().trim().isEmpty()) {
             throw new BadRequestException("해당 상태란이 비어있습니다.", request.status());
         }
 
@@ -133,11 +133,11 @@ public class MilestoneService {
             throw new AccessDeniedException("해당 마일스톤 수정 권한이 없습니다.", userId);
         }
 
-        if (request.name() == null || request.name().isEmpty()) {
+        if (request.name() == null || request.name().trim().isEmpty()) {
             throw new BadRequestException("해당 제목란이 비어있습니다.", request.name());
         }
 
-        if (request.status() == null || request.status().isEmpty()) {
+        if (request.status() == null || request.status().trim().isEmpty()) {
             throw new BadRequestException("해당 상태란이 비어있습니다.", request.status());
         }
 
