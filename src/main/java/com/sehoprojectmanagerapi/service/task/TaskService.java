@@ -106,7 +106,7 @@ public class TaskService {
     @Transactional
     public TaskResponse getTaskById(Long userId, Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 태스크를 찾을 수 없습니다.", taskId));
 
         projectMemberRepository.findByUserIdAndProjectId(userId, task.getProject().getId())
                 .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", null));
