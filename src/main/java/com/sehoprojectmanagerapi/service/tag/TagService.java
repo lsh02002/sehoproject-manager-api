@@ -44,6 +44,7 @@ public class TagService {
         // 사용자/프로젝트 존재 체크
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
+
         projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
@@ -65,6 +66,9 @@ public class TagService {
     /* 태그 생성: 프로젝트 멤버 중 최소 CONTRIBUTOR 이상 권장 */
     @Transactional
     public TagResponse createTag(Long userId, TagRequest request) {
+        projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
                 .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 생성할 수 있습니다.", userId));
         roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", userId);
@@ -101,6 +105,9 @@ public class TagService {
     /* 태그 수정: 프로젝트 멤버 중 최소 CONTRIBUTOR 이상 추천 (정책에 따라 MANAGER 이상으로 격상 가능) */
     @Transactional
     public TagResponse updateTag(Long userId, Long tagId, TagRequest request) {
+        projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
+
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new NotFoundException("해당 태그를 찾을 수 없습니다.", tagId));
 

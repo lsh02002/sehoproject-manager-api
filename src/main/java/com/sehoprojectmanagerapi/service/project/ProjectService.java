@@ -58,7 +58,7 @@ public class ProjectService {
     @Transactional
     public List<ProjectResponse> getAllProjectsByUserAndSpace(Long userId, Long spaceId) {
         spaceRepository.findById(spaceId)
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 스페이스를 찾을 수 없습니다.", null));
 
         return projectMemberRepository.findByUserId(userId)
                 .stream().filter(projectMember -> Objects.equals(projectMember.getProject().getSpace().getId(), spaceId))

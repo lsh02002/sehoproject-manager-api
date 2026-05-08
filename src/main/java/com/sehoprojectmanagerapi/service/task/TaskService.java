@@ -89,7 +89,8 @@ public class TaskService {
     @Transactional
     public List<TaskResponse> getAllTasksByUserAndProject(Long userId, Long projectId) {
         projectRepository.findById(projectId)
-                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
+
         // 멤버십 확인: 권한 예외 사용(403)
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
@@ -117,6 +118,9 @@ public class TaskService {
     public List<TaskResponse> getTasksByAssigneeId(Long userId, Long projectId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자가 없습니다.", userId));
+
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", projectId));
 
         return taskRepository.findTasksVisibleToUser(userId, projectId)
                 .stream().map(taskMapper::toTaskResponse).toList();
@@ -323,6 +327,9 @@ public class TaskService {
         // 0) 공통 로드 & 권한
         User updater = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", userId));
+
+        projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundException("작업(Task)을 찾을 수 없습니다.", taskId));
@@ -570,6 +577,9 @@ public class TaskService {
 
     @Transactional
     public void deleteTask(Long userId, Long projectId, Long taskId) {
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", null));
+
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 접근 권한이 없습니다.", null));
 
