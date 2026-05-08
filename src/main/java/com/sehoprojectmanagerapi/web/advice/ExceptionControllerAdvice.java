@@ -59,7 +59,8 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(Exception.class) // fallback
-    public ResponseEntity<?> handle() {
+    public ResponseEntity<?> handle(Exception e) {
+        e.printStackTrace();
         ErrorResponse errorRequestResponse = new ErrorResponse(500, "INTERNAL SERVER ERROR", "INTERNAL SERVER ERROR", null);
         return new ResponseEntity<>(errorRequestResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
