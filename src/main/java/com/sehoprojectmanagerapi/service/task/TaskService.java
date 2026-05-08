@@ -138,7 +138,7 @@ public class TaskService {
                 .orElseThrow(() -> new AccessDeniedException("해당 프로젝트에 대한 접근 권한이 없습니다.", userId));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.CONTRIBUTOR)) {
-            throw new AccessDeniedException("해당 태스크 생성 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 태스크 생성 권한이 없습니다.", null);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {

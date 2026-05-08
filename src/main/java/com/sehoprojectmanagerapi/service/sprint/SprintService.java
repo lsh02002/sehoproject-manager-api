@@ -82,7 +82,7 @@ public class SprintService {
         Project project = sprint.getProject();
 
         projectMemberRepository.findByUserIdAndProjectId(userId, project.getId())
-                .orElseThrow(() -> new AccessDeniedException("해당 스프린트에 접근 권한이 없습니다.", sprintId));
+                .orElseThrow(() -> new AccessDeniedException("해당 스프린트에 접근 권한이 없습니다.", null));
 
         return sprintMapper.toResponse(sprint);
     }

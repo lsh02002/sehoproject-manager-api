@@ -79,7 +79,7 @@ public class TeamService {
     @Transactional
     public TeamResponse updateTeam(Long userId, Long teamId, TeamRequest teamRequest) {
         TeamMember teamMember = teamMemberRepository.findByUserIdAndTeamId(userId, teamId)
-                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", null));
 
         Team team = teamMember.getTeam();
 

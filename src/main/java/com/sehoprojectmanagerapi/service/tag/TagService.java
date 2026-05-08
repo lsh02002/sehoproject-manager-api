@@ -50,7 +50,7 @@ public class TagService {
 
         // 프로젝트 멤버 여부
         projectMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 조회할 수 있습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 조회할 수 있습니다.", null));
 
         return tagRepository.findAllByProjectId(projectId)
                 .stream().map(tagMapper::toResponse).toList();
@@ -70,8 +70,8 @@ public class TagService {
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 생성할 수 있습니다.", userId));
-        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", userId);
+                .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 생성할 수 있습니다.", null));
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 생성 권한이 없습니다.", null);
 
         if (request.name() == null || request.name().trim().isEmpty()) {
             throw new BadRequestException("태그명이 비어있습니다.", request.name());
