@@ -31,6 +31,6 @@ public class Team extends BaseEntity implements Loggable {
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "팀 아이디 '" + id + "'";
     }
 }

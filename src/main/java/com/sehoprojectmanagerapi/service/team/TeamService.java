@@ -1,6 +1,9 @@
 package com.sehoprojectmanagerapi.service.team;
 
 import com.sehoprojectmanagerapi.config.function.RoleFunc;
+import com.sehoprojectmanagerapi.config.function.SnapshotFunc;
+import com.sehoprojectmanagerapi.repository.activity.ActivityAction;
+import com.sehoprojectmanagerapi.repository.activity.ActivityEntityType;
 import com.sehoprojectmanagerapi.repository.team.Team;
 import com.sehoprojectmanagerapi.repository.team.TeamRepository;
 import com.sehoprojectmanagerapi.repository.team.teamInvite.TeamInvite;
@@ -10,6 +13,7 @@ import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import com.sehoprojectmanagerapi.repository.team.teammember.TeamMemberRepository;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.user.UserRepository;
+import com.sehoprojectmanagerapi.service.activitylog.ActivityLogService;
 import com.sehoprojectmanagerapi.service.exceptions.*;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteRequest;
 import com.sehoprojectmanagerapi.web.dto.team.TeamInviteResponse;
@@ -35,6 +39,8 @@ public class TeamService {
     private final UserRepository userRepository;
     private final TeamMapper teamMapper;
     private final RoleFunc roleFunc;
+    private final SnapshotFunc snapshotFunc;
+    private final ActivityLogService activityLogService;
 
     @Transactional
     public List<TeamResponse> getAllTeamsByUser(Long userId) {
@@ -56,6 +62,10 @@ public class TeamService {
             throw new BadRequestException("팀명이 비어있습니다.", null);
         }
 
+        if (teamRepository.existsByNameIgnoreCase(teamRequest.name())) {
+            throw new ConflictException("동일한 팀명이 이미 존재합니다.", teamRequest.name());
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
 
@@ -65,13 +75,21 @@ public class TeamService {
 
         Team savedTeam = teamRepository.save(team);
 
+        Object afterteam = snapshotFunc.snapshot(savedTeam);
+
         TeamMember teamMember = new TeamMember();
         teamMember.setTeam(savedTeam);
         teamMember.setUser(user);
         teamMember.setRole(RoleTeam.OWNER);
         teamMember.setJoinedAt(LocalDateTime.now());
 
-        teamMemberRepository.save(teamMember);
+        TeamMember savedmember = teamMemberRepository.save(teamMember);
+
+        Object aftermember = snapshotFunc.snapshot(savedmember);
+
+        activityLogService.log(ActivityEntityType.TEAM_MEMBER, ActivityAction.CREATE, savedmember.getId(), savedmember.logMessage(), user, null, aftermember);
+
+        activityLogService.log(ActivityEntityType.TEAM, ActivityAction.CREATE, savedTeam.getId(), savedTeam.logMessage(), user, null, afterteam);
 
         return teamMapper.toTeamResponse(savedTeam);
     }
@@ -82,6 +100,8 @@ public class TeamService {
                 .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", null));
 
         Team team = teamMember.getTeam();
+
+        Object beforeteam = snapshotFunc.snapshot(team);
 
         boolean teamOk = roleFunc.hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
 
@@ -94,12 +114,22 @@ public class TeamService {
             // 같은 프로젝트 내 팀명 중복 방지
             boolean nameExists = teamRepository.existsByNameIgnoreCase(teamRequest.name());
             if (nameExists) {
-                throw new ConflictException("같은 프로젝트에 동일한 팀명이 이미 존재합니다.", teamRequest.name());
+                throw new ConflictException("동일한 팀명이 이미 존재합니다.", teamRequest.name());
             }
             team.setName(teamRequest.name());
         }
 
-        teamRepository.save(team);
+        Team savedTeam = teamRepository.save(team);
+
+        Object afterteam = snapshotFunc.snapshot(savedTeam);
+
+        activityLogService.log(
+                ActivityEntityType.TEAM, ActivityAction.UPDATE,
+                savedTeam.getId(), savedTeam.logMessage(),
+                teamMember.getUser(),
+                beforeteam, afterteam
+        );
+
         return teamMapper.toTeamResponse(team);
     }
 
@@ -120,6 +150,18 @@ public class TeamService {
         if (!teamOk) {
             throw new AccessDeniedException("팀 삭제 권한이 없습니다.", userId);
         }
+
+        Object beforeteam = snapshotFunc.snapshot(team);
+
+        activityLogService.log(
+                ActivityEntityType.TEAM,
+                ActivityAction.DELETE,
+                team.getId(),
+                team.logMessage(),
+                tm.getUser(),
+                beforeteam,
+                null
+        );
 
         // 4) 삭제 (Team.members는 orphanRemoval=true 이므로 함께 제거)
         try {

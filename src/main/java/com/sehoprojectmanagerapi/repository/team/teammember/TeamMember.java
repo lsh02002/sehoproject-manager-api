@@ -39,13 +39,13 @@ public class TeamMember extends BaseEntity implements Loggable {
     private RoleTeam role = RoleTeam.MEMBER;  // 팀 내 역할
 
     @Column(nullable = false)
-    private boolean active = true;  // 활동 여부
+    private Boolean active = true;  // 활동 여부
 
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;  // 가입 시각
 
     @Override
     public String logMessage() {
-        return "name=";
+        return "팀 아이디 '" + team.getId() + "' 의멤버 " + user.getNickname() + "에게 권한 '" + role.name() + "'";
     }
 }

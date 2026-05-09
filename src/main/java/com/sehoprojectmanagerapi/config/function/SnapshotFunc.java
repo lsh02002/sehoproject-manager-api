@@ -12,6 +12,8 @@ import com.sehoprojectmanagerapi.repository.sprint.Sprint;
 import com.sehoprojectmanagerapi.repository.tag.Tag;
 import com.sehoprojectmanagerapi.repository.task.Task;
 import com.sehoprojectmanagerapi.repository.task.taskdependency.TaskDependency;
+import com.sehoprojectmanagerapi.repository.team.Team;
+import com.sehoprojectmanagerapi.repository.team.teammember.TeamMember;
 import com.sehoprojectmanagerapi.repository.user.User;
 import com.sehoprojectmanagerapi.repository.workspace.Workspace;
 import com.sehoprojectmanagerapi.repository.workspace.workspacemember.WorkspaceMember;
@@ -174,6 +176,26 @@ public class SnapshotFunc {
                             .toList()
             );
             m.put("logMessage", task.logMessage());
+            return m;
+        }
+
+        if(obj instanceof Team team) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", team.getId());
+            m.put("name", team.getName());
+            return m;
+        }
+
+        if(obj instanceof TeamMember teamMember) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", teamMember.getId());
+            m.put("teamId", teamMember.getTeam().getId());
+            m.put("userId", teamMember.getUser().getId());
+            m.put("role", teamMember.getRole());
+            m.put("active", teamMember.getActive());
+            m.put("joinedAt", teamMember.getJoinedAt());
+            m.put("logMessage", teamMember.logMessage());
+            m.put("createdAt", teamMember.getCreatedAt());
             return m;
         }
 
