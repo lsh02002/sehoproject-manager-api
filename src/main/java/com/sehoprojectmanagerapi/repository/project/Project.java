@@ -33,7 +33,7 @@ public class Project extends BaseEntity implements Loggable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "project_key", length = 32, nullable = true)
+    @Column(name = "project_key", length = 300, nullable = true)
     private String key;
 
     @Column(nullable = false, length = 255)
