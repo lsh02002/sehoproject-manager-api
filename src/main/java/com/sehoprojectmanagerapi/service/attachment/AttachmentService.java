@@ -125,7 +125,7 @@ public class AttachmentService {
                 );
 
         if(!hasPermission) {
-            throw new AccessDeniedException("해당 사용자는 이미지 업로드 권한이 없습니다!", userId);
+            throw new AccessDeniedException("해당 사용자는 이미지 업로드 권한이 없습니다!", null);
         }
 
         List<Attachment> currentImages = task.getTaskImages().stream()
@@ -192,7 +192,7 @@ public class AttachmentService {
                 );
 
         if(!hasPermission) {
-            throw new AccessDeniedException("해당 사용자는 이미지 삭제 권한이 없습니다!", user.getId());
+            throw new AccessDeniedException("해당 사용자는 이미지 삭제 권한이 없습니다!", null);
         }
 
         Object beforeattachimage = snapshotFunc.snapshot(image);

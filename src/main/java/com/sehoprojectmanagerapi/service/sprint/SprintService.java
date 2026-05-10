@@ -97,10 +97,10 @@ public class SprintService {
 
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", null));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new AccessDeniedException("해당 스프린트 생성 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 생성 권한이 없습니다.", null);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -145,10 +145,10 @@ public class SprintService {
 
         ProjectMember projectMember = projectMemberRepository
                 .findByUserIdAndProjectId(userId, request.projectId())
-                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", request.projectId()));
+                .orElseThrow(() -> new AccessDeniedException("해당 프로젝트 접근 권한이 없습니다.", null));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new AccessDeniedException("해당 스프린트 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 수정 권한이 없습니다.", null);
         }
 
         if (request.name() == null || request.name().trim().isEmpty()) {
@@ -242,10 +242,10 @@ public class SprintService {
         Object beforesprint = snapshotFunc.snapshot(sprint);
 
         ProjectMember projectMember = projectMemberRepository.findByUserIdAndProjectId(userId, sprint.getProject().getId())
-                .orElseThrow(() -> new AccessDeniedException("해당 스프린트를 삭제할 권한이 없습니다.", userId));
+                .orElseThrow(() -> new AccessDeniedException("해당 스프린트를 삭제할 권한이 없습니다.", null));
 
         if (!roleFunc.hasAtLeast(projectMember.getRole(), RoleProject.MANAGER)) {
-            throw new AccessDeniedException("해당 스프린트 삭제할 권한이 없습니다.", userId);
+            throw new AccessDeniedException("해당 스프린트 삭제할 권한이 없습니다.", null);
         }
 
         activityLogService.log(ActivityEntityType.SPRINT, ActivityAction.DELETE, sprint.getId(), sprint.logMessage(), projectMember.getUser(), beforesprint, null);

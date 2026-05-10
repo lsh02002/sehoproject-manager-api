@@ -106,7 +106,7 @@ public class TeamService {
         boolean teamOk = roleFunc.hasAtLeast(teamMember.getRole(), RoleTeam.ADMIN);
 
         if (!teamOk) {
-            throw new AccessDeniedException("팀 수정 권한이 없습니다.", userId);
+            throw new AccessDeniedException("팀 수정 권한이 없습니다.", null);
         }
 
         // 3) 이름 변경 처리
@@ -148,7 +148,7 @@ public class TeamService {
         boolean teamOk = roleFunc.hasAtLeast(tm.getRole(), RoleTeam.ADMIN);
 
         if (!teamOk) {
-            throw new AccessDeniedException("팀 삭제 권한이 없습니다.", userId);
+            throw new AccessDeniedException("팀 삭제 권한이 없습니다.", null);
         }
 
         Object beforeteam = snapshotFunc.snapshot(team);
@@ -178,9 +178,9 @@ public class TeamService {
     public TeamInviteResponse inviteToTeam(Long inviterId, Long teamId, TeamInviteRequest request) {
         // 1) 권한자 확인
         TeamMember inviterMember = teamMemberRepository.findByUserIdAndTeamId(inviterId, teamId)
-                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", inviterId));
+                .orElseThrow(() -> new AccessDeniedException("해당 팀에 본 사용자는 권한이 없습니다.", null));
         if (inviterMember.getRole() != RoleTeam.OWNER) {
-            throw new AccessDeniedException("초대 권한이 없습니다.", inviterId);
+            throw new AccessDeniedException("초대 권한이 없습니다.", null);
         }
 
         // 2) 팀/유저 조회

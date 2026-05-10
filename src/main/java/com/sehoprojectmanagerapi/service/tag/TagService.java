@@ -115,7 +115,7 @@ public class TagService {
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 수정할 수 있습니다.", userId));
-        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 수정 권한이 없습니다.", userId);
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.CONTRIBUTOR, "태그 수정 권한이 없습니다.", null);
 
         if (request.name() != null && !request.name().trim().isEmpty()) {
             String newName = request.name().trim();
@@ -148,7 +148,7 @@ public class TagService {
 
         var pm = projectMemberRepository.findByUserIdAndProjectId(userId, tag.getProject().getId())
                 .orElseThrow(() -> new AccessDeniedException("프로젝트 멤버만 삭제할 수 있습니다.", userId));
-        roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", userId);
+        roleFunc.requireAtLeast(pm.getRole(), RoleProject.MANAGER, "태그 삭제 권한이 없습니다.", null);
 
         activityLogService.log(ActivityEntityType.TAG, ActivityAction.DELETE, tag.getId(), tag.logMessage(), pm.getUser(), beforetag, null);
         // 연결된 TaskTag가 있으면 FK/제약 위반될 수 있습니다.

@@ -259,10 +259,10 @@ public class WorkspaceService {
 
         // 2) 권한 체크
         WorkspaceRole inviterRole = workspaceMemberRepository.findRoleByUserIdAndWorkspaceId(inviterId, workspaceId)
-                .orElseThrow(() -> new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", workspaceId));
+                .orElseThrow(() -> new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", null));
 
         if (!roleFunc.hasAtLeast(inviterRole, WorkspaceRole.ADMIN)) {
-            throw new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", workspaceId);
+            throw new AccessDeniedException("워크스페이스에 초대할 권한이 없습니다.", null);
         }
 
         // 3) 초대 대상 유저들 조회
