@@ -46,7 +46,7 @@ public class SpaceService {
         Long workspaceId = request.workspaceId();
 
         if (workspaceId == null) {
-            throw new NotFoundException("해당 워크스페이스 아이디가 비어있습니다.", null);
+            throw new NotFoundException("해당 워크스페이스 아이디가 NULL 입니다.", null);
         }
 
         Workspace workspace = workspaceRepository.findById(workspaceId)

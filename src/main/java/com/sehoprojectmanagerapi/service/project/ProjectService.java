@@ -78,7 +78,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse createProject(Long userId, ProjectRequest projectRequest) {
         if (projectRequest.getSpaceId() == null) {
-            throw new NotFoundException("해당 스페이스 아이디가 비어있습니다.", null);
+            throw new NotFoundException("해당 스페이스 아이디가 NULL 입니다.", null);
         }
 
         Space space = spaceRepository.findById(projectRequest.getSpaceId())

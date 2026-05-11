@@ -49,9 +49,6 @@ public class SprintService {
      */
     @Transactional
     public List<SprintResponse> getAllSprintsByUserIdAndProjectId(Long userId, Long projectId) {
-        if(projectId == null) {
-            throw new NotFoundException("해당 프로젝트 아이디가 비어있습니다.", null);
-        }
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다.", userId));
@@ -97,7 +94,7 @@ public class SprintService {
     @Transactional
     public SprintResponse createSprint(Long userId, SprintRequest request) {
         if (request.projectId() == null) {
-            throw new NotFoundException("해당 프로젝트 아이디가 비어있습니다.", null);
+            throw new NotFoundException("해당 프로젝트 아이디가 NULL 입니다.", null);
         }
 
         projectRepository.findById(request.projectId())

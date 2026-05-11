@@ -129,7 +129,7 @@ public class TaskService {
     @Transactional
     public TaskResponse createTask(Long userId, TaskRequest request, List<MultipartFile> files) {
         if (request.projectId() == null) {
-            throw new NotFoundException("해당 프로젝트 아이디가 비어있습니다.", null);
+            throw new NotFoundException("해당 프로젝트 아이디가 NULL 입니다.", null);
         }
 
         User creator = userRepository.findById(userId)
