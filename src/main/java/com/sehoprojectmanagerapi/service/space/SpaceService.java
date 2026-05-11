@@ -43,6 +43,10 @@ public class SpaceService {
 
     @Transactional
     public SpaceResponse createSpace(Long currentUserId, Long workspaceId, SpaceRequest request) {
+        if (workspaceId == null) {
+            throw new NotFoundException("해당 워크스페이스 아이디가 비어있습니다.", null);
+        }
+
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new NotFoundException("워크스페이스를 찾을 수 없습니다.", workspaceId));
 

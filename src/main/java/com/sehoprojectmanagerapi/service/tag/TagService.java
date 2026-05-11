@@ -66,6 +66,10 @@ public class TagService {
     /* 태그 생성: 프로젝트 멤버 중 최소 CONTRIBUTOR 이상 권장 */
     @Transactional
     public TagResponse createTag(Long userId, TagRequest request) {
+        if (request.projectId() == null) {
+            throw new NotFoundException("해당 프로젝트 아이디가 비어있습니다.", null);
+        }
+
         projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new NotFoundException("해당 프로젝트를 찾을 수 없습니다.", request.projectId()));
 
