@@ -9,6 +9,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
@@ -60,6 +61,12 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException() {
         ErrorResponse errorRequestResponse = new ErrorResponse(403, "FORBIDDEN", "접근 권한이 없습니다.", null);
         return new ResponseEntity<>(errorRequestResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({NumberFormatException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<?> handleBadRequest() {
+        ErrorResponse errorRequestResponse = new ErrorResponse(400, "BAD_REQUEST", "숫자 파라미터가 NULL입니다.", null);
+        return new ResponseEntity<>(errorRequestResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class) // fallback

@@ -21,9 +21,8 @@ public class SprintController {
     private final SprintService sprintService;
 
     @GetMapping("/projects/{projectId}")
-    public ResponseEntity<List<SprintResponse>> getAllVisibleByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable String projectId) {
-        // 예외적으로 projectId null값을 허용하기 위해 String 형식으로 받음 - 주의!!!
-        return ResponseEntity.ok(sprintService.getAllSprintsByUserIdAndProjectId(customUserDetails.getId(), Long.parseLong(projectId)));
+    public ResponseEntity<List<SprintResponse>> getAllVisibleByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long projectId) {
+        return ResponseEntity.ok(sprintService.getAllSprintsByUserIdAndProjectId(customUserDetails.getId(), projectId));
     }
 
     @GetMapping("/assignee/project/{projectId}")
