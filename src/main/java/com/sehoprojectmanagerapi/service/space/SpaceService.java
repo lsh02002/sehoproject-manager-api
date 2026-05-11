@@ -42,7 +42,9 @@ public class SpaceService {
     private final SnapshotFunc snapshotFunc;
 
     @Transactional
-    public SpaceResponse createSpace(Long currentUserId, Long workspaceId, SpaceRequest request) {
+    public SpaceResponse createSpace(Long currentUserId, SpaceRequest request) {
+        Long workspaceId = request.workspaceId();
+
         if (workspaceId == null) {
             throw new NotFoundException("해당 워크스페이스 아이디가 비어있습니다.", null);
         }

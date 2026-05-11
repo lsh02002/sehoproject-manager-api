@@ -427,11 +427,12 @@ public class WorkspaceService {
         //WorkspaceResponse workspaceResponse = workspaceService.createWorkspace(userId, workspaceRequest);
 
         SpaceRequest spaceRequest = SpaceRequest.builder()
+                .workspaceId(workspaceResponse.id())
                 .name("Team Space")
                 .slug("team-space")
                 .build();
 
-        SpaceResponse spaceResponse = spaceService.createSpace(userId, workspaceResponse.id(), spaceRequest);
+        SpaceResponse spaceResponse = spaceService.createSpace(userId, spaceRequest);
 
         ProjectRequest projectRequest = ProjectRequest.builder()
                 .spaceId(spaceResponse.id())

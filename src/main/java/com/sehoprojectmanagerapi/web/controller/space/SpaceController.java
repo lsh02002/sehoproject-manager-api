@@ -18,11 +18,10 @@ public class SpaceController {
 
     private final SpaceService spaceService;
 
-    @PostMapping("/{workspaceId}/spaces/create")
+    @PostMapping("/spaces/create")
     public ResponseEntity<SpaceResponse> createSpace(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                     @PathVariable Long workspaceId,
                                                      @RequestBody SpaceRequest request) {
-        return ResponseEntity.ok(spaceService.createSpace(customUserDetails.getId(), workspaceId, request));
+        return ResponseEntity.ok(spaceService.createSpace(customUserDetails.getId(), request));
     }
 
     @GetMapping("/{workspaceId}/spaces")
