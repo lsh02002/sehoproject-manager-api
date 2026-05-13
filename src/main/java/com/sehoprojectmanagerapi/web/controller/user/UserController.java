@@ -38,6 +38,9 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<UserResponse> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletRequest request, HttpServletResponse response) {
+        if(customUserDetails == null) {
+            return null;
+        }
         return ResponseEntity.ok(userService.logout(Objects.requireNonNull(customUserDetails).getEmail(), request, response));
     }
 
